@@ -1,3 +1,8 @@
--- This module serves as the root of the `Pi1` library.
--- Import modules here that should be built as part of the library.
 import Pi1.Basic
+import Pi1.EtaleCohomology.SmallSite
+import Pi1.FundamentalGroup.AffineColimits
+import Pi1.FundamentalGroup.FiniteEtale
+import Pi1.FundamentalGroup.Galois
+import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Etale
+import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Finite
+import Pi1.Mathlib.CategoryTheory.MorphismProperty.Composition
