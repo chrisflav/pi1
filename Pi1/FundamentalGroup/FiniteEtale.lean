@@ -3,13 +3,7 @@ Copyright (c) 2025 Christian Merten. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christian Merten
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.Etale
-import Mathlib.AlgebraicGeometry.Morphisms.Finite
-import Mathlib.CategoryTheory.Limits.MorphismProperty
-import Pi1.Mathlib.CategoryTheory.MorphismProperty.Composition
-import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Etale
-import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Finite
-import Pi1.FundamentalGroup.AffineColimits
+import Pi1.FundamentalGroup.AffineAnd
 
 /-!
 # Finite étale morphisms
@@ -22,22 +16,26 @@ universe u
 
 open CategoryTheory Limits
 
+namespace Algebra
+
+class IsFiniteEtale (R S : Type u) [CommRing R] [CommRing S] [Algebra R S]
+    extends Module.Finite R S, Algebra.Etale R S : Prop
+
+end Algebra
+
 namespace RingHom
 
-variable (Q : ∀ {R S : Type u} [CommRing R] [CommRing S], (R →+* S) → Prop)
+def IsFiniteEtale {R S : Type u} [CommRing R] [CommRing S] (f : R →+* S) : Prop :=
+  letI := f.toAlgebra
+  Algebra.IsFiniteEtale R S
 
--- TODO: reformulate these with ringhoms?
+namespace IsFiniteEtale
 
-/-- A property of ring homomorphisms `Q` is said to have equalizers, if the equalizer of algebra maps
-between algebras satisfiying `Q` also satisfies `Q`. -/
-def HasEqualizers (Q : ∀ {R S : Type u} [CommRing R] [CommRing S], (R →+* S) → Prop) : Prop :=
-  ∀ {R S T : Type u} [CommRing R] [CommRing S] [CommRing T] [Algebra R S] [Algebra R T]
-    (f g : S →ₐ[R] T), Q (algebraMap R S) → Q (algebraMap R T) →
-      Q (algebraMap R (AlgHom.equalizer f g))
+lemma hasFiniteProducts : HasFiniteProducts IsFiniteEtale := sorry
+lemma hasEqualizers : HasEqualizers IsFiniteEtale := sorry
+lemma respectsIso : RespectsIso IsFiniteEtale := sorry
 
-def HasProducts (Q : ∀ {R S : Type u} [CommRing R] [CommRing S], (R →+* S) → Prop) : Prop :=
-  ∀ {R S T : Type u} [CommRing R] [CommRing S] [CommRing T] [Algebra R S] [Algebra R T],
-    Q (algebraMap R S) → Q (algebraMap R T) → Q (algebraMap R (S × T))
+end IsFiniteEtale
 
 end RingHom
 
@@ -73,6 +71,9 @@ instance : HasOfPostcompProperty @IsFiniteEtale @IsFiniteEtale := by
     exact inf_le_left
   rw [eq_inf]
   infer_instance
+
+instance : HasAffineProperty @IsFiniteEtale (affineAnd RingHom.IsFiniteEtale) :=
+  sorry
 
 end IsFiniteEtale
 
@@ -121,50 +122,16 @@ def toAffineFullyFaithful : (toAffine X).FullyFaithful where
 instance : (toAffine X).Faithful := (toAffineFullyFaithful X).faithful
 instance : (toAffine X).Full := (toAffineFullyFaithful X).full
 
-instance : HasFiniteColimits (Affine X) := sorry
-
 instance : HasFiniteColimits (FiniteEtale X) :=
-  sorry
+  AffineAnd.hasFiniteColimits _
+    RingHom.IsFiniteEtale.respectsIso
+    RingHom.IsFiniteEtale.hasFiniteProducts
+    RingHom.IsFiniteEtale.hasEqualizers
 
 lemma mono_iff (f g : FiniteEtale X) (i : f ⟶ g) :
     Mono i ↔ IsOpenImmersion i.hom.left ∧ IsClosedImmersion i.hom.left :=
   sorry
 
 end FiniteEtale
-
-variable {Q : ∀ {R S : Type u} [CommRing R] [CommRing S], (R →+* S) → Prop}
-variable (P : MorphismProperty Scheme.{u}) [HasAffineProperty P (affineAnd Q)]
-
-namespace AffineAnd
-
-open MorphismProperty
-
-variable {X : Scheme.{u}}
-
-instance (f : P.Over ⊤ X) : IsAffineHom f.hom :=
-  HasAffineProperty.affineAnd_le_isAffineHom P inferInstance _ f.2
-
-def toAffine (X : Scheme.{u}) : P.Over ⊤ X ⥤ Affine X where
-  obj f := ⟨f.toComma, inferInstance⟩
-  map f := ⟨f.toCommaMorphism, trivial, trivial⟩
-
-def toAffineFullyFaithful (X : Scheme.{u}) : (toAffine P X).FullyFaithful where
-  preimage f := ⟨f.toCommaMorphism, trivial, trivial⟩
-
-instance : (toAffine P X).Faithful := (toAffineFullyFaithful P X).faithful
-instance : (toAffine P X).Full := (toAffineFullyFaithful P X).full
-
-variable [P.IsStableUnderBaseChange]
-
-theorem hasFiniteColimits (hQp : RingHom.HasProducts Q) (hQe : RingHom.HasEqualizers Q) :
-    HasFiniteColimits (P.Over ⊤ X) :=
-  sorry
-
-theorem preservesFiniteColimits_pullback (hQp : RingHom.HasProducts Q)
-    (hQe : RingHom.HasEqualizers Q) {Y : Scheme.{u}} (f : X ⟶ Y) [Flat f] :
-    PreservesFiniteColimits (MorphismProperty.Over.pullback P ⊤ f) :=
-  sorry
-
-end AffineAnd
 
 end AlgebraicGeometry
