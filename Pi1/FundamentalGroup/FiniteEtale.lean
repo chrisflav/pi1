@@ -75,6 +75,10 @@ instance : HasOfPostcompProperty @IsFiniteEtale @IsFiniteEtale := by
 instance : HasAffineProperty @IsFiniteEtale (affineAnd RingHom.IsFiniteEtale) :=
   sorry
 
+instance {X Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) [IsFiniteEtale f] [IsFiniteEtale g] :
+    IsFiniteEtale (f ≫ g) :=
+  sorry
+
 end IsFiniteEtale
 
 /-- The category of schemes finite étale over `X`. -/
