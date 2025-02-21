@@ -52,6 +52,15 @@ lemma isColimit_cofanMk_iff_of_finite {S : Scheme.{u}} {Y : FiniteEtale S}
       ∀ i, IsOpenImmersion (f i).hom.left ∧ IsClosedImmersion (f i).hom.left :=
   sorry
 
+lemma isColimit_binaryCofanMk_of {S : Scheme.{u}}
+    {X Y Z : FiniteEtale S} (f : X ⟶ Z) (g : Y ⟶ Z)
+    [IsOpenImmersion f.hom.left] [IsOpenImmersion g.hom.left] :
+    Nonempty (IsColimit (BinaryCofan.mk f g)) ↔ IsOpenImmersion f.hom.left ∧
+      IsOpenImmersion g.hom.left ∧
+      IsClosedImmersion f.hom.left ∧
+      IsClosedImmersion g.hom.left :=
+  sorry
+
 lemma isColimit_binaryCofanMk_iff {S : Scheme.{u}}
     {X Y Z : FiniteEtale S} (f : X ⟶ Z) (g : Y ⟶ Z) :
     Nonempty (IsColimit (BinaryCofan.mk f g)) ↔ IsOpenImmersion f.hom.left ∧
@@ -73,13 +82,10 @@ instance (X : Scheme.{u}) : PreGaloisCategory (FiniteEtale X) where
       simp only [Scheme.Opens.range_ι, TopologicalSpace.Opens.coe_mk, isClosed_compl_iff, U, A]
       apply IsOpenImmersion.isOpen_range
     let u : FiniteEtale X := ⟨Over.mk (U.ι ≫ g.hom), by simpa using ⟨⟩⟩
-    refine ⟨u, MorphismProperty.Over.homMk U.ι, ?_⟩
-    rw [isColimit_binaryCofanMk_iff]
-    refine ⟨inferInstance, ?_, inferInstance, ?_⟩
-    · dsimp
-      infer_instance
-    · dsimp
-      infer_instance
+    refine ⟨u, MorphismProperty.Over.homMk U.ι, ⟨?_⟩⟩
+    apply isColimitOfReflects (MorphismProperty.Over.forget _ _ _ ⋙ Over.forget _)
+    apply (isColimitMapCoconeBinaryCofanEquiv _ _ _).invFun
+    sorry
 
 noncomputable
 def fiber {Ω : Type u} [Field Ω] (x : Spec (.of Ω) ⟶ X) (f : FiniteEtale X) : Scheme.{u} :=
