@@ -69,7 +69,7 @@ instance (X : Scheme.{u}) : PreGaloisCategory (FiniteEtale X) where
     have hA : IsClosed A := i.hom.left.isClosedEmbedding.isClosed_range
     let U : g.left.Opens := ⟨Aᶜ, hA.isOpen_compl⟩
     have : IsClosedImmersion U.ι := by
-      apply isClosedImmersion_of_isOpenImmersion_of_isClosed
+      apply isClosedImmersion_of_isPreimmersion_of_isClosed
       simp only [Scheme.Opens.range_ι, TopologicalSpace.Opens.coe_mk, isClosed_compl_iff, U, A]
       apply IsOpenImmersion.isOpen_range
     let u : FiniteEtale X := ⟨Over.mk (U.ι ≫ g.hom), by simpa using ⟨⟩⟩
