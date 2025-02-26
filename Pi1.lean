@@ -12,4 +12,4 @@ import Pi1.Mathlib.CategoryTheory.MorphismProperty.UnderAdjunction
 import Pi1.RingTheory.FinitePresentation
 import Pi1.RingTheory.RankAtStalk
 import Pi1.RingTheory.SmoothFlat
-import Pi1.TotallySplit
+import Pi1.RingTheory.TotallySplit
