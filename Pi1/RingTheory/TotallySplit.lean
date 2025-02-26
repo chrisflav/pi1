@@ -2,6 +2,7 @@ import Mathlib.RingTheory.Etale.Pi
 import Mathlib.RingTheory.Ideal.IdempotentFG
 import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
 import Mathlib.RingTheory.TensorProduct.Pi
+import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
 import Pi1.RingTheory.FinitePresentation
 import Pi1.RingTheory.RankAtStalk
 import Pi1.RingTheory.SmoothFlat
@@ -202,7 +203,7 @@ lemma Algebra.Etale.faithfullyFlat_of_rankAtStalk_pos (R S : Type u) [CommRing R
     [Algebra R S] [Algebra.Etale R S] [Module.Finite R S]
     (h : ∀ p, 0 < Module.rankAtStalk (R := R) S p) :
     Module.FaithfullyFlat R S := by
-  apply Module.FaithfullyFlat.of_flat_of_specComap_surjective
+  apply Module.FaithfullyFlat.of_specComap_surjective
   exact Algebra.specComap_surjective_of_rankAtStalk_pos h
 
 class Algebra.IsSplitOfRank (n : outParam ℕ) (R S : Type*) [CommRing R]
