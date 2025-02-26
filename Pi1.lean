@@ -4,7 +4,12 @@ import Pi1.FundamentalGroup.AffineAnd
 import Pi1.FundamentalGroup.AffineColimits
 import Pi1.FundamentalGroup.FiniteEtale
 import Pi1.FundamentalGroup.Galois
+import Pi1.Mathlib.Algebra.Module.LocalizedModule.Basic
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Etale
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Finite
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.Composition
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.UnderAdjunction
+import Pi1.RingTheory.FinitePresentation
+import Pi1.RingTheory.RankAtStalk
+import Pi1.RingTheory.SmoothFlat
+import Pi1.TotallySplit
