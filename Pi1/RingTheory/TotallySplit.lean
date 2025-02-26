@@ -204,7 +204,7 @@ lemma Algebra.Etale.faithfullyFlat_of_rankAtStalk_pos (R S : Type u) [CommRing R
     (h : ∀ p, 0 < Module.rankAtStalk (R := R) S p) :
     Module.FaithfullyFlat R S := by
   apply Module.FaithfullyFlat.of_specComap_surjective
-  exact Algebra.specComap_surjective_of_rankAtStalk_pos h
+  rwa [← Algebra.rankAtStalk_pos_iff_specComap_surjective]
 
 class Algebra.IsSplitOfRank (n : outParam ℕ) (R S : Type*) [CommRing R]
     [CommRing S] [Algebra R S] : Prop where
@@ -296,7 +296,7 @@ lemma exists_isSplitOfRank_tensorProduct [Etale R S] [Module.Finite R S] {n : �
         have : IsSplitOfRank (n + 1) R S := .of_subsingleton
         apply IsSplitOfRank.of_equiv (TensorProduct.lid R S).symm
       have : Nontrivial S := by
-        apply Module.nontrivial_of_rankAtStalk_gt_zero (R := R) (p := Nonempty.some inferInstance)
+        apply Module.nontrivial_of_rankAtStalk_pos (R := R) (p := Nonempty.some inferInstance)
         simp [hn]
       obtain ⟨U, _, _, ⟨e⟩⟩ := exists_split_of_formallyUnramified R S
       algebraize [RingHom.snd S U]
