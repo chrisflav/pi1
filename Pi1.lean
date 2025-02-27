@@ -7,7 +7,9 @@ import Pi1.Mathlib.Algebra.Module.LocalizedModule.Basic
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Etale
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Finite
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.Composition
+import Pi1.Mathlib.CategoryTheory.MorphismProperty.Over
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.UnderAdjunction
+import Pi1.Mathlib.RingTheory.RingHom.Etale
 import Pi1.RingTheory.FinitePresentation
 import Pi1.RingTheory.RankAtStalk
 import Pi1.RingTheory.SmoothFlat
