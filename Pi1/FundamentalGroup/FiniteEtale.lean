@@ -3,6 +3,7 @@ Copyright (c) 2025 Christian Merten. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christian Merten
 -/
+import Pi1.Mathlib.RingTheory.RingHom.Etale
 import Pi1.FundamentalGroup.AffineAnd
 
 /-!
@@ -18,6 +19,7 @@ open CategoryTheory Limits
 
 namespace Algebra
 
+@[mk_iff]
 class IsFiniteEtale (R S : Type u) [CommRing R] [CommRing S] [Algebra R S]
     extends Module.Finite R S, Algebra.Etale R S : Prop
 
@@ -29,10 +31,18 @@ def IsFiniteEtale {R S : Type u} [CommRing R] [CommRing S] (f : R →+* S) : Pro
   letI := f.toAlgebra
   Algebra.IsFiniteEtale R S
 
+lemma IsFiniteEtale.iff_finite_and_etale
+    {R S : Type u} [CommRing R] [CommRing S] (f : R →+* S) :
+    f.IsFiniteEtale ↔ f.Finite ∧ f.Etale := by
+  rw [IsFiniteEtale, Finite, Etale]
+  rw [Algebra.isFiniteEtale_iff]
+
 namespace IsFiniteEtale
 
 lemma hasFiniteProducts : HasFiniteProducts IsFiniteEtale := sorry
+
 lemma hasEqualizers : HasEqualizers IsFiniteEtale := sorry
+
 lemma respectsIso : RespectsIso IsFiniteEtale := sorry
 
 end IsFiniteEtale
@@ -72,12 +82,27 @@ instance : HasOfPostcompProperty @IsFiniteEtale @IsFiniteEtale := by
   rw [eq_inf]
   infer_instance
 
-instance : HasAffineProperty @IsFiniteEtale (affineAnd RingHom.IsFiniteEtale) :=
-  sorry
+instance : HasAffineProperty @IsFiniteEtale (affineAnd RingHom.IsFiniteEtale) := by
+  rw [HasAffineProperty.iff, eq_inf]
+  constructor
+  · infer_instance
+  · ext X Y f _
+    simp only [affineAnd_apply, RingHom.IsFiniteEtale.iff_finite_and_etale]
+    show _ ↔ IsFinite f ∧ IsEtale f
+    simp only [HasAffineProperty.iff_of_isAffine (P := @IsFinite), and_assoc, and_congr_right_iff]
+    intro h
+    rw [HasRingHomProperty.iff_of_isAffine (P := @IsEtale)]
+    intro h
+    rw [RingHom.Etale.iff_locally_isStandardSmoothOfRelativeDimension]
 
 instance {X Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) [IsFiniteEtale f] [IsFiniteEtale g] :
-    IsFiniteEtale (f ≫ g) :=
-  sorry
+    IsFiniteEtale (f ≫ g) where
+
+lemma mono_iff {X Y : Scheme.{u}} (f : X ⟶ Y) [IsFiniteEtale f] :
+    Mono f ↔ IsOpenImmersion f ∧ IsClosedImmersion f := by
+  refine ⟨fun hf ↦ ⟨inferInstance, ?_⟩, fun ⟨hfo, _⟩ ↦ inferInstance⟩
+  · rw [IsClosedImmersion.iff_isFinite_and_mono]
+    exact ⟨inferInstance, inferInstance⟩
 
 end IsFiniteEtale
 
@@ -96,7 +121,8 @@ instance : Category (FiniteEtale X) :=
 def forget : FiniteEtale X ⥤ Over X :=
   MorphismProperty.Over.forget @IsFiniteEtale ⊤ X
 
-/-- The forgetful functor from schemes finite étale over `X` to schemes over `X` is fully faithful. -/
+/-- The forgetful functor from schemes finite étale over `X` to schemes over `X` is fully
+faithful. -/
 def forgetFullyFaithful : (FiniteEtale.forget X).FullyFaithful :=
   MorphismProperty.Comma.forgetFullyFaithful _ _ _
 
@@ -132,9 +158,18 @@ instance : HasFiniteColimits (FiniteEtale X) :=
     RingHom.IsFiniteEtale.hasFiniteProducts
     RingHom.IsFiniteEtale.hasEqualizers
 
+instance (f g : FiniteEtale X) (i : f ⟶ g) : IsFiniteEtale i.hom.left := by
+  apply MorphismProperty.of_postcomp @IsFiniteEtale (W' := @IsFiniteEtale) _ g.hom
+  · infer_instance
+  · simp only [Functor.const_obj_obj, Functor.id_obj, Over.w]
+    infer_instance
+
 lemma mono_iff (f g : FiniteEtale X) (i : f ⟶ g) :
-    Mono i ↔ IsOpenImmersion i.hom.left ∧ IsClosedImmersion i.hom.left :=
-  sorry
+    Mono i ↔ IsOpenImmersion i.hom.left ∧ IsClosedImmersion i.hom.left := by
+  rw [← IsFiniteEtale.mono_iff]
+  refine ⟨fun hi ↦ ?_, fun hi ↦ ?_⟩
+  · exact (MorphismProperty.Over.forget _ _ _ ⋙ Over.forget _).map_mono _
+  · exact (MorphismProperty.Over.forget _ _ _ ⋙ Over.forget _).mono_of_mono_map hi
 
 end FiniteEtale
 

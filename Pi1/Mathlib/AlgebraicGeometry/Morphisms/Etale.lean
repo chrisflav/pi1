@@ -15,6 +15,8 @@ open CategoryTheory Limits
 
 namespace AlgebraicGeometry
 
+namespace IsEtale
+
 instance (priority := 900) {X Y : Scheme.{u}} (f : X ⟶ Y) [IsEtale f] :
     FormallyUnramified f where
   formallyUnramified_of_affine_subset U V e := by
@@ -40,7 +42,7 @@ instance : MorphismProperty.HasOfPostcompProperty
   rw [MorphismProperty.hasOfPostcompProperty_iff_le_diagonal]
   rintro X Y f ⟨hft, hfu⟩
   have : IsOpenImmersion (pullback.diagonal f) := by
-    apply AlgebraicGeometry.FormallyUnramified.AlgebraicGeometry.FormallyUnramified.isOpenImmersion_diagonal
+    apply FormallyUnramified.AlgebraicGeometry.FormallyUnramified.isOpenImmersion_diagonal
   show IsEtale (pullback.diagonal f)
   infer_instance
 
@@ -65,5 +67,11 @@ instance : MorphismProperty.HasOfPostcompProperty @IsEtale @IsEtale := by
 instance : HasPullbacks (Etale X) := by
   unfold Etale
   infer_instance
+
+instance isOpenImmersion_of_mono {X Y : Scheme.{u}} (f : X ⟶ Y) [IsEtale f] [Mono f] :
+    IsOpenImmersion f :=
+  sorry
+
+end IsEtale
 
 end AlgebraicGeometry
