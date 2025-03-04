@@ -9,6 +9,7 @@ namespace Module
 variable {R : Type*} (S : Type*) [CommRing R] [CommRing S] [Algebra R S]
 variable (M : Type*) [AddCommGroup M] [Module R M]
 
+-- #22565
 /-- Flat descends along faithfully flat ring maps. -/
 lemma Flat.of_flat_tensorProduct [Module.FaithfullyFlat R S] [Module.Flat S (S ⊗[R] M)] :
     Module.Flat R M := by
@@ -23,6 +24,7 @@ lemma Flat.of_flat_tensorProduct [Module.FaithfullyFlat R S] [Module.Flat S (S �
     simp
   simpa [this] using lTensor_preserves_injective_linearMap f hf
 
+-- #22565
 /-- Faithful flatness is preserved by arbitrary base change. -/
 instance [Module.FaithfullyFlat R M] : Module.FaithfullyFlat S (S ⊗[R] M) := by
   rw [Module.FaithfullyFlat.iff_flat_and_rTensor_reflects_triviality]
@@ -34,6 +36,21 @@ instance [Module.FaithfullyFlat R M] : Module.FaithfullyFlat S (S ⊗[R] M) := b
 
 end Module
 
+namespace LinearMap
+
+variable (R S : Type*) [CommRing R] [CommRing S] [Algebra R S]
+variable (M N : Type*) [AddCommGroup M] [AddCommGroup N] [Module R M] [Module R N]
+  [Module S N] [IsScalarTower R S N]
+
+lemma liftBaseChange_surjective {f : M →ₗ[R] N} (hf : Function.Surjective f) :
+    Function.Surjective (f.liftBaseChange S) := by
+  intro n
+  obtain ⟨m, rfl⟩ := hf n
+  use 1 ⊗ₜ m
+  simp
+
+end LinearMap
+
 namespace Algebra
 
 section
@@ -43,6 +60,9 @@ variable (R S : Type*) [CommRing R] [CommRing S] [Algebra R S]
 /-- Flat base change commutes with `H1Cotangent`. -/
 def tensorH1CotangentOfFlat (T : Type*) [CommRing T] [Algebra R T] [Module.Flat R T] :
     T ⊗[R] H1Cotangent R S ≃ₗ[T] H1Cotangent T (T ⊗[R] S) :=
+  let _ : Algebra S (T ⊗[R] S) := TensorProduct.includeRight.toRingHom.toAlgebra
+  let f := H1Cotangent.map R T S (T ⊗[R] S)
+  let f' := (f.restrictScalars R).liftBaseChange T
   sorry
 
 end
