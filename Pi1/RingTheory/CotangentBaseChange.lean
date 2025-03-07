@@ -2,6 +2,7 @@ import Mathlib
 import Pi1.RingTheory.KaehlerBaseChange
 import Pi1.RingTheory.Cotangent.SpaceBaseChange
 import Pi1.RingTheory.FiveLemma
+import Pi1.RingTheory.Utils
 
 noncomputable section
 
@@ -57,6 +58,7 @@ lemma map_includeRight_eq (I : Ideal T) :
   have := I.map_includeRight_eq (R := R) (A := A)
   rwa [Submodule.ext_iff] at this ⊢
 
+set_option maxHeartbeats 0 in
 def tensorQuotientEquiv (I : Ideal T) :
     A ⊗[R] (T ⧸ I) ≃ₐ[S] (A ⊗[R] T) ⧸ I.map (includeRight (A := A) (R := R)) :=
   let f : A ⊗[R] (T ⧸ I) ≃ₗ[S]
@@ -75,7 +77,24 @@ def tensorQuotientEquiv (I : Ideal T) :
     Submodule.quotEquivOfEq _ _ heq
   let e : A ⊗[R] (T ⧸ I) ≃ₗ[S] (A ⊗[R] T) ⧸ I.map (includeRight (A := A) (R := R)) :=
     f ≪≫ₗ g
-  AlgEquiv.ofLinearEquiv e rfl sorry
+  AlgEquiv.ofLinearEquiv e rfl <| by
+    apply Algebra.TensorProduct.map_mul_of_map_mul_tmul
+    intro a₁ a₂ b₁ b₂
+    obtain ⟨b₁, rfl⟩ := Ideal.Quotient.mk_surjective b₁
+    obtain ⟨b₂, rfl⟩ := Ideal.Quotient.mk_surjective b₂
+    rw [Algebra.TensorProduct.tmul_mul_tmul, ← map_mul]
+    have : (Ideal.Quotient.mk I) (b₁ * b₂) = Submodule.Quotient.mk (b₁ * b₂) := rfl
+    simp only [LinearEquiv.coe_coe, LinearEquiv.trans_apply, e, f, g]
+    rw [this, AlgebraTensorModule.tensorQuotientEquiv_apply_tmul]
+    erw [Submodule.quotEquivOfEq_mk]
+    rw [← Ideal.Quotient.mk_eq_mk]
+    rw [← Ideal.Quotient.mk_eq_mk]
+    erw [Submodule.quotEquivOfEq_mk]
+    erw [Submodule.quotEquivOfEq_mk]
+    simp only [LinearEquiv.refl_toLinearMap, LinearMap.flip_apply, mk_apply, LinearMap.id_coe,
+      id_eq]
+    rw [← Algebra.TensorProduct.tmul_mul_tmul]
+    rfl
 
 @[simp]
 lemma tensorQuotientEquiv_apply_tmul (I : Ideal T) (a : A) (t : T) :
@@ -95,18 +114,26 @@ variable {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
 variable (T : Type*) [CommRing T] [Algebra R T]
 variable (I : Ideal S)
 
-example : T ⊗[R] I →ₗ[T] T ⊗[R] S :=
-  AlgebraTensorModule.lTensor T T I.subtype
-
 attribute [local instance] Algebra.TensorProduct.rightAlgebra
-
---#check I.map (algebraMap S (T ⊗[R] S))
 
 variable {I} in
 def Cotangent.lift {M : Type*} [AddCommGroup M] [Module R M]
     (f : I →ₗ[R] M) (hf : ∀ (x y : I), f (x * y) = 0) :
-    I.Cotangent →ₗ[R] M :=
-  sorry
+    I.Cotangent →ₗ[R] M where
+  __ := QuotientAddGroup.lift _ f <| by
+    intro x hx
+    simp only [Submodule.mem_toAddSubgroup] at hx
+    simp only [AddMonoidHom.mem_ker, AddMonoidHom.coe_coe]
+    refine Submodule.smul_induction_on hx ?_ ?_
+    · intro r hr y _
+      exact hf ⟨r, hr⟩ y
+    · intro x y hx hy
+      simp [hx, hy]
+  map_smul' r x := by
+    obtain ⟨x, rfl⟩ := I.toCotangent_surjective x
+    have : r • I.toCotangent x = I.toCotangent (r • x) := by simp
+    simp only [ZeroHom.toFun_eq_coe, AddMonoidHom.toZeroHom_coe, RingHom.id_apply, this]
+    apply map_smul f
 
 variable {I} in
 @[simp]
@@ -114,17 +141,28 @@ lemma Cotangent.lift_toCotangent {M : Type*} [AddCommGroup M] [Module R M]
     (f : I →ₗ[R] M) (hf : ∀ (x y : I), f (x * y) = 0)
     (x : I) :
     Cotangent.lift f hf (I.toCotangent x) = f x :=
-  sorry
+  rfl
 
 variable (R)
+
+@[simp]
+lemma _root_.Algebra.idealMap_mul {R : Type*} [CommSemiring R] (S : Type*) [Semiring S]
+    [Algebra R S] (I : Ideal R) (x y : I) :
+    Algebra.idealMap S I (x * y) = Algebra.idealMap S I x * Algebra.idealMap S I y := by
+  ext
+  simp
 
 def tensorCotangentTo :
     T ⊗[R] I.Cotangent →ₗ[T] (I.map <| algebraMap S (T ⊗[R] S)).Cotangent :=
   LinearMap.liftBaseChange T <|
     Cotangent.lift
       ((map (algebraMap S (T ⊗[R] S)) I).toCotangent.restrictScalars R ∘ₗ
-        (Algebra.idealMap _ I).restrictScalars R)
-      (fun x y ↦ sorry)
+        (Algebra.idealMap _ I).restrictScalars R) <| fun x y ↦ by
+    simp only [LinearMap.coe_comp, LinearMap.coe_restrictScalars, Function.comp_apply,
+      Algebra.idealMap_mul, toCotangent_eq_zero, sq]
+    apply mul_mem_mul
+    · exact ((Algebra.idealMap (T ⊗[R] S) I) x).property
+    · exact ((Algebra.idealMap (T ⊗[R] S) I) y).property
 
 @[simp]
 lemma tensorCotangentTo_tmul (t : T) (x : I) :
@@ -223,6 +261,11 @@ noncomputable def tensorCotangent [Module.Flat R T] :
   LinearEquiv.ofBijective (I.tensorCotangentTo R T)
     ⟨I.tensorCotangentTo_injective_of_flat R T, I.tensorCotangentTo_surjective R T⟩
 
+@[simp]
+lemma tensorCotangent_apply [Module.Flat R T] (x : T ⊗[R] I.Cotangent) :
+    I.tensorCotangent R T x = I.tensorCotangentTo R T x :=
+  rfl
+
 def Cotangent.equivOfEq (I J : Ideal S) (hIJ : I = J) :
     I.Cotangent ≃ₗ[S] J.Cotangent where
   __ := Cotangent.lift (J.toCotangent ∘ₗ LinearEquiv.ofEq I J hIJ) <| fun x y ↦ by
@@ -240,10 +283,10 @@ def Cotangent.equivOfEq (I J : Ideal S) (hIJ : I = J) :
       LinearEquiv.coe_coe, Function.comp_apply]
     rfl
 
+@[simp]
 lemma Cotangent.equivOfEq_toCotangent (I J : Ideal S) (hIJ : I = J) (x : I) :
-    Cotangent.equivOfEq I J hIJ (I.toCotangent x) = J.toCotangent (LinearEquiv.ofEq I J hIJ x) := by
-  simp [Cotangent.equivOfEq]
-  sorry
+    Cotangent.equivOfEq I J hIJ (I.toCotangent x) = J.toCotangent (LinearEquiv.ofEq I J hIJ x) :=
+  rfl
 
 end Ideal
 
@@ -263,6 +306,7 @@ attribute [local instance] KaehlerDifferential.moduleBaseChange'
 attribute [local instance] Algebra.TensorProduct.rightAlgebra
 
 /-- `Cotangent.val` as a linear isomorphism. -/
+@[simps]
 def valEquiv : P.Cotangent ≃ₗ[P.Ring] P.ker.Cotangent where
   toFun := Cotangent.val
   invFun := Cotangent.of
@@ -289,10 +333,14 @@ noncomputable def tensorCotangent' [Module.Flat R T] :
 
 @[simp]
 lemma tensorCotangent'_tmul [Module.Flat R T] (t : T) (x : P.Cotangent) :
-    P.tensorCotangent' T (t ⊗ₜ x) = t • Cotangent.map (P.toBaseChange T) x :=
-  sorry
-
-#exit
+    P.tensorCotangent' T (t ⊗ₜ x) = t • Cotangent.map (P.toBaseChange T) x := by
+  obtain ⟨x, rfl⟩ := Cotangent.mk_surjective x
+  simp only [tensorCotangent', LinearEquiv.trans_apply, AlgebraTensorModule.congr_tmul,
+    LinearEquiv.refl_apply, LinearEquiv.restrictScalars_apply, valEquiv_apply, Cotangent.val_mk,
+    Ideal.tensorCotangent_apply, Ideal.tensorCotangentTo_tmul, map_smul,
+    Ideal.Cotangent.equivOfEq_toCotangent, valEquiv_symm_apply, Cotangent.map_mk,
+    Hom.toAlgHom_apply]
+  rfl
 
 noncomputable
 def tensorToH1Cotangent :
@@ -350,18 +398,29 @@ lemma tensorToH1Cotangent_bijective_of_flat [Module.Flat R T] :
   · exact (P.tensorCotangent' T).bijective
   · exact (P.tensorCotangentSpace' T).injective
 
+def tensorH1Cotangent' [Module.Flat R T] :
+    T ⊗[R] P.H1Cotangent ≃ₗ[T] (P.baseChange (T := T)).H1Cotangent :=
+  LinearEquiv.ofBijective (P.tensorToH1Cotangent T)
+    (P.tensorToH1Cotangent_bijective_of_flat T)
+
 end Extension
 
 end
 
-variable (R S : Type*) [CommRing R] [CommRing S] [Algebra R S]
+variable (R S : Type u) [CommRing R] [CommRing S] [Algebra R S]
 
 /-- Flat base change commutes with `H1Cotangent`. -/
-def tensorH1CotangentOfFlat (T : Type*) [CommRing T] [Algebra R T] [Module.Flat R T] :
+def tensorH1CotangentOfFlat (T : Type u) [CommRing T] [Algebra R T] [Module.Flat R T] :
     T ⊗[R] H1Cotangent R S ≃ₗ[T] H1Cotangent T (T ⊗[R] S) :=
-  let _ : Algebra S (T ⊗[R] S) := TensorProduct.includeRight.toRingHom.toAlgebra
-  let f := H1Cotangent.map R T S (T ⊗[R] S)
-  let f' := (f.restrictScalars R).liftBaseChange T
-  sorry
+  let P : Extension R S := (Generators.self R S).toExtension
+  let e : T ⊗[R] P.H1Cotangent ≃ₗ[T] (P.baseChange (T := T)).H1Cotangent :=
+    P.tensorH1Cotangent' T
+  let PT : Extension T (T ⊗[R] S) := P.baseChange
+  let PT' : Extension T (T ⊗[R] S) := (Generators.self R S).baseChange.toExtension
+  let f₁ : PT.Hom PT' := (Generators.self R S).baseChangeFromBaseChange T
+  let f₂ : PT'.Hom PT := (Generators.self R S).baseChangeToBaseChange T
+  let e₂ : PT.H1Cotangent ≃ₗ[T] PT'.H1Cotangent :=
+    (Extension.H1Cotangent.equiv f₁ f₂).restrictScalars T
+  e ≪≫ₗ e₂ ≪≫ₗ ((Generators.self R S).baseChange (T := T)).equivH1Cotangent.restrictScalars T
 
 end Algebra
