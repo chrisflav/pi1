@@ -6,6 +6,7 @@ import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
 import Pi1.RingTheory.FinitePresentation
 import Pi1.RingTheory.RankAtStalk
 import Pi1.RingTheory.SmoothFlat
+import Pi1.RingTheory.Utils
 
 open TensorProduct
 
@@ -84,23 +85,6 @@ lemma RingHom.prod_bijective_of_isIdempotentElem {R : Type*} [CommRing R]
   · intro i j hij
     fin_cases i <;> fin_cases j <;> simp at hij ⊢ <;> simpa [mul_comm]
   · simpa
-
-lemma Algebra.TensorProduct.map_mul_of_map_mul_tmul {R S A B C : Type*} [CommRing R]
-    [CommRing S] [CommRing A] [CommRing B] [CommRing C]
-    [Algebra R S] [Algebra R A] [Algebra R B]
-    [Algebra S A] [IsScalarTower R S A] [Algebra S C]
-    {f : A ⊗[R] B →ₗ[S] C}
-    (hf : ∀ (a₁ a₂ : A) (b₁ b₂ : B), f (a₁ ⊗ₜ b₁ * a₂ ⊗ₜ b₂) = f (a₁ ⊗ₜ b₁) * f (a₂ ⊗ₜ b₂))
-    (x y : A ⊗[R] B) :
-    f (x * y) = f x * f y := by
-  induction x with
-  | zero => simp
-  | add a b ha hb => simp [ha, hb, add_mul]
-  | tmul a b =>
-      induction y with
-      | zero => simp
-      | add c d hc hd => simp [hc, hd, mul_add]
-      | tmul => apply hf
 
 noncomputable
 nonrec def Algebra.TensorProduct.prodRight (R S T A B : Type*) [CommRing R] [CommRing A]
