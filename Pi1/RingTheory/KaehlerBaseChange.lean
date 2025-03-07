@@ -43,6 +43,14 @@ def IsPushout.cancelBaseChange [SMulCommClass A S B] : B ⊗[A] M ≃ₗ[S] S �
     | add x y hx hy => simp only [smul_add, map_add, hx, hy]
     | tmul s' m => simp [Algebra.smul_def, TensorProduct.smul_tmul']
 
+--lemma _root_.AddEquiv.toLin
+
+@[simp]
+lemma IsPushout.cancelBaseChange_tmul [SMulCommClass A S B] (m : M) :
+    IsPushout.cancelBaseChange R S A B M (1 ⊗ₜ m) = 1 ⊗ₜ m := by
+  show ((cancelBaseChange_aux R S A B M).symm).symm (1 ⊗ₜ[A] m) = 1 ⊗ₜ[R] m
+  simp [cancelBaseChange_aux, TensorProduct.one_def]
+
 @[simp]
 lemma IsPushout.cancelBaseChange_symm_tmul [SMulCommClass A S B] (s : S) (m : M) :
     (IsPushout.cancelBaseChange R S A B M).symm (s ⊗ₜ m) = algebraMap S B s ⊗ₜ m :=
@@ -78,6 +86,20 @@ def _root_.KaehlerDifferential.tensorKaehlerCancelBase : B ⊗[A] Ω[A⁄R] ≃�
     | h₃ s b h => rw [smul_assoc, map_smul, h, smul_assoc]
     | h₄ b₁ b₂ h1 h2 => rw [add_smul, add_smul, map_add, h1, h2]
 
+@[simp]
+lemma _root_.KaehlerDifferential.tensorKaehlerCancelBase_tmul (x : Ω[A⁄R]) :
+    KaehlerDifferential.tensorKaehlerCancelBase R S A B (1 ⊗ₜ x) =
+      1 ⊗ₜ x := by
+  have : SMulCommClass A S B := SMulCommClass.of_commMonoid A S B
+  show ((IsPushout.cancelBaseChange R S A B (Ω[A⁄R])).symm).symm (1 ⊗ₜ[A] x) = _
+  simp [KaehlerDifferential.tensorKaehlerCancelBase]
+
+@[simp]
+lemma _root_.KaehlerDifferential.tensorKaehlerCancelBase_symm_tmul (s : S) (x : Ω[A⁄R]) :
+    (KaehlerDifferential.tensorKaehlerCancelBase R S A B).symm (s ⊗ₜ x) =
+      algebraMap S B s ⊗ₜ x := by
+  simp [KaehlerDifferential.tensorKaehlerCancelBase]
+
 /-- A `B`-linear version of `KaehlerDifferential.tensorKaehlerEquiv` depending on
 `KaehlerDifferential.moduleBaseChange'`. -/
 noncomputable
@@ -85,11 +107,28 @@ def _root_.KaehlerDifferential.tensorKaehlerEquivExtend : S ⊗[R] Ω[A⁄R] ≃
   LinearEquiv.symm <| (KaehlerDifferential.tensorKaehlerEquiv R S A B).symm.toLinearEquiv <|
     (KaehlerDifferential.derivationTensorProduct R S A B).liftKaehlerDifferential.map_smul
 
+@[simp]
+lemma _root_.KaehlerDifferential.tensorKaehlerEquivExtend_tmul (s : S) (x : A) :
+    KaehlerDifferential.tensorKaehlerEquivExtend R S A B (s ⊗ₜ KaehlerDifferential.D R A x) =
+      s • KaehlerDifferential.D S B (algebraMap A B x) := by
+  show ((KaehlerDifferential.tensorKaehlerEquiv R S A B).symm).symm
+    (s ⊗ₜ[R] (KaehlerDifferential.D R A) x) = _
+  simp
+
 /-- A `B`-linear version of `KaehlerDifferential.tensorKaehlerEquiv`. -/
 noncomputable
 def _root_.KaehlerDifferential.tensorKaehlerEquiv' : B ⊗[A] Ω[A⁄R] ≃ₗ[B] Ω[B⁄S] :=
   KaehlerDifferential.tensorKaehlerCancelBase R S A B ≪≫ₗ
     KaehlerDifferential.tensorKaehlerEquivExtend R S A B
+
+@[simp]
+lemma _root_.KaehlerDifferential.tensorKaehlerEquiv'_tmul (b : B) (x : A) :
+    KaehlerDifferential.tensorKaehlerEquiv' R S A B (b ⊗ₜ KaehlerDifferential.D R A x) =
+      b • KaehlerDifferential.D S B (algebraMap A B x) := by
+  have : b ⊗ₜ[A] KaehlerDifferential.D R A x = b • 1 ⊗ₜ[A] (KaehlerDifferential.D R A) x := by
+    simp [smul_tmul']
+  rw [this, map_smul]
+  simp [KaehlerDifferential.tensorKaehlerEquiv']
 
 end
 
