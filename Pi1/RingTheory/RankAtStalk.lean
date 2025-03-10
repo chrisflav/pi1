@@ -13,6 +13,12 @@ section rankAtStalk
 
 variable {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M]
 
+-- this is soon in mathlib
+lemma Module.free_of_flat_of_isLocalRing' [IsLocalRing R] [Module.Finite R M]
+    [Module.Flat R M] : Module.Free R M :=
+  --free_of_flat_of_isLocalRing
+  sorry
+
 lemma PrimeSpectrum.nontrivial (p : PrimeSpectrum R) : Nontrivial R := by
   refine ⟨0, 1, fun h ↦ p.2.ne_top ?_⟩
   simp [Ideal.eq_top_iff_one p.asIdeal, ← h]
@@ -72,10 +78,15 @@ lemma rankAtStalk_self [Nontrivial R] : rankAtStalk (R := R) R = 1 := by
 
 open LocalizedModule Localization
 
+instance {R : Type*} [CommSemiring R] (S : Submonoid R)
+    (M : Type*) [AddCommMonoid M] [Module R M] [Module.Finite R M] :
+    Module.Finite (Localization S) (LocalizedModule S M) :=
+  Module.Finite.of_isLocalizedModule S (LocalizedModule.mkLinearMap S M)
+
 /-- The rank of `Π i, M i` at a prime `p` is the sum of the ranks of `M i` at `p`. -/
 lemma rankAtStalk_pi {ι : Type*} [Finite ι] (M : ι → Type*)
     [∀ i, AddCommGroup (M i)] [∀ i, Module R (M i)] [∀ i, Module.Flat R (M i)]
-    [∀ i, Module.FinitePresentation R (M i)] (p : PrimeSpectrum R) :
+    [∀ i, Module.Finite R (M i)] (p : PrimeSpectrum R) :
     rankAtStalk (Π i, M i) p = ∑ᶠ i, rankAtStalk (M i) p := by
   cases nonempty_fintype ι
   let f : (Π i, M i) →ₗ[R] Π i, LocalizedModule p.asIdeal.primeCompl (M i) :=
@@ -86,10 +97,10 @@ lemma rankAtStalk_pi {ι : Type*} [Finite ι] (M : ι → Type*)
       (mkLinearMap _ _) f |>.extendScalarsOfIsLocalization p.asIdeal.primeCompl _
   have (i : ι) : Free (Localization.AtPrime p.asIdeal)
       (LocalizedModule p.asIdeal.primeCompl (M i)) :=
-    free_of_flat_of_isLocalRing
+    free_of_flat_of_isLocalRing'
   simp_rw [rankAtStalk, e.finrank_eq, Module.finrank_pi_fintype, finsum_eq_sum_of_fintype]
 
-variable [Flat R M] [FinitePresentation R M]
+variable [Flat R M] [Module.Finite R M]
 
 lemma rankAtStalk_eq_zero_iff_subsingleton :
     rankAtStalk (R := R) M = 0 ↔ Subsingleton M := by
@@ -97,7 +108,7 @@ lemma rankAtStalk_eq_zero_iff_subsingleton :
   simp_rw [← support_eq_empty_iff (R := R), Set.eq_empty_iff_forall_not_mem, not_mem_support_iff]
   intro p
   have : Free (Localization.AtPrime p.asIdeal) (LocalizedModule p.asIdeal.primeCompl M) :=
-    free_of_flat_of_isLocalRing
+    free_of_flat_of_isLocalRing'
   apply subsingleton_of_rank_zero (R := Localization.AtPrime p.asIdeal)
   have hr : finrank (Localization.AtPrime p.asIdeal) (LocalizedModule p.asIdeal.primeCompl M) = 0 :=
     funext_iff.mp h p
@@ -106,7 +117,7 @@ lemma rankAtStalk_eq_zero_iff_subsingleton :
 variable (M) in
 /-- The rank of `M × N` at `p` is equal to the sum of the ranks. -/
 lemma rankAtStalk_prod (N : Type*) [AddCommGroup N] [Module R N]
-    [Module.Flat R N] [Module.FinitePresentation R N] (p : PrimeSpectrum R) :
+    [Module.Flat R N] [Module.Finite R N] (p : PrimeSpectrum R) :
     rankAtStalk (M × N) p = rankAtStalk M p + rankAtStalk N p := by
   let e : LocalizedModule p.asIdeal.primeCompl (M × N) ≃ₗ[Localization.AtPrime p.asIdeal]
       LocalizedModule p.asIdeal.primeCompl M × LocalizedModule p.asIdeal.primeCompl N :=
@@ -114,9 +125,9 @@ lemma rankAtStalk_prod (N : Type*) [AddCommGroup N] [Module R N]
       (.prodMap (mkLinearMap _ M) (mkLinearMap _ N)) |>.extendScalarsOfIsLocalization
       p.asIdeal.primeCompl _
   have : Free (Localization.AtPrime p.asIdeal) (LocalizedModule p.asIdeal.primeCompl N) :=
-    free_of_flat_of_isLocalRing
+    free_of_flat_of_isLocalRing'
   have : Free (Localization.AtPrime p.asIdeal) (LocalizedModule p.asIdeal.primeCompl M) :=
-    free_of_flat_of_isLocalRing
+    free_of_flat_of_isLocalRing'
   simp [rankAtStalk, e.finrank_eq]
 
 lemma rankAtStalk_tensorProduct {S : Type*} [CommRing S] [Algebra R S] (p : PrimeSpectrum S) :
@@ -138,7 +149,7 @@ lemma rankAtStalk_tensorProduct {S : Type*} [CommRing S] [Algebra R S] (p : Prim
         (LocalizedModule.equivTensorProduct _ M).symm)
   rw [rankAtStalk, e.finrank_eq]
   have : Free (Localization.AtPrime q.asIdeal) (LocalizedModule q.asIdeal.primeCompl M) :=
-    free_of_flat_of_isLocalRing
+    free_of_flat_of_isLocalRing'
   apply Module.finrank_baseChange
 
 /-- The rank of a module `M` at a prime `p` is equal to the dimension
@@ -147,7 +158,7 @@ lemma rankAtStalk_eq (p : PrimeSpectrum R) :
     rankAtStalk M p = finrank p.asIdeal.ResidueField (p.asIdeal.ResidueField ⊗[R] M) := by
   let k := p.asIdeal.ResidueField
   have : Free (Localization.AtPrime p.asIdeal) (Localization.AtPrime p.asIdeal ⊗[R] M) :=
-    free_of_flat_of_isLocalRing
+    free_of_flat_of_isLocalRing'
   let e₁ : LocalizedModule p.asIdeal.primeCompl M ≃ₗ[Localization.AtPrime p.asIdeal]
       Localization.AtPrime p.asIdeal ⊗[R] M :=
     LocalizedModule.equivTensorProduct p.asIdeal.primeCompl M
@@ -163,7 +174,7 @@ lemma rankAtStalk_pos_iff_nontrivial (p : PrimeSpectrum R) :
 
 end Module
 
-variable {S : Type*} [CommRing S] [Algebra R S] [Module.Flat R S] [Module.FinitePresentation R S]
+variable {S : Type*} [CommRing S] [Algebra R S] [Module.Flat R S] [Module.Finite R S]
 
 lemma Algebra.rankAtStalk_pos_iff_mem_range_specComap (p : PrimeSpectrum R) :
     0 < Module.rankAtStalk (R := R) S p ↔ p ∈ Set.range (algebraMap R S).specComap := by
