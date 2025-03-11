@@ -365,7 +365,7 @@ set_option maxHeartbeats 0 in
 lemma Algebra.FiniteEtale.equalizer_fun {R : Type u} {E F : Type} [CommRing R] [Finite E] [Finite F]
     (f g : (E → R) →ₐ[R] (F → R)) :
     Algebra.FiniteEtale R (AlgHom.equalizer f g) := by
-  apply Algebra.finite_etale_of_exists_cover'
+  apply Algebra.FiniteEtale.of_exists_of_isPrime
   intro p hp
   obtain ⟨r, hr, σ, τ, hσ, hτ⟩ := AlgHom.exists_cover_eq_compRight''₂ f g p
   use r, hr
@@ -449,7 +449,7 @@ theorem Algebra.Etale.equalizer {R S T : Type u} [CommRing R] [CommRing S] [Comm
     (f g : S →ₐ[R] T) :
     Algebra.FiniteEtale R (AlgHom.equalizer f g) := by
   wlog h : ∃ (n : ℕ), Module.rankAtStalk (R := R) S = n
-  · apply Algebra.finite_etale_of_exists_cover'
+  · apply Algebra.FiniteEtale.of_exists_of_isPrime
     intro p hp
     obtain ⟨r, hr, hn⟩ := Algebra.exists_cover_rankAtStalk_eq S p
     use r, hr
@@ -464,7 +464,7 @@ theorem Algebra.Etale.equalizer {R S T : Type u} [CommRing R] [CommRing S] [Comm
     exact Algebra.FiniteEtale.of_equiv (S := AlgHom.equalizer f' g') cong.symm
   obtain ⟨n, hn⟩ := h
   wlog h : ∃ (m : ℕ), Module.rankAtStalk (R := R) T = m
-  · apply Algebra.finite_etale_of_exists_cover'
+  · apply Algebra.FiniteEtale.of_exists_of_isPrime
     intro p hp
     obtain ⟨r, hr, hm⟩ := Algebra.exists_cover_rankAtStalk_eq T p
     use r, hr
