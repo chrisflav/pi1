@@ -6,15 +6,6 @@ import Mathlib.LinearAlgebra.TensorProduct.Prod
 open TensorProduct
 
 section
-
-lemma Module.FinitePresentation.of_equiv {R M N : Type*} [Ring R] [AddCommGroup M]
-    [Module R M] [AddCommGroup N] [Module R N] (e : M ≃ₗ[R] N) [Module.FinitePresentation R M] :
-    Module.FinitePresentation R N := by
-  simp [← Module.FinitePresentation.fg_ker_iff e.toLinearMap e.surjective, Submodule.fg_bot]
-
-end
-
-section
 -- #22339
 
 section

@@ -99,11 +99,10 @@ instance (R A B : Type u) [CommRing R] [CommRing A] [CommRing B]
 proof_wanted Algebra.FinitePresentation.of_finitePresentation {R S : Type*} [CommRing R]
     [CommRing S] [Algebra R S] [Module.FinitePresentation R S] : Algebra.FinitePresentation R S
 
-lemma Module.FinitePresentation.of_equiv {R M N : Type*} [CommRing R]
-    [AddCommGroup M] [AddCommGroup N] [Module R M] [Module R N]
-    [Module.FinitePresentation R M] (e : M ≃ₗ[R] N) :
-    Module.FinitePresentation R N :=
-  sorry
+lemma Module.FinitePresentation.of_equiv {R M N : Type*} [Ring R] [AddCommGroup M]
+    [Module R M] [AddCommGroup N] [Module R N] (e : M ≃ₗ[R] N) [Module.FinitePresentation R M] :
+    Module.FinitePresentation R N := by
+  simp [← Module.FinitePresentation.fg_ker_iff e.toLinearMap e.surjective, Submodule.fg_bot]
 
 instance (priority := 900) Module.FinitePresentation.of_subsingleton
     {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M] [Subsingleton M] :
