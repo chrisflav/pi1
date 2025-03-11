@@ -10,10 +10,15 @@ import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Finite
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.Composition
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.Over
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.UnderAdjunction
+import Pi1.Mathlib.RingTheory.RingHom.And
 import Pi1.Mathlib.RingTheory.RingHom.Etale
+import Pi1.Mathlib.RingTheory.RingHom.Smooth
 import Pi1.RingTheory.Cotangent.Basic
 import Pi1.RingTheory.Cotangent.SpaceBaseChange
 import Pi1.RingTheory.CotangentBaseChange
+import Pi1.RingTheory.FiniteEtale.Basic
+import Pi1.RingTheory.FiniteEtale.Descent
+import Pi1.RingTheory.FiniteEtale.Equalizer
 import Pi1.RingTheory.FinitePresentation
 import Pi1.RingTheory.FiveLemma
 import Pi1.RingTheory.KaehlerBaseChange

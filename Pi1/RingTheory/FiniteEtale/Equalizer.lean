@@ -98,7 +98,6 @@ lemma Algebra.exists_cover_rankAtStalk_eq {R : Type*} (S : Type*) [CommRing R] [
     ∃ r ∉ p,
       Module.rankAtStalk (R := Localization.Away r) (Localization.Away r ⊗[R] S) =
         Module.rankAtStalk S ⟨p, inferInstance⟩ := by
-  have := Module.isLocallyConstant_rankAtStalk (R := R) (M := S)
   obtain ⟨U, hU, hp, heq⟩ := (Module.isLocallyConstant_rankAtStalk (M := S)).exists_open ⟨p, ‹_›⟩
   obtain ⟨V, ⟨r, rfl⟩, (hr : r ∉ p), hrU⟩ :=
     PrimeSpectrum.isTopologicalBasis_basic_opens.exists_subset_of_mem_open hp hU
@@ -361,6 +360,7 @@ lemma AlgHom.exists_cover_eq_compRight''₂ {R : Type*} {E F : Type u}
 
 end
 
+set_option synthInstance.maxHeartbeats 0 in
 set_option maxHeartbeats 0 in
 lemma Algebra.FiniteEtale.equalizer_fun {R : Type u} {E F : Type} [CommRing R] [Finite E] [Finite F]
     (f g : (E → R) →ₐ[R] (F → R)) :
