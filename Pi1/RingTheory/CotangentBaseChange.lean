@@ -227,6 +227,7 @@ lemma cotangentToQuotientSquare_injective :
   rw [Ideal.toCotangent_eq_zero]
   exact (Submodule.Quotient.mk_eq_zero (I ^ 2)).mp hx
 
+set_option maxHeartbeats 0 in
 lemma tensorCotangentTo_injective_of_flat [Module.Flat R T] :
     Function.Injective (I.tensorCotangentTo R T) := by
   let f : (I.map <| algebraMap S (T ⊗[R] S)).Cotangent →ₗ[T]
