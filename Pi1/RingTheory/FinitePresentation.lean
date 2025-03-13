@@ -216,25 +216,66 @@ lemma MvPolynomial.aeval_polynomialEval₂_C {R S : Type*} [CommSemiring R]
 
 noncomputable
 def Polynomial.toMvPolynomial {R ι : Type*} [CommSemiring R]
-    (i : ι) (p : R[X]) : MvPolynomial ι R :=
-  MvPolynomial.rename (fun _ : Unit ↦ i) (MvPolynomial.pUnitAlgEquiv R |>.symm <| p)
+    (i : ι) : R[X] →ₐ[R] MvPolynomial ι R :=
+  (MvPolynomial.rename (fun _ : Unit ↦ i)).comp (MvPolynomial.pUnitAlgEquiv R).symm
+
+@[simp]
+lemma Polynomial.toMvPolynomial_C {R ι : Type*} [CommSemiring R]
+    (i : ι) (r : R) :
+    (C r).toMvPolynomial i = MvPolynomial.C r := by
+  simp [toMvPolynomial]
+
+@[simp]
+lemma Polynomial.toMvPolynomial_X {R ι : Type*} [CommSemiring R]
+    (i : ι) :
+    X.toMvPolynomial i = MvPolynomial.X (R := R) i := by
+  simp [toMvPolynomial]
+
+@[simp]
+lemma MvPolynomial.aeval_toMvPolynomial {R S ι : Type*} [CommSemiring R] [CommSemiring S]
+    [Algebra R S] (f : ι → S) (i : ι) (p : R[X]) :
+    MvPolynomial.aeval f (p.toMvPolynomial i) = Polynomial.aeval (f i) p := by
+  induction p using Polynomial.induction_on with
+  | h_add p q hp hq => simp [hp, hq]
+  | h_C => simp
+  | h_monomial => simp
+
+@[simp]
+lemma MvPolynomial.rename_comp_toMvPolynomial {R α β : Type*} [CommSemiring R]
+    (f : α → β) (a : α) :
+    (MvPolynomial.rename (R := R) f).comp (Polynomial.toMvPolynomial a) =
+      Polynomial.toMvPolynomial (f a) := by
+  ext
+  simp
+
+@[simp]
+lemma MvPolynomial.rename_toMvPolynomial {R α β : Type*} [CommSemiring R]
+    (f : α → β) (a : α) (p : R[X]) :
+    (MvPolynomial.rename (R := R) f) (Polynomial.toMvPolynomial a p) =
+      Polynomial.toMvPolynomial (f a) p :=
+  DFunLike.congr_fun (rename_comp_toMvPolynomial ..) p
 
 lemma Module.Free.trans (R S M : Type*) [CommSemiring R] [CommSemiring S] [Algebra R S]
     [AddCommMonoid M] [Module R M] [Module S M] [IsScalarTower R S M]
     [Module.Free R S] [Module.Free S M] :
     Module.Free R M :=
-  sorry
+  let e : (ChooseBasisIndex S M →₀ S) ≃ₗ[R] ChooseBasisIndex S M →₀ (ChooseBasisIndex R S →₀ R) :=
+    Finsupp.mapRange.linearEquiv (Module.Free.chooseBasis R S).repr
+  let e : M ≃ₗ[R] ChooseBasisIndex S M →₀ (ChooseBasisIndex R S →₀ R) :=
+    (Module.Free.chooseBasis S M).repr.restrictScalars R ≪≫ₗ e
+  .of_equiv e.symm
 
 lemma AdjoinRoot.free_of_monic {R : Type*} [CommRing R] {f : R[X]} (hf : f.Monic) :
     Module.Free R (AdjoinRoot f) :=
   .of_basis (AdjoinRoot.powerBasis' hf).basis
 
+lemma AdjoinRoot.finite_of_monic {R : Type*} [CommRing R] {f : R[X]} (hf : f.Monic) :
+    Module.Finite R (AdjoinRoot f) :=
+  .of_basis (AdjoinRoot.powerBasis' hf).basis
+
 lemma Polynomial.free_quotient_of_monic {R : Type*} [CommRing R] {p : R[X]} (hp : p.Monic) :
     Module.Free R (R[X] ⧸ Ideal.span {p}) :=
   AdjoinRoot.free_of_monic hp
-
---def fooEquiv {R ι : Type*} [CommRing R] (p : Option ι → R[X]) :
---    AdjoinRoot
 
 lemma AdjoinRoot.lift_algebraMap {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
     (f : Polynomial R) (x : S) (hfx : Polynomial.aeval x f = 0) (r : R) :
@@ -242,52 +283,125 @@ lemma AdjoinRoot.lift_algebraMap {R S : Type*} [CommRing R] [CommRing S] [Algebr
       algebraMap R S r := by
   simp
 
+@[simp]
+lemma RingEquiv.quotientBot_mk {R : Type*} [Ring R] (r : R) :
+    RingEquiv.quotientBot R (Ideal.Quotient.mk ⊥ r) = r :=
+  rfl
+
+def AlgEquiv.quotientBot (R S : Type*) [CommSemiring R] [CommRing S] [Algebra R S] :
+    (S ⧸ (⊥ : Ideal S)) ≃ₐ[R] S where
+  __ := RingEquiv.quotientBot S
+  commutes' x := by
+    rw [← Ideal.Quotient.mk_algebraMap]
+    simp [-Ideal.Quotient.mk_algebraMap]
+
 set_option maxHeartbeats 0 in
 set_option synthInstance.maxHeartbeats 0 in
-lemma MvPolynomial.freeQuotientOfMonic {R ι : Type*} [Finite ι] [CommRing R] (p : ι → R[X])
-    (hp : ∀ i, (p i).Monic) :
+private lemma MvPolynomial.free_and_finite_quotient_of_monic {R ι : Type*} [Finite ι] [CommRing R]
+    (p : ι → R[X]) (hp : ∀ i, (p i).Monic) :
     Module.Free R
-      (MvPolynomial ι R ⧸ (Ideal.span <| Set.range fun i ↦ (p i).toMvPolynomial i)) := by
+      (MvPolynomial ι R ⧸ (Ideal.span <| Set.range fun i ↦ (p i).toMvPolynomial i)) ∧
+      Module.Finite R
+        (MvPolynomial ι R ⧸ (Ideal.span <| Set.range fun i ↦ (p i).toMvPolynomial i)) := by
   cases nonempty_fintype ι
   revert p
   refine Fintype.induction_empty_option ?_ ?_ ?_ ι
-  · sorry
+  · intro α β _ e h p hp
+    let q (a : α) : R[X] := p (e a)
+    let e : (MvPolynomial α R ⧸ Ideal.span (Set.range fun i ↦ (toMvPolynomial i) (q i))) ≃ₐ[R]
+        (MvPolynomial β R ⧸ Ideal.span (Set.range fun i ↦ (toMvPolynomial i) (p i))) :=
+      Ideal.quotientEquivAlg _ _ (MvPolynomial.renameEquiv R e) <| by
+        rw [Ideal.map_span]
+        have : (fun x ↦ (toMvPolynomial (e x)) (p (e x))) =
+          (fun x ↦ toMvPolynomial x (p x)) ∘ e := rfl
+        simp_rw [RingHom.coe_coe, renameEquiv_apply, ← Set.range_comp, Function.comp_def]
+        simp [rename_toMvPolynomial, q, this, Set.range_comp]
+    have := (h q (fun a ↦ hp _)).1
+    have := (h q (fun a ↦ hp _)).2
+    exact ⟨Module.Free.of_equiv e.toLinearEquiv, Module.Finite.equiv e.toLinearEquiv⟩
   · intro p _
+    let e0 : MvPolynomial PEmpty R ≃ₐ[R] R := isEmptyAlgEquiv R PEmpty
+    let e1 := Ideal.quotientEquivAlg
+      (Ideal.span (Set.range fun i : PEmpty ↦ (p i).toMvPolynomial i)) _ e0 rfl
+    have : Ideal.map e0 (Ideal.span (Set.range fun i ↦ (toMvPolynomial i) (p i))) = ⊥ := by
+      rw [eq_bot_iff, Ideal.map_le_iff_le_comap, Ideal.span_le]
+      rintro - ⟨i, rfl⟩
+      contradiction
+    let e2 : (R ⧸ Ideal.map e0 (Ideal.span (Set.range fun i ↦ (toMvPolynomial i) (p i)))) ≃ₐ[R] R :=
+      (Ideal.quotientEquivAlgOfEq R this).trans (AlgEquiv.quotientBot R R)
     let e :
         (MvPolynomial PEmpty R ⧸ Ideal.span (Set.range fun i : PEmpty ↦ (p i).toMvPolynomial i))
           ≃ₐ[R] R :=
-      sorry
-    apply Module.Free.of_equiv e.toLinearEquiv.symm
+      e1.trans e2
+    exact ⟨Module.Free.of_equiv e.toLinearEquiv.symm, Module.Finite.equiv e.toLinearEquiv.symm⟩
   · intro α _ hp q hq
-    let A :=
-      MvPolynomial α R ⧸ (Ideal.span <| Set.range fun i : α ↦ (q i).toMvPolynomial i)
+    let A := MvPolynomial α R ⧸ (Ideal.span <| Set.range fun i : α ↦ (q i).toMvPolynomial i)
     let B := MvPolynomial (Option α) R ⧸ (Ideal.span <| Set.range fun i ↦ (q i).toMvPolynomial i)
+    have heq (x : R[X]) (i : Option α) : (Polynomial.aeval
+          ((Ideal.Quotient.mk (Ideal.span (Set.range fun i ↦ toMvPolynomial i (q i)))) (X i))) x =
+        Ideal.Quotient.mk _ (toMvPolynomial i x) := by
+      induction x using Polynomial.induction_on with
+      | h_C => simp [IsScalarTower.algebraMap_apply R (MvPolynomial (Option α) R)]
+      | h_add x y hx hy => simp [hx, hy]
+      | h_monomial n r hn =>
+        simp only [map_mul, Polynomial.aeval_C, map_pow, Polynomial.aeval_X, toMvPolynomial_C,
+          toMvPolynomial_X] at hn
+        simp [pow_add, hn, ← mul_assoc]
     let f : A →ₐ[R] B :=
-      Ideal.Quotient.liftₐ _ (MvPolynomial.aeval fun x ↦ Ideal.Quotient.mk _ <| X (some x)) sorry
-    have : Module.Free R A := by
-      apply hp
-      intro i
-      exact hq i
+      Ideal.Quotient.liftₐ _ (MvPolynomial.aeval fun x ↦ Ideal.Quotient.mk _ <| X (some x)) <| by
+        simp_rw [← RingHom.mem_ker, ← SetLike.le_def, Ideal.span_le]
+        rintro - ⟨i, rfl⟩
+        simp only [SetLike.mem_coe, RingHom.mem_ker, aeval_toMvPolynomial]
+        rw [heq, Ideal.Quotient.eq_zero_iff_mem]
+        apply Ideal.subset_span
+        use i
+    have : Module.Free R A := (hp _ (fun i ↦ hq i)).1
     let _ : Algebra A B := f.toRingHom.toAlgebra
     let P : A[X] := (q none).map (algebraMap R A)
-    let u : AdjoinRoot P →ₐ[A] B :=
-      AdjoinRoot.liftHom _
-        (Ideal.Quotient.mk _ (toMvPolynomial none (q none)))
-        sorry
+    have heq2 (a : α) (x : R[X]) : (Polynomial.aeval
+        ((AdjoinRoot.of P) ((Ideal.Quotient.mk _) (X a)))) x =
+          AdjoinRoot.of P (Ideal.Quotient.mk _ (toMvPolynomial a x)) := by
+      induction x using Polynomial.induction_on with
+      | h_C => simp; rfl
+      | h_monomial n a h => simp [pow_add, ← mul_assoc, h]
+      | h_add p q hp hq => simp [hp, hq]
+    have h0 (a : α) :
+        ((Ideal.Quotient.mk (Ideal.span (Set.range fun i ↦ (toMvPolynomial i) (q (some i)))))
+          ((toMvPolynomial a) (q (some a)))) = 0 := by
+      rw [Ideal.Quotient.eq_zero_iff_mem]
+      apply Ideal.subset_span
+      use a
+    let u : AdjoinRoot P →ₐ[A] B := AdjoinRoot.liftHom _ (Ideal.Quotient.mk _ <| X none) <| by
+      simp [P]
+      rw [heq, Ideal.Quotient.eq_zero_iff_mem]
+      apply Ideal.subset_span
+      use none
     let v' : B →ₐ[R] AdjoinRoot P :=
-      Ideal.Quotient.liftₐ _
-        (MvPolynomial.aeval (fun x ↦ x.elim (AdjoinRoot.root P)
-          (fun i ↦ AdjoinRoot.mk _ (Polynomial.C <| Ideal.Quotient.mk _ (X i)))))
-        sorry
+      Ideal.Quotient.liftₐ _ (MvPolynomial.aeval (fun x ↦ x.elim (AdjoinRoot.root P)
+          (fun i ↦ AdjoinRoot.mk _ (Polynomial.C <| Ideal.Quotient.mk _ (X i))))) <| by
+        simp_rw [← RingHom.mem_ker, ← SetLike.le_def, Ideal.span_le]
+        rintro - ⟨i, rfl⟩
+        simp only [AdjoinRoot.mk_C, SetLike.mem_coe, RingHom.mem_ker, aeval_toMvPolynomial]
+        cases i
+        · simp only [Option.elim_none]
+          rw [← Polynomial.aeval_map_algebraMap A, AdjoinRoot.aeval_eq, AdjoinRoot.mk_self]
+        · simp [heq2, h0]
+    have hcomp : v'.comp f = IsScalarTower.toAlgHom _ _ _ := by
+      apply Ideal.Quotient.algHom_ext
+      apply MvPolynomial.algHom_ext
+      intro i
+      simp [v', f]
+      rw [Ideal.Quotient.liftₐ_apply]
+      simp
+      rfl
     let v : B →ₐ[A] AdjoinRoot P :=
       { __ := v'.toRingHom
-        commutes' := sorry }
+        commutes' := DFunLike.congr_fun hcomp }
     have h1 : v.comp u = AlgHom.id A (AdjoinRoot P) := by
       apply AdjoinRoot.algHom_ext
       simp [u, v, v']
       rw [Ideal.Quotient.liftₐ_apply]
-      have : Polynomial.eval₂ (algebraMap R (AdjoinRoot P)) (AdjoinRoot.root P) (q none) = AdjoinRoot.root P := sorry
-      simp [toMvPolynomial, MvPolynomial.aeval_rename, this]
+      simp [toMvPolynomial, MvPolynomial.aeval_rename]
     have h2 : ((u.comp v).restrictScalars R) =
         ((AlgHom.id A B).restrictScalars R) := by
       apply Ideal.Quotient.algHom_ext
@@ -297,119 +411,40 @@ lemma MvPolynomial.freeQuotientOfMonic {R ι : Type*} [Finite ι] [CommRing R] (
       rw [Ideal.Quotient.liftₐ_apply]
       simp [Ideal.Quotient.mkₐ]
       cases i
-      · simp [P]
-        simp [toMvPolynomial]
-        sorry
+      · simp
+        show Ideal.Quotient.mk _ _ = Ideal.Quotient.mk _ _
+        simp only [toMvPolynomial]
       · simp [RingHom.algebraMap_toAlgebra, f]
         rw [Ideal.Quotient.liftₐ_apply]
         rw [Ideal.Quotient.lift_mk]
         simp
         rfl
-    /-
-    let h : IsAdjoinRoot B P :=
-      { map := (Polynomial.aeval <| Ideal.Quotient.mk _ (toMvPolynomial none (q none))).toRingHom
-        map_surjective x := by
-          obtain ⟨x, rfl⟩ := Ideal.Quotient.mk_surjective x
-          induction x using MvPolynomial.induction_on with
-          | h_C r =>
-            use Polynomial.C (algebraMap R A r)
-            simp
-            erw [Polynomial.aeval_C]
-            rw [RingHom.algebraMap_toAlgebra]
-            simp
-            rfl
-          | h_X => sorry
-          | h_add p q hp hq =>
-            obtain ⟨a, ha⟩ := hp
-            obtain ⟨b, hb⟩ := hq
-            use a + b
-            simp at ha hb
-            simp [ha, hb]
-        ker_map := sorry
-        algebraMap_eq := by
-          ext
-          simp
-          sorry
-          sorry
-      }
-    #exit
-    -/
     let e : AdjoinRoot P ≃ₐ[A] B :=
-      sorry
-      /-
-      { __ := u
-        invFun := v
-        left_inv x := by
-          induction' x using AdjoinRoot.induction_on with p
-          simp [u, v]
-          induction p using Polynomial.induction_on with
-          | h_C a =>
-            obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective a
-            simp [RingHom.algebraMap_toAlgebra, f, AdjoinRoot.mk, AdjoinRoot]
-            nth_rw 2 [Ideal.Quotient.liftₐ_apply]
-            simp
-            induction a using MvPolynomial.induction_on with
-            | h_C r =>
-              have : IsScalarTower R A (A[X] ⧸ Ideal.span {P}) := sorry
-              simp
-              rw [IsScalarTower.algebraMap_apply R A]
-              simp [A]
-              rfl
-            | h_X p i hp =>
-              simp [hp]
-              rw [Ideal.Quotient.liftₐ_apply]
-              have : (Ideal.Quotient.mk (Ideal.span {P}))
-                  (Polynomial.C
-                    ((Ideal.Quotient.mk
-                      (Ideal.span (Set.range fun i ↦ toMvPolynomial i (q (some i))))) p)) = 0 :=
-                sorry
-              simp [this]
-            | h_add p q hp hq =>
-              simp_rw [map_add, hp, hq]
-          | h_add p q hp hq =>
-            simp [hp, hq]
-          | h_monomial n a hn =>
-            simp at hn
-            simp [pow_add, hn]
-            rw [← mul_assoc, hn]
-            rw [Ideal.Quotient.liftₐ_apply]
-            simp [Polynomial.toMvPolynomial, MvPolynomial.aeval_rename]
-            have : (algebraMap R (AdjoinRoot P)) ((q none).coeff 0) = AdjoinRoot.root P := sorry
-            rw [← mul_assoc, this]
-        right_inv x := by
-          simp [u, v]
-          obtain ⟨x, rfl⟩ := Ideal.Quotient.mk_surjective x
-          rw [Ideal.Quotient.liftₐ_apply]
-          simp
-          induction x using MvPolynomial.induction_on with
-          | h_C r =>
-              simp
-              rw [IsScalarTower.algebraMap_apply R A]
-              simp
-              rw [IsScalarTower.algebraMap_apply R (MvPolynomial α R) A]
-              simp [RingHom.algebraMap_toAlgebra, f]
-              rw [Ideal.Quotient.liftₐ_apply]
-              rw [Ideal.Quotient.lift_mk]
-              simp
-              rfl
-          | h_add p q hp hq =>
-              simp [hp, hq]
-          | h_X p n hp =>
-              simp at hp
-              simp [hp]
-              congr
-              cases n
-              · simp [P]
-                sorry
-              · simp
-                sorry
-        }
-      -/
+      { __ := u, invFun := v,
+        left_inv := DFunLike.congr_fun h1, right_inv := DFunLike.congr_fun h2 }
     have : Module.Free A (AdjoinRoot P) := by
       apply AdjoinRoot.free_of_monic
       exact (hq none).map _
     have : Module.Free A B := Module.Free.of_equiv e.toLinearEquiv
-    apply Module.Free.trans R A B
+    have : IsScalarTower R A B := IsScalarTower.of_algHom f
+    have : Module.Finite R A := (hp _ (fun i ↦ hq i)).2
+    have : Module.Finite A (AdjoinRoot P) := by
+      apply AdjoinRoot.finite_of_monic
+      exact (hq none).map _
+    have : Module.Finite A B := Module.Finite.equiv e.toLinearEquiv
+    exact ⟨Module.Free.trans R A B, Module.Finite.trans A B⟩
+
+lemma MvPolynomial.free_quotient_of_monic {R ι : Type*} [Finite ι] [CommRing R]
+    (p : ι → R[X]) (hp : ∀ i, (p i).Monic) :
+    Module.Free R
+      (MvPolynomial ι R ⧸ (Ideal.span <| Set.range fun i ↦ (p i).toMvPolynomial i)) :=
+  (MvPolynomial.free_and_finite_quotient_of_monic p hp).1
+
+lemma MvPolynomial.finite_quotient_of_monic {R ι : Type*} [Finite ι] [CommRing R]
+    (p : ι → R[X]) (hp : ∀ i, (p i).Monic) :
+    Module.Finite R
+      (MvPolynomial ι R ⧸ (Ideal.span <| Set.range fun i ↦ (p i).toMvPolynomial i)) :=
+  (MvPolynomial.free_and_finite_quotient_of_monic p hp).2
 
 instance (priority := 900) {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
     [Module.Finite R S] [Algebra.FinitePresentation R S] : Module.FinitePresentation R S := by
@@ -457,10 +492,8 @@ instance (priority := 900) {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
   have : Module.FinitePresentation S' S :=
     Module.finitePresentation_of_surjective (Algebra.linearMap S' S) hf hker
   have : IsScalarTower R S' S := .of_algHom f
-  have : Module.Finite R S' := by
-    sorry
-  have : Module.Free R S' :=
-    sorry
+  have : Module.Finite R S' := MvPolynomial.finite_quotient_of_monic _ (fun i ↦ hm i)
+  have : Module.Free R S' := MvPolynomial.free_quotient_of_monic _ (fun i ↦ hm i)
   have : Module.FinitePresentation R S' :=
     Module.finitePresentation_of_projective R S'
   apply Module.FinitePresentation.trans S'
