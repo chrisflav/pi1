@@ -3,6 +3,7 @@ import Pi1.FundamentalGroup.AffineAnd
 import Pi1.FundamentalGroup.AffineColimits
 import Pi1.FundamentalGroup.FiniteEtale
 import Pi1.FundamentalGroup.Galois
+import Pi1.Mathlib.Algebra.Module.FinitePresentation
 import Pi1.Mathlib.Algebra.Module.LocalizedModule.Basic
 import Pi1.Mathlib.AlgebraicGeometry.Limits
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Etale
@@ -13,6 +14,7 @@ import Pi1.Mathlib.CategoryTheory.MorphismProperty.UnderAdjunction
 import Pi1.Mathlib.RingTheory.RingHom.And
 import Pi1.Mathlib.RingTheory.RingHom.Etale
 import Pi1.Mathlib.RingTheory.RingHom.Smooth
+import Pi1.Meta.AxiomBlame
 import Pi1.RingTheory.Cotangent.Basic
 import Pi1.RingTheory.Cotangent.SpaceBaseChange
 import Pi1.RingTheory.CotangentBaseChange
