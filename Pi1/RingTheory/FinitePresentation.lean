@@ -4,6 +4,7 @@ import Mathlib.RingTheory.FinitePresentation
 import Mathlib.RingTheory.Etale.Pi
 import Mathlib.RingTheory.RingHom.FinitePresentation
 import Pi1.Mathlib.Algebra.Module.FinitePresentation
+import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
 
 universe u
 
@@ -113,10 +114,18 @@ lemma MvPolynomial.aeval_polynomialEval₂_C {R S : Type*} [CommSemiring R]
   | h_monomial => simp
   | h_add p q hp hq => simp [hp, hq]
 
-noncomputable
-def Polynomial.toMvPolynomial {R ι : Type*} [CommSemiring R]
+-- #22922
+section
+
+/-- The embedding of `R[X]` into `R[Xᵢ]` as an `R`-algebra homomorphism. -/
+noncomputable def Polynomial.toMvPolynomial {R ι : Type*} [CommSemiring R]
     (i : ι) : R[X] →ₐ[R] MvPolynomial ι R :=
   (MvPolynomial.rename (fun _ : Unit ↦ i)).comp (MvPolynomial.pUnitAlgEquiv R).symm
+
+lemma Polynomial.toMvPolynomial_injective {R ι : Type*} [CommSemiring R] (i : ι) :
+    Function.Injective (toMvPolynomial (R := R) i) := by
+  simp only [toMvPolynomial, AlgHom.coe_comp, AlgHom.coe_coe, EquivLike.injective_comp]
+  exact MvPolynomial.rename_injective (fun x ↦ i) fun ⦃a₁ a₂⦄ ↦ congrFun rfl
 
 @[simp]
 lemma Polynomial.toMvPolynomial_C {R ι : Type*} [CommSemiring R]
@@ -131,13 +140,17 @@ lemma Polynomial.toMvPolynomial_X {R ι : Type*} [CommSemiring R]
   simp [toMvPolynomial]
 
 @[simp]
+lemma MvPolynomial.aeval_comp_toMvPolynomial {R S ι : Type*} [CommSemiring R] [CommSemiring S]
+    [Algebra R S] (f : ι → S) (i : ι) :
+    (MvPolynomial.aeval (R := R) f).comp (toMvPolynomial i) = Polynomial.aeval (f i) := by
+  ext
+  simp [toMvPolynomial, MvPolynomial.aeval_rename, Polynomial.aeval_def]
+
+@[simp]
 lemma MvPolynomial.aeval_toMvPolynomial {R S ι : Type*} [CommSemiring R] [CommSemiring S]
     [Algebra R S] (f : ι → S) (i : ι) (p : R[X]) :
-    MvPolynomial.aeval f (p.toMvPolynomial i) = Polynomial.aeval (f i) p := by
-  induction p using Polynomial.induction_on with
-  | h_add p q hp hq => simp [hp, hq]
-  | h_C => simp
-  | h_monomial => simp
+    MvPolynomial.aeval f (p.toMvPolynomial i) = Polynomial.aeval (f i) p :=
+  DFunLike.congr_fun (aeval_comp_toMvPolynomial ..) p
 
 @[simp]
 lemma MvPolynomial.rename_comp_toMvPolynomial {R α β : Type*} [CommSemiring R]
@@ -153,6 +166,11 @@ lemma MvPolynomial.rename_toMvPolynomial {R α β : Type*} [CommSemiring R]
     (MvPolynomial.rename (R := R) f) (Polynomial.toMvPolynomial a p) =
       Polynomial.toMvPolynomial (f a) p :=
   DFunLike.congr_fun (rename_comp_toMvPolynomial ..) p
+
+end
+
+-- #22920
+section
 
 lemma Module.Free.trans (R S M : Type*) [CommSemiring R] [CommSemiring S] [Algebra R S]
     [AddCommMonoid M] [Module R M] [Module S M] [IsScalarTower R S M]
@@ -176,39 +194,7 @@ lemma Polynomial.free_quotient_of_monic {R : Type*} [CommRing R] {p : R[X]} (hp 
     Module.Free R (R[X] ⧸ Ideal.span {p}) :=
   AdjoinRoot.free_of_monic hp
 
-lemma AdjoinRoot.lift_algebraMap {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
-    (f : Polynomial R) (x : S) (hfx : Polynomial.aeval x f = 0) (r : R) :
-    AdjoinRoot.lift (algebraMap R S) x hfx (algebraMap R (AdjoinRoot f) r) =
-      algebraMap R S r := by
-  simp
-
-@[simp]
-lemma RingEquiv.quotientBot_mk {R : Type*} [Ring R] (r : R) :
-    RingEquiv.quotientBot R (Ideal.Quotient.mk ⊥ r) = r :=
-  rfl
-
-@[simp]
-lemma RingEquiv.quotientBot_symm_mk {R : Type*} [Ring R] (r : R) :
-    (RingEquiv.quotientBot R).symm r = r :=
-  rfl
-
-/-- `RingEquiv.quotientBot` as an algebra isomorphism. -/
-def AlgEquiv.quotientBot (R S : Type*) [CommSemiring R] [CommRing S] [Algebra R S] :
-    (S ⧸ (⊥ : Ideal S)) ≃ₐ[R] S where
-  __ := RingEquiv.quotientBot S
-  commutes' x := by
-    rw [← Ideal.Quotient.mk_algebraMap]
-    simp [-Ideal.Quotient.mk_algebraMap]
-
-@[simp]
-lemma AlgEquiv.quotientBot_mk (R S : Type*) [CommSemiring R] [CommRing S] [Algebra R S] (s : S) :
-    AlgEquiv.quotientBot R S (Ideal.Quotient.mk ⊥ s) = s :=
-  rfl
-
-@[simp]
-lemma AlgEquiv.quotientBot_symm_mk (R S : Type*) [CommSemiring R] [CommRing S] [Algebra R S]
-    (s : S) : (AlgEquiv.quotientBot R S).symm s = s :=
-  rfl
+end
 
 set_option maxHeartbeats 0 in
 set_option synthInstance.maxHeartbeats 0 in
