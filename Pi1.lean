@@ -11,10 +11,10 @@ import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Finite
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.Composition
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.Over
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.UnderAdjunction
+import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
 import Pi1.Mathlib.RingTheory.RingHom.And
 import Pi1.Mathlib.RingTheory.RingHom.Etale
 import Pi1.Mathlib.RingTheory.RingHom.Smooth
-import Pi1.Meta.AxiomBlame
 import Pi1.RingTheory.Cotangent.Basic
 import Pi1.RingTheory.Cotangent.SpaceBaseChange
 import Pi1.RingTheory.CotangentBaseChange
