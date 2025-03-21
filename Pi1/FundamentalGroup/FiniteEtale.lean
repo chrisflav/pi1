@@ -13,6 +13,8 @@ We say a morphism is finite étale if it is finite and étale. The category `Fin
 the category of finite etale schemes over `X`.
 -/
 
+noncomputable section
+
 universe u
 
 open CategoryTheory Limits
@@ -170,6 +172,20 @@ lemma mono_iff (f g : FiniteEtale X) (i : f ⟶ g) :
   refine ⟨fun hi ↦ ?_, fun hi ↦ ?_⟩
   · exact (MorphismProperty.Over.forget _ _ _ ⋙ Over.forget _).map_mono _
   · exact (MorphismProperty.Over.forget _ _ _ ⋙ Over.forget _).mono_of_mono_map hi
+
+variable {X}
+
+abbrev pullback {Y : Scheme.{u}} (f : X ⟶ Y) : FiniteEtale Y ⥤ FiniteEtale X :=
+  MorphismProperty.Over.pullback _ _ f
+
+def mk {T : Scheme.{u}} (f : T ⟶ X) [IsFiniteEtale f] : FiniteEtale X :=
+  MorphismProperty.Over.mk ⊤ f inferInstance
+
+@[simp]
+lemma mk_hom {T : Scheme.{u}} (f : T ⟶ X) [IsFiniteEtale f] : (mk f).hom = f := rfl
+
+@[simp]
+lemma mk_left {T : Scheme.{u}} (f : T ⟶ X) [IsFiniteEtale f] : (mk f).left = T := rfl
 
 end FiniteEtale
 
