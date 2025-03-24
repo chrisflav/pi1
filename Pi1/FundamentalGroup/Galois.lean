@@ -5,6 +5,7 @@ Authors: Christian Merten
 -/
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Etale
 import Pi1.Mathlib.AlgebraicGeometry.Limits
+import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
 import Pi1.FundamentalGroup.FiniteEtale
 import Mathlib.CategoryTheory.Galois.Basic
 import Mathlib.AlgebraicGeometry.Morphisms.Immersion
@@ -289,11 +290,9 @@ variable {X}
 def fiber : FiniteEtale X ⥤ FintypeCat :=
   pullback ξ ⋙ forgetScheme Ω
 
-instance [IsSepClosed Ω] : PreservesLimitsOfShape (Discrete PEmpty.{1}) (pullback ξ) :=
-  sorry
-
-instance [IsSepClosed Ω] : PreservesLimitsOfShape WalkingCospan (pullback ξ) :=
-  sorry
+instance [IsSepClosed Ω] : PreservesFiniteLimits (pullback ξ) := by
+  dsimp [pullback]
+  apply AffineAnd.preservesFiniteLimits_pullback
 
 instance [IsSepClosed Ω] : PreservesFiniteColimits (pullback ξ) :=
   sorry

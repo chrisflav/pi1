@@ -8,6 +8,7 @@ import Mathlib.AlgebraicGeometry.Morphisms.Finite
 import Mathlib.CategoryTheory.Limits.MorphismProperty
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.Composition
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.UnderAdjunction
+import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Etale
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Finite
 import Pi1.FundamentalGroup.AffineColimits
@@ -70,8 +71,8 @@ variable {Q : ∀ {R S : Type u} [CommRing R] [CommRing S], (R →+* S) → Prop
 
 -- TODO: reformulate these with ringhoms?
 
-/-- A property of ring homomorphisms `Q` is said to have equalizers, if the equalizer of algebra maps
-between algebras satisfiying `Q` also satisfies `Q`. -/
+/-- A property of ring homomorphisms `Q` is said to have equalizers, if the equalizer of algebra
+maps between algebras satisfiying `Q` also satisfies `Q`. -/
 def HasEqualizers (Q : ∀ {R S : Type u} [CommRing R] [CommRing S], (R →+* S) → Prop) : Prop :=
   ∀ {R S T : Type u} [CommRing R] [CommRing S] [CommRing T] [Algebra R S] [Algebra R T]
     (f g : S →ₐ[R] T), Q (algebraMap R S) → Q (algebraMap R T) →
@@ -83,23 +84,6 @@ def HasFiniteProducts (Q : ∀ {R S : Type u} [CommRing R] [CommRing S], (R →+
     (∀ i, Q (algebraMap R (S i))) → Q (algebraMap R (Π i, S i))
 
 end RingHom
-
-namespace CategoryTheory.MorphismProperty.Over
-
-noncomputable
-instance {C : Type*} [Category C] (P : MorphismProperty C) (X : C)
-    [HasPullbacks C] [P.IsStableUnderComposition] [P.ContainsIdentities]
-    [P.IsStableUnderBaseChange] [P.HasOfPostcompProperty P] :
-    CreatesFiniteLimits (Over.forget P ⊤ X) :=
-  createsFiniteLimitsOfCreatesTerminalAndPullbacks _
-
-instance {C : Type*} [Category C] (P : MorphismProperty C) (X : C)
-    [HasPullbacks C] [P.IsStableUnderComposition] [P.ContainsIdentities]
-    [P.IsStableUnderBaseChange] [P.HasOfPostcompProperty P] :
-    PreservesFiniteLimits (Over.forget P ⊤ X) :=
-  preservesFiniteLimits_of_preservesTerminal_and_pullbacks (Over.forget P ⊤ X)
-
-end CategoryTheory.MorphismProperty.Over
 
 namespace AlgebraicGeometry
 
@@ -291,17 +275,7 @@ theorem preservesFiniteLimits_pullback
     [P.IsStableUnderComposition] [P.ContainsIdentities]
     [P.HasOfPostcompProperty P] {Y : Scheme.{u}} (f : X ⟶ Y) :
     PreservesFiniteLimits (MorphismProperty.Over.pullback P ⊤ f) := by
-  constructor
-  intro J _ _
-  have heq : MorphismProperty.Over.pullback P ⊤ f ⋙ MorphismProperty.Over.forget _ _ _ =
-      MorphismProperty.Over.forget _ _ _ ⋙ Over.pullback f :=
-    rfl
-  have : PreservesLimitsOfShape J
-      (MorphismProperty.Over.pullback P ⊤ f ⋙ MorphismProperty.Over.forget _ _ _) := by
-    rw [heq]
-    infer_instance
-  apply preservesLimitsOfShape_of_reflects_of_preserves
-    (MorphismProperty.Over.pullback P ⊤ f) (MorphismProperty.Over.forget _ _ _)
+  infer_instance
 
 theorem preservesFiniteColimits_pullback' (hQi : RingHom.RespectsIso Q)
     (hQp : RingHom.HasFiniteProducts Q) (hQe : RingHom.HasEqualizers Q)
