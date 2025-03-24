@@ -33,6 +33,12 @@ def IsFiniteEtale {R S : Type u} [CommRing R] [CommRing S] (f : R →+* S) : Pro
   letI := f.toAlgebra
   Algebra.IsFiniteEtale R S
 
+lemma isFiniteEtale_algebraMap_iff {R S : Type u} [CommRing R] [CommRing S] [Algebra R S] :
+    (algebraMap R S).IsFiniteEtale ↔ Algebra.IsFiniteEtale R S := by
+  simp only [RingHom.IsFiniteEtale]
+  congr!
+  exact Algebra.algebra_ext _ _ fun _ ↦ rfl
+
 lemma IsFiniteEtale.iff_finite_and_etale
     {R S : Type u} [CommRing R] [CommRing S] (f : R →+* S) :
     f.IsFiniteEtale ↔ f.Finite ∧ f.Etale := by

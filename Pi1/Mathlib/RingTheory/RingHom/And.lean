@@ -31,6 +31,14 @@ lemma StableUnderCompositionWithLocalizationAwayTarget.and
   introv R h hf
   exact ⟨hP T s f hf.1, hQ T s f hf.2⟩
 
+lemma StableUnderComposition.and
+    (hP : StableUnderComposition P)
+    (hQ : StableUnderComposition Q) :
+    StableUnderComposition (fun f ↦ P f ∧ Q f) := by
+  introv R hf hg
+  exact ⟨hP f g hf.1 hg.1, hQ f g hf.2 hg.2⟩
+
+
 lemma PropertyIsLocal.and (hP : PropertyIsLocal P)
     (hQ : PropertyIsLocal Q) :
     PropertyIsLocal (fun f ↦ P f ∧ Q f) where

@@ -82,7 +82,25 @@ instance Algebra.FinitePresentation.pi (A : Type u) {α : Type} [Finite α] (B :
   exact Algebra.FinitePresentation.of_cover_target (fun i ↦ B i) (fun i : α ↦ Pi.single i 1)
     (Ideal.span_single_eq_top B) fun i ↦ inferInstance
 
+instance Algebra.FinitePresentation.pi' (A : Type u) {α : Type u} [Finite α] (B : α → Type u)
+    [CommRing A] [∀ a, CommRing (B a)] [∀ a, Algebra A (B a)]
+    [∀ a, Algebra.FinitePresentation A (B a)] :
+    Algebra.FinitePresentation A (∀ a, B a) := by
+  classical
+  let _ (i : α) : Algebra (Π a, B a) (B i) := (Pi.evalAlgHom A B i).toAlgebra
+  have (i : α) : IsLocalization.Away (Pi.single i 1 : ∀ a, B a) (B i) := by
+    refine IsLocalization.away_of_isIdempotentElem ?_ (RingHom.ker_evalRingHom _ _)
+      ((Pi.evalRingHom B i).surjective)
+    simp [IsIdempotentElem, ← Pi.single_mul_left]
+  exact Algebra.FinitePresentation.of_cover_target (fun i ↦ B i) (fun i : α ↦ Pi.single i 1)
+    (Ideal.span_single_eq_top B) fun i ↦ inferInstance
+
 instance Algebra.Etale.pi (A : Type u) {α : Type} [Finite α] (B : α → Type u)
+    [CommRing A] [∀ a, CommRing (B a)] [∀ a, Algebra A (B a)]
+    [hf : ∀ a, Algebra.Etale A (B a)] :
+    Algebra.Etale A (∀ a, B a) where
+
+instance Algebra.Etale.pi' (A : Type u) {α : Type u} [Finite α] (B : α → Type u)
     [CommRing A] [∀ a, CommRing (B a)] [∀ a, Algebra A (B a)]
     [hf : ∀ a, Algebra.Etale A (B a)] :
     Algebra.Etale A (∀ a, B a) where

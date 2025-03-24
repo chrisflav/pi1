@@ -59,8 +59,14 @@ lemma Etale.respectsIso : RespectsIso Etale :=
 lemma Etale.ofLocalizationSpanTarget : OfLocalizationSpanTarget Etale :=
   propertyIsLocal.ofLocalizationSpanTarget
 
-lemma Etale.ofLocalizationSpan : RingHom.OfLocalizationSpan RingHom.Etale :=
+lemma Etale.ofLocalizationSpan : OfLocalizationSpan Etale :=
   propertyIsLocal.ofLocalizationSpan
+
+lemma Etale.stableUnderComposition : StableUnderComposition Etale := by
+  rw [eq_and]
+  apply StableUnderComposition.and
+  · exact FormallyUnramified.stableUnderComposition
+  · exact Smooth.stableUnderComposition
 
 -- this follows from the analogous statement for smoothness and is done in a branch of mathlib
 -- TODO: integrate that branch into pi1 or mathlib

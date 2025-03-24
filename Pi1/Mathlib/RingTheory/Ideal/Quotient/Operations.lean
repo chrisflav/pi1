@@ -27,3 +27,8 @@ lemma AlgEquiv.quotientBot_mk (R S : Type*) [CommSemiring R] [CommRing S] [Algeb
 lemma AlgEquiv.quotientBot_symm_mk (R S : Type*) [CommSemiring R] [CommRing S] [Algebra R S]
     (s : S) : (AlgEquiv.quotientBot R S).symm s = s :=
   rfl
+
+@[simp]
+lemma Ideal.quotientInfRingEquivPiQuotient_mk {R ι : Type*} [Finite ι] [CommRing R]
+    (I : ι → Ideal R) (hI : Pairwise (Function.onFun IsCoprime I)) (x : R) :
+    Ideal.quotientInfRingEquivPiQuotient I hI x = fun _ ↦ Ideal.Quotient.mk _ x := rfl

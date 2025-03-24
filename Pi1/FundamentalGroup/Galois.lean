@@ -6,7 +6,9 @@ Authors: Christian Merten
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Etale
 import Pi1.Mathlib.AlgebraicGeometry.Limits
 import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
+import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
 import Pi1.FundamentalGroup.FiniteEtale
+import Pi1.RingTheory.FinitePresentation
 import Mathlib.CategoryTheory.Galois.Basic
 import Mathlib.AlgebraicGeometry.Morphisms.Immersion
 import Mathlib.AlgebraicGeometry.Morphisms.UniversallyInjective
@@ -78,7 +80,7 @@ instance (X : Scheme.{u}) : PreGaloisCategory (FiniteEtale X) where
 instance : HasRingHomProperty @IsEtale RingHom.Etale :=
   sorry
 
-lemma finite_of_isFinite_of_etale (X : Scheme.{u}) {Ω : Type u} [Field Ω]
+lemma finite_of_isEtale_of_isAffineHom (X : Scheme.{u}) {Ω : Type u} [Field Ω]
     (f : X ⟶ Spec (.of Ω)) [IsEtale f] [IsAffineHom f] :
     Finite X := by
   have : IsAffine X := isAffine_of_isAffineHom f
@@ -101,7 +103,7 @@ lemma finite_of_isFinite_of_etale (X : Scheme.{u}) {Ω : Type u} [Field Ω]
   apply Finite.of_equiv _ eq3.symm
 
 instance {Ω : Type u} [Field Ω] (X : FiniteEtale (Spec (.of Ω))) : Fintype X.left :=
-  have : Finite X.left := finite_of_isFinite_of_etale X.left X.hom
+  have : Finite X.left := finite_of_isEtale_of_isAffineHom X.left X.hom
   Fintype.ofFinite X.left
 
 /-- -/
@@ -112,9 +114,22 @@ def forgetScheme (Ω : Type u) [Field Ω] : FiniteEtale (Spec (.of Ω)) ⥤ Fint
 
 variable (Ω : Type u) [Field Ω]
 
+lemma _root_.AlgebraicGeometry.IsFiniteEtale.SpecMap_iff {R S : CommRingCat.{u}}
+    {f : R ⟶ S} :
+    IsFiniteEtale (Spec.map f) ↔ f.hom.IsFiniteEtale := by
+  have := RingHom.toMorphismProperty_respectsIso_iff.mp RingHom.IsFiniteEtale.respectsIso
+  simp only [HasAffineProperty.iff_of_isAffine (P := @IsFiniteEtale), affineAnd, and_iff_right]
+  exact MorphismProperty.arrow_mk_iso_iff (RingHom.toMorphismProperty RingHom.IsFiniteEtale)
+    (arrowIsoΓSpecOfIsAffine f).symm
+
 instance {ι : Type u} [Finite ι] (R : Type u) [CommRing R] :
-    IsFiniteEtale (Spec.map <| CommRingCat.ofHom <| algebraMap R (ι → R)) :=
-  sorry
+    IsFiniteEtale (Spec.map <| CommRingCat.ofHom <| algebraMap R (ι → R)) := by
+  rw [IsFiniteEtale.SpecMap_iff]
+  simp
+  rw [RingHom.isFiniteEtale_algebraMap_iff]
+  have : Algebra.Etale R R :=
+    Algebra.instEtaleOfIsStandardSmoothOfRelativeDimensionOfNatNat.{u, u, u}
+  constructor
 
 @[simps]
 def inventScheme (Ω : Type u) [Field Ω] : FintypeCat.{u} ⥤ FiniteEtale (Spec (.of Ω)) where
@@ -137,9 +152,18 @@ def inventScheme (Ω : Type u) [Field Ω] : FintypeCat.{u} ⥤ FiniteEtale (Spec
     rw [← Spec.map_comp]
     rfl
 
-instance (S : FintypeCat) :
+instance (S : FintypeCat.{u}) :
     Fintype (Spec (CommRingCat.of (S.carrier → Ω))).toPresheafedSpace :=
-  have : Finite (Spec (CommRingCat.of (S.carrier → Ω))).toPresheafedSpace := sorry
+  let f : Spec (CommRingCat.of (S.carrier → Ω)) ⟶ Spec (.of Ω) :=
+    Spec.map (CommRingCat.ofHom <| algebraMap Ω _)
+  have : IsEtale f := by
+    rw [HasRingHomProperty.Spec_iff (P := @IsEtale)]
+    simp only [CommRingCat.hom_ofHom, RingHom.etale_algebraMap_iff]
+    have : Algebra.Etale Ω Ω :=
+      Algebra.instEtaleOfIsStandardSmoothOfRelativeDimensionOfNatNat.{u, u, u}
+    infer_instance
+  have : Finite (Spec (CommRingCat.of (S.carrier → Ω))).toPresheafedSpace :=
+    finite_of_isEtale_of_isAffineHom _ f
   Fintype.ofFinite _
 
 def specPiEquiv (ι : Type u) [Finite ι] (K : Type u) [Field K] :
@@ -169,52 +193,103 @@ def inventForgetIso : inventScheme Ω ⋙ forgetScheme Ω ≅ 𝟭 FintypeCat :=
       rw [← Scheme.comp_base_apply, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
       rw [this])
 
-def _root_.AlgebraicGeometry.IsFiniteEtale.isoSpecPi {X : Scheme.{u}} (f : X ⟶ Spec (.of Ω))
-    [IsFiniteEtale f] :
+instance (X : Scheme.{u}) (R : CommRingCat.{u}) [X.Over (Spec R)] (U : X.Opens) :
+    Algebra R Γ(X, U) :=
+  ((((X ↘ Spec R)).appLE ⊤ U (by simp)).hom.comp
+    (Scheme.ΓSpecIso R).commRingCatIsoToRingEquiv.symm.toRingHom).toAlgebra
+
+instance (X : Scheme.{u}) (R : Type u) [CommRing R] [X.Over (Spec (.of R))] (U : X.Opens) :
+    Algebra R Γ(X, U) :=
+  ((((X ↘ Spec (.of R))).appLE ⊤ U (by simp)).hom.comp
+    (Scheme.ΓSpecIso (.of R)).commRingCatIsoToRingEquiv.symm.toRingHom).toAlgebra
+
+@[simp]
+lemma _root_.CategoryTheory.Iso.commRingCatIsoToRingEquiv_symm_apply {R S : CommRingCat.{u}}
+    (e : R ≅ S) (x : S) :
+    e.commRingCatIsoToRingEquiv.symm x = e.symm.hom x := rfl
+
+@[simp]
+lemma _root_.CategoryTheory.Iso.commRingCatIsoToRingEquiv_symm_toRingHom {R S : CommRingCat.{u}}
+    (e : R ≅ S) :
+    e.commRingCatIsoToRingEquiv.symm = e.symm.hom.hom := rfl
+
+lemma appLE_comp_algebraMap {X Y : Scheme.{u}} (f : X ⟶ Y) (R : Type u) [CommRing R]
+    [X.Over (Spec (.of R))] [Y.Over (Spec (.of R))] [f.IsOver (Spec (.of R))]
+    (U : Y.Opens) (V : X.Opens) (hUV : V ≤ f ⁻¹ᵁ U) :
+    (f.appLE U V hUV).hom.comp (algebraMap R Γ(Y, U)) = algebraMap R Γ(X, V) := by
+  ext r
+  simp only [RingHom.algebraMap_toAlgebra, Iso.commRingCatIsoToRingEquiv,
+    RingEquiv.toRingHom_eq_coe, RingHom.coe_comp, RingHom.coe_coe, Function.comp_apply,
+    RingEquiv.ofHomInv_symm_apply]
+  rw [← CommRingCat.comp_apply]
+  rw [Scheme.appLE_comp_appLE]
+  simp
+
+set_option pp.proofs true
+instance (X : Scheme.{u}) (R : Type u) [CommRing R] [X.Over (Spec (.of R))]
+    [IsEtale (X ↘ Spec (.of R))] [IsAffineHom (X ↘ Spec (.of R))] :
+    Algebra.Etale R Γ(X, ⊤) := by
+  rw [← RingHom.etale_algebraMap_iff, RingHom.algebraMap_toAlgebra]
+  apply RingHom.Etale.respectsIso.2
+  simp [Scheme.Hom.appLE]
+  have : IsAffine X := isAffine_of_isAffineHom (X ↘ Spec (.of R))
+  apply HasRingHomProperty.appTop @IsEtale
+  infer_instance
+
+instance (X : Scheme.{u}) (R : Type u) [Field R] [X.Over (Spec (.of R))]
+    [IsEtale (X ↘ Spec (.of R))] [IsAffineHom (X ↘ Spec (.of R))] :
+    Module.Finite R Γ(X, ⊤) :=
+  Algebra.FormallyUnramified.finite_of_free R Γ(X, ⊤)
+
+def _root_.AlgebraicGeometry.IsFiniteEtale.isoSpecPi (X : Scheme.{u}) [X.Over (Spec (.of Ω))]
+    [IsFiniteEtale (X ↘ Spec (.of Ω))] :
     X ≅ Spec (.of <| Π (m : MaximalSpectrum Γ(X, ⊤)), Γ(X, ⊤) ⧸ m.asIdeal) :=
-  have : IsAffine X := isAffine_of_isAffineHom f
-  have : IsArtinianRing Γ(X, ⊤) := sorry
-  have : _root_.IsReduced Γ(X, ⊤) := sorry
+  have : IsAffine X := isAffine_of_isAffineHom (X ↘ Spec (.of Ω))
+  have := Algebra.FormallyUnramified.finite_of_free Ω Γ(X, ⊤)
+  have := Algebra.FormallyUnramified.isReduced_of_field Ω Γ(X, ⊤)
+  have : IsArtinianRing Γ(X, ⊤) := isArtinian_of_tower Ω inferInstance
   X.isoSpec ≪≫ Scheme.Spec.mapIso ((IsArtinianRing.equivPi _).symm.toCommRingCatIso).op
-
---lemma isoSpecPi_naturality {X Y : FiniteEtale (Spec (.of Ω))} (f : X ⟶ Y) :
---    f.left ≫ (IsFiniteEtale.isoSpecPi Ω Y.hom).hom =
---      (IsFiniteEtale.isoSpecPi Ω X.hom).hom ≫
---        Spec.map (CommRingCat.ofHom <|
---          Pi.ringHom (fun i ↦ RingHom.comp _ (Pi.evalRingHom _ _))) := sorry
-
---lemma _root_.AlgebraicGeometry.IsFiniteEtale.isoSpecPi {X : Scheme.{u}} (f : X ⟶ Spec (.of Ω))
---    [IsFiniteEtale f] :
-
-instance (X : FiniteEtale (Spec <| .of Ω)) : Algebra Ω Γ(X.left, ⊤) :=
-  X.hom.appTop.hom.comp
-    (Scheme.ΓSpecIso (.of Ω)).commRingCatIsoToRingEquiv.symm.toRingHom |>.toAlgebra
 
 @[simp]
 lemma appTop_left_comp_algebraMap {X Y : FiniteEtale (Spec <| .of Ω)} (f : X ⟶ Y) :
-    f.left.appTop.hom.comp (algebraMap Ω Γ(Y.left, ⊤)) = algebraMap Ω Γ(X.left, ⊤) :=
-  sorry
+    f.left.appTop.hom.comp (algebraMap Ω Γ(Y.left, ⊤)) = algebraMap Ω Γ(X.left, ⊤) := by
+  simp [Scheme.Hom.appTop, Scheme.Hom.app_eq_appLE, appLE_comp_algebraMap]
 
 @[simp]
 lemma appTop_left_algebraMap {X Y : FiniteEtale (Spec <| .of Ω)} (f : X ⟶ Y) (x : Ω) :
     f.left.appTop.hom (algebraMap Ω Γ(Y.left, ⊤) x) = algebraMap Ω Γ(X.left, ⊤) x :=
-  sorry
+  DFunLike.congr_fun (appTop_left_comp_algebraMap Ω f) x
 
-def _root_.AlgebraicGeometry.IsFiniteEtale.isoSpecFun [IsSepClosed Ω] {X : Scheme.{u}}
-    (f : X ⟶ Spec (.of Ω)) [IsFiniteEtale f] :
+instance {S : Scheme.{u}} (X : FiniteEtale S) : IsFiniteEtale (X.left ↘ S) :=
+  X.prop
+
+instance (X : FiniteEtale (Spec (.of Ω))) : IsArtinianRing Γ(X.left, ⊤) :=
+  isArtinian_of_tower Ω inferInstance
+
+instance (X : FiniteEtale (Spec (.of Ω))) : _root_.IsReduced Γ(X.left, ⊤) :=
+  Algebra.FormallyUnramified.isReduced_of_field Ω Γ(X.left, ⊤)
+
+def _root_.AlgebraicGeometry.IsFiniteEtale.isoSpecFun [IsSepClosed Ω] (X : Scheme.{u})
+    [X.Over (Spec (.of Ω))] [IsFiniteEtale (X ↘ Spec (.of Ω))] :
     X ≅ Spec (.of <| X → Ω) :=
-  have : IsAffine X := isAffine_of_isAffineHom f
-  let i1 := IsFiniteEtale.isoSpecPi Ω f
-  have : IsArtinianRing Γ(X, ⊤) := sorry
+  have : IsAffine X := isAffine_of_isAffineHom (X ↘ Spec (.of Ω))
+  let i1 := IsFiniteEtale.isoSpecPi Ω X
+  have : IsArtinianRing Γ(X, ⊤) := isArtinian_of_tower Ω inferInstance
   let e : X ≃ MaximalSpectrum Γ(X, ⊤) :=
     X.isoSpec.schemeIsoToHomeo.toEquiv.trans IsArtinianRing.primeSpectrumEquivMaximalSpectrum
-  let _ : Algebra Ω Γ(X, ⊤) :=
-    f.appTop.hom.comp
-      (Scheme.ΓSpecIso (.of Ω)).commRingCatIsoToRingEquiv.symm.toRingHom |>.toAlgebra
-  have (m : MaximalSpectrum Γ(X, ⊤)) : Algebra.IsSeparable Ω (Γ(X, ⊤) ⧸ m.asIdeal) :=
-    sorry
+  have : _root_.IsReduced ↑Γ(X, ⊤) :=
+    Algebra.FormallyUnramified.isReduced_of_field Ω Γ(X, ⊤)
+  let eo : Γ(X, ⊤) ≃ₐ[Ω] _ := { __ := IsArtinianRing.equivPi Γ(X, ⊤), commutes' := fun r ↦ rfl }
+  have : Algebra.FormallyEtale Ω (Π (m : MaximalSpectrum Γ(X, ⊤)), (Γ(X, ⊤) ⧸ m.asIdeal)) :=
+    Algebra.FormallyEtale.of_equiv eo
+  have (m : MaximalSpectrum Γ(X, ⊤)) : Algebra.FormallyEtale Ω (Γ(X, ⊤) ⧸ m.asIdeal) := by
+    rw [Algebra.FormallyEtale.pi_iff] at this
+    exact this m
   let _ (m : MaximalSpectrum Γ(X, ⊤)) : Field (Γ(X, ⊤) ⧸ m.asIdeal) :=
     Ideal.Quotient.field m.asIdeal
+  have (m : MaximalSpectrum Γ(X, ⊤)) : Algebra.IsSeparable Ω (Γ(X, ⊤) ⧸ m.asIdeal) := by
+    rw [← Algebra.FormallyEtale.iff_isSeparable]
+    infer_instance
   have hb (m : MaximalSpectrum Γ(X, ⊤)) :
       Function.Bijective (algebraMap Ω (Γ(X, ⊤) ⧸ m.asIdeal)) :=
     ⟨FaithfulSMul.algebraMap_injective _ _,
@@ -225,19 +300,33 @@ def _root_.AlgebraicGeometry.IsFiniteEtale.isoSpecFun [IsSepClosed Ω] {X : Sche
     (RingEquiv.piCongrRight a).trans (RingEquiv.piCongrLeft (fun _ ↦ Ω) e.symm)
   i1 ≪≫ Scheme.Spec.mapIso o.toCommRingCatIso.symm.op
 
-@[reassoc (attr := simp)]
-lemma _root_.AlgebraicGeometry.IsFiniteEtale.isoSpecFun_hom_SpecMap [IsSepClosed Ω]
-    {X : Scheme.{u}} (f : X ⟶ Spec (.of Ω)) [IsFiniteEtale f] :
-    (IsFiniteEtale.isoSpecFun Ω f).hom ≫
-      Spec.map (CommRingCat.ofHom <| algebraMap Ω (X → Ω)) = f := sorry
-
---@[simp]
 lemma IsArtinianRing.equivPi_apply (R : Type*) [CommRing R] [IsArtinianRing R] [_root_.IsReduced R]
     (x : R) (m : MaximalSpectrum R) :
     (IsArtinianRing.equivPi R x) m = Ideal.Quotient.mk m.asIdeal x := rfl
 
---@[simp]set_option maxHeartbeats <num>
-set_option maxHeartbeats 0 in
+@[reassoc (attr := simp)]
+lemma _root_.AlgebraicGeometry.IsFiniteEtale.isoSpecFun_hom_SpecMap [IsSepClosed Ω]
+    (X : Scheme.{u}) [X.Over (Spec (.of Ω))] [IsFiniteEtale (X ↘ Spec (.of Ω))] :
+    (IsFiniteEtale.isoSpecFun Ω X).hom ≫
+      Spec.map (CommRingCat.ofHom <| algebraMap Ω (X → Ω)) = X ↘ Spec (.of Ω) := by
+  have : IsAffine X := isAffine_of_isAffineHom (X ↘ Spec (.of Ω))
+  rw [← cancel_epi X.isoSpec.inv]
+  conv_rhs => rw [← Scheme.isoSpec_inv_naturality]
+  simp only [IsFiniteEtale.isoSpecFun, IsFiniteEtale.isoSpecPi, RingEquiv.toRingHom_eq_coe,
+    Iso.trans_assoc, Iso.trans_hom, Functor.mapIso_hom, Iso.op_hom, RingEquiv.toCommRingCatIso_hom,
+    Scheme.Spec_map, Quiver.Hom.unop_op, Iso.symm_hom, RingEquiv.toCommRingCatIso_inv,
+    Category.assoc, Iso.inv_hom_id_assoc, Scheme.isoSpec_Spec_inv, ← Spec.map_comp]
+  congr 1
+  have : IsArtinianRing Γ(X, ⊤) := isArtinian_of_tower Ω inferInstance
+  have : _root_.IsReduced ↑Γ(X, ⊤) := Algebra.FormallyUnramified.isReduced_of_field Ω Γ(X, ⊤)
+  ext x
+  apply (IsArtinianRing.equivPi Γ(X, ⊤)).injective
+  ext j
+  simp [RingHom.algebraMap_toAlgebra]
+  rw [IsArtinianRing.equivPi_apply]
+  simp [Scheme.Hom.appTop, Scheme.Hom.appLE, Iso.commRingCatIsoToRingEquiv]
+
+--@[simp]
 lemma IsArtinianRing.equivPi_naturality_apply (R S : Type*) [CommRing R] [CommRing S]
     [IsArtinianRing R] [IsArtinianRing S] [_root_.IsReduced R] [_root_.IsReduced S]
     (f : R →+* S) (x : R) :
@@ -246,36 +335,55 @@ lemma IsArtinianRing.equivPi_naturality_apply (R S : Type*) [CommRing R] [CommRi
         (fun m ↦ RingHom.comp
           (by exact Ideal.quotientMap m.asIdeal f (by simp))
           (Pi.evalRingHom _ ⟨Ideal.comap f m.asIdeal, IsArtinianRing.isMaximal_of_isPrime _⟩))
-        (IsArtinianRing.equivPi R x) :=
-  sorry
+        (IsArtinianRing.equivPi R x) := by
+  ext m
+  simp [IsArtinianRing.equivPi, IsArtinianRing.quotNilradicalEquivPi]
+
+instance (priority := 900) [IsAffine X] (Y : FiniteEtale X) : IsAffine Y.left :=
+  let f : Y.left ⟶ X := Y.hom
+  isAffine_of_isAffineHom f
 
 set_option maxHeartbeats 0 in
 def forgetInventIso [IsSepClosed Ω] : 𝟭 (FiniteEtale _) ≅ forgetScheme Ω ⋙ inventScheme Ω :=
   NatIso.ofComponents (fun X ↦
-    (MorphismProperty.Over.isoMk (IsFiniteEtale.isoSpecFun Ω X.hom))) <| fun {X Y} f ↦ by
+    (MorphismProperty.Over.isoMk (IsFiniteEtale.isoSpecFun Ω X.left))) <| fun {X Y} f ↦ by
       apply MorphismProperty.Over.Hom.ext
-      simp [FiniteEtale, IsFiniteEtale.isoSpecFun]
-      simp [IsFiniteEtale.isoSpecPi]
+      simp only [FiniteEtale, Functor.id_obj, Functor.comp_obj, inventScheme_obj,
+        forgetScheme_obj_carrier, mk_left, Functor.id_map, IsFiniteEtale.isoSpecFun,
+        RingEquiv.toRingHom_eq_coe, MorphismProperty.Comma.comp_hom, Comma.comp_left,
+        MorphismProperty.Over.isoMk_hom_left, Iso.trans_hom, Functor.mapIso_hom, Iso.op_hom,
+        Iso.symm_hom, RingEquiv.toCommRingCatIso_inv, Scheme.Spec_map, Quiver.Hom.unop_op,
+        Functor.comp_map, inventScheme_map, forgetScheme_map, MorphismProperty.Over.homMk_hom,
+        Over.homMk_left, Category.assoc]
+      simp only [IsFiniteEtale.isoSpecPi, Iso.trans_hom, Functor.mapIso_hom, Iso.op_hom,
+        RingEquiv.toCommRingCatIso_hom, Scheme.Spec_map, Quiver.Hom.unop_op, Category.assoc]
       rw [← Spec.map_comp, ← CommRingCat.ofHom_comp]
       rw [← Spec.map_comp, ← Spec.map_comp]
-      have : IsAffine X.left := sorry
-      have : IsAffine Y.left := sorry
       rw [← Scheme.isoSpec_hom_naturality_assoc, ← Spec.map_comp]
       congr 2
       ext x
-      simp
-      have : IsArtinianRing ↑Γ(X.left, ⊤) := sorry
-      have : _root_.IsReduced ↑Γ(X.left, ⊤) := sorry
-      have : _root_.IsReduced ↑Γ(Y.left, ⊤) := sorry
-      have : IsArtinianRing ↑Γ(Y.left, ⊤) := sorry
+      simp only [CommRingCat.ofHom_comp, Category.assoc, CommRingCat.hom_comp,
+        CommRingCat.hom_ofHom, RingHom.coe_comp, RingHom.coe_coe, Function.comp_apply,
+        RingEquiv.symm_trans_apply, RingEquiv.piCongrRight_symm, RingEquiv.symm_symm]
       apply (IsArtinianRing.equivPi Γ(X.left, ⊤)).injective
       ext j
-      simp
-      --rw [IsArtinianRing.equivPi_apply]
+      simp only [RingEquiv.apply_symm_apply, RingEquiv.piCongrRight_apply,
+        RingEquiv.piCongrLeft_symm_apply, Equiv.symm_symm, RingEquiv.piCongrLeft'_apply,
+        Equiv.symm_trans_apply, Homeomorph.coe_symm_toEquiv, Pi.ringHom_apply, Pi.evalRingHom_apply,
+        RingEquiv.coe_ofBijective]
       rw [IsArtinianRing.equivPi_naturality_apply]
-      simp
+      simp only [RingEquiv.apply_symm_apply, Pi.ringHom_apply, RingHom.coe_comp,
+        Function.comp_apply, Pi.evalRingHom_apply, RingEquiv.piCongrRight_apply,
+        RingEquiv.piCongrLeft_symm_apply, Equiv.symm_symm, RingEquiv.piCongrLeft'_apply,
+        Equiv.symm_trans_apply, Homeomorph.coe_symm_toEquiv, RingEquiv.coe_ofBijective,
+        Ideal.quotientMap_algebraMap, appTop_left_algebraMap, Ideal.Quotient.mk_algebraMap,
+        algebraMap.coe_inj]
       congr 1
-      sorry
+      simp only [Iso.schemeIsoToHomeo, Scheme.homeoOfIso_symm, Scheme.homeoOfIso_apply,
+        Iso.symm_hom]
+      rw [← Scheme.comp_base_apply, ← Scheme.isoSpec_inv_naturality]
+      simp only [Scheme.comp_coeBase, TopCat.hom_comp, ContinuousMap.comp_apply]
+      rfl
 
 def equivFintypeCat [IsSepClosed Ω] : FiniteEtale (Spec <| .of Ω) ≌ FintypeCat.{u} :=
   CategoryTheory.Equivalence.mk (forgetScheme Ω) (inventScheme Ω)
