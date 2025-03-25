@@ -1,15 +1,15 @@
 import Mathlib.CategoryTheory.Comma.Over.Basic
 
+open CategoryTheory
+
 variable {C D : Type*} [Category C] [Category D] {F : C ⥤ D} {G : D ⥤ C} (A : F ⊣ G)
 
 variable (X : C)
 
 instance [F.Faithful] : (Over.post (X := X) F).Faithful where
   map_injective {A B} f g h := by
-    apply_fun CommaMorphism.left at h
-    simp only [Over.post_obj, Functor.id_obj, Over.mk_left, Over.post_map, Over.homMk_left] at h
     ext
-    exact F.map_injective h
+    exact F.map_injective (congrArg CommaMorphism.left h)
 
 instance [F.Faithful] [F.Full] : (Over.post (X := X) F).Full where
   map_surjective {A B} f := by
