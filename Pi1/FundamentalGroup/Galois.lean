@@ -481,6 +481,7 @@ instance [ConnectedSpace X] [IsSepClosed Ω] : (fiber ξ).ReflectsIsomorphisms :
       B.left.connectedComponents]
     intro c
     simp
+    sorry
   --wlog h : ConnectedSpace B.left
   --· sorry
   sorry
