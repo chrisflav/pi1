@@ -8,7 +8,9 @@ import Pi1.Mathlib.AlgebraicGeometry.Limits
 import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
 import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
 import Pi1.FundamentalGroup.FiniteEtale
+import Pi1.FundamentalGroup.Rank
 import Pi1.RingTheory.FinitePresentation
+import Pi1.RingTheory.SmoothFlat
 import Mathlib.CategoryTheory.Galois.Basic
 import Mathlib.AlgebraicGeometry.Morphisms.Immersion
 import Mathlib.AlgebraicGeometry.Morphisms.UniversallyInjective
@@ -398,6 +400,12 @@ variable {X}
 def fiber : FiniteEtale X ⥤ FintypeCat :=
   pullback ξ ⋙ forgetScheme Ω
 
+variable {ξ} in
+def fiberPt {A : FiniteEtale X} (x : (fiber ξ).obj A) : A.left :=
+  (pullback.fst A.hom ξ).base x
+
+instance (A : FiniteEtale X) [Nonempty A.left] : Nonempty ((fiber ξ).obj A) := sorry
+
 instance [IsSepClosed Ω] : PreservesFiniteLimits (pullback ξ) := by
   dsimp [pullback]
   apply AffineAnd.preservesFiniteLimits_pullback
@@ -405,7 +413,76 @@ instance [IsSepClosed Ω] : PreservesFiniteLimits (pullback ξ) := by
 instance [IsSepClosed Ω] : PreservesFiniteColimits (pullback ξ) :=
   sorry
 
-instance [ConnectedSpace X] [IsSepClosed Ω] : (pullback ξ).ReflectsIsomorphisms :=
+lemma card_fiber_eq_finrank [ConnectedSpace X] (Y : FiniteEtale X) :
+    Fintype.card ((fiber ξ).obj Y) = finrank Y.hom :=
+  sorry
+
+-- TODO: move this somewhere else
+instance {X Y : Scheme.{u}} (f : X ⟶ Y) [IsSmooth f] : Flat f := by
+  rw [HasRingHomProperty.iff_appLE (P := @Flat)]
+  intro U V e
+  have := HasRingHomProperty.appLE @IsSmooth f inferInstance U V e
+  rw [RingHom.locally_isStandardSmooth_iff_smooth] at this
+  algebraize [(Scheme.Hom.appLE f U V e).hom]
+  have : Algebra.Smooth Γ(Y, U) Γ(X, V) := this
+  show Module.Flat _ _
+  infer_instance
+
+lemma finrank_fiberPt_eq [ConnectedSpace X] [IsSepClosed Ω]
+    (A B : FiniteEtale X)
+    {f : A ⟶ B} (b : (fiber ξ).obj B) :
+    finrank f.left (fiberPt b) = ((fiber ξ).map f ⁻¹' {b}).ncard :=
+  sorry
+
+def geomFiber {X Y : Scheme.{u}} (f : X ⟶ Y) (y : Spec (.of Ω) ⟶ Y) :
+    Set (Spec (.of Ω) ⟶ X) :=
+  (fun x : Spec (.of Ω) ⟶ X ↦ x ≫ f) ⁻¹' {y}
+
+lemma finrank_eq_ncard_geomFiber {X Y : Scheme.{u}} (f : X ⟶ Y) (y : Spec (.of Ω) ⟶ Y)
+    [ConnectedSpace Y] [IsFiniteEtale f] :
+    finrank f (y.base default) = (geomFiber f y).ncard :=
+  sorry
+
+lemma isIso_aux [ConnectedSpace X] [IsSepClosed Ω]
+    (A B : FiniteEtale X)
+    {f : A ⟶ B} [ConnectedSpace B.left]
+    [IsIso ((fiber ξ).map f)] : IsIso f := by
+  have : IsIso ((forget X ⋙ Over.forget X).map f) := by
+    show IsIso f.left
+    rw [isIso_iff_rank_eq]
+    ext b
+    simp only [Pi.one_apply]
+    let f' := (fiber ξ).map f
+    have : Nonempty ((fiber ξ).obj B) := inferInstance
+    obtain ⟨b'⟩ := this
+    rw [finrank_eq_const_of_preconnectedSpace _ _ (fiberPt b'), finrank_fiberPt_eq]
+    have : Function.Bijective ((fiber ξ).map f) :=
+      CategoryTheory.ConcreteCategory.bijective_of_isIso
+        ((fiber ξ).map f)
+    rw [← ENat.coe_inj, Set.Finite.cast_ncard_eq (Set.toFinite _)]
+    simpa using Set.encard_preimage_of_bijective this {b'}
+  apply isIso_of_reflects_iso _ (FiniteEtale.forget X ⋙ Over.forget X)
+
+def _root_.AlgebraicGeometry.Scheme.connectedComponents (X : Scheme.{u}) : X.OpenCover where
+  J := ConnectedComponents X
+  obj c := sorry
+  map := sorry
+  f := sorry
+  covers := sorry
+  map_prop := sorry
+
+instance [ConnectedSpace X] [IsSepClosed Ω] : (fiber ξ).ReflectsIsomorphisms := by
+  constructor
+  intro A B f hf
+  show MorphismProperty.isomorphisms _ f
+  have : IsIso ((forget X ⋙ Over.forget X).map f) := by
+    show MorphismProperty.isomorphisms Scheme f.left
+    rw [IsLocalAtTarget.iff_of_openCover (P := MorphismProperty.isomorphisms Scheme)
+      B.left.connectedComponents]
+    intro c
+    simp
+  --wlog h : ConnectedSpace B.left
+  --· sorry
   sorry
 
 instance [IsSepClosed Ω] : PreservesFiniteColimits (fiber ξ) := by
@@ -417,7 +494,6 @@ open PreGaloisCategory
 instance [ConnectedSpace X] [IsSepClosed Ω] : FiberFunctor (fiber ξ) where
   preservesTerminalObjects := by dsimp [fiber]; infer_instance
   preservesPullbacks := by dsimp [fiber]; infer_instance
-  reflectsIsos := by dsimp [fiber]; infer_instance
   preservesQuotientsByFiniteGroups _ _ := inferInstance
 
 instance [ConnectedSpace X] : GaloisCategory (FiniteEtale X) where

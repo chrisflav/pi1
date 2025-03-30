@@ -21,14 +21,16 @@ open CategoryTheory Limits
 
 namespace Algebra
 
+/-- A finite étale algebra is a finite and étale algebra. -/
 @[mk_iff]
-class IsFiniteEtale (R S : Type u) [CommRing R] [CommRing S] [Algebra R S]
-    extends Module.Finite R S, Algebra.Etale R S : Prop
+class IsFiniteEtale (R S : Type u) [CommRing R] [CommRing S] [Algebra R S] : Prop
+    extends Module.Finite R S, Algebra.Etale R S
 
 end Algebra
 
 namespace RingHom
 
+/-- A ring homomorphism is finite étale if the induced algebra is finite étale. -/
 def IsFiniteEtale {R S : Type u} [CommRing R] [CommRing S] (f : R →+* S) : Prop :=
   letI := f.toAlgebra
   Algebra.IsFiniteEtale R S
@@ -61,7 +63,8 @@ namespace AlgebraicGeometry
 
 /-- A morphism is finite étale if it is finite and étale. -/
 @[mk_iff]
-class IsFiniteEtale {X Y : Scheme.{u}} (f : X ⟶ Y) extends IsFinite f, IsEtale f : Prop
+class IsFiniteEtale {X Y : Scheme.{u}} (f : X ⟶ Y) : Prop
+  extends IsFinite f, IsEtale f
 
 namespace IsFiniteEtale
 

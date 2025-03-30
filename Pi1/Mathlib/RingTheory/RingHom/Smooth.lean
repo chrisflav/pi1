@@ -87,4 +87,27 @@ lemma Smooth.propertyIsLocal : PropertyIsLocal Smooth where
     (stableUnderComposition.stableUnderCompositionWithLocalizationAway
       holdsForLocalizationAway).right
 
+-- done in a branch of mathlib
+lemma locally_isStandardSmooth_iff_smooth {R S : Type u} [CommRing R] [CommRing S]
+    (f : R →+* S) : Locally IsStandardSmooth.{0, 0} f ↔ f.Smooth :=
+  sorry
+
 end RingHom
+
+lemma Algebra.FormallySmooth.of_bijective_algebraMap {R S : Type u} [CommRing R] [CommRing S]
+    [Algebra R S] (h : Function.Bijective (algebraMap R S)) :
+    Algebra.FormallySmooth R S :=
+  have : Algebra.Etale R R :=
+    instEtaleOfIsStandardSmoothOfRelativeDimensionOfNatNat.{u, u, u}
+  Algebra.FormallySmooth.of_equiv
+    { __ := RingEquiv.ofBijective (algebraMap R S) h, commutes' := by simp }
+
+namespace Algebra
+
+instance {k ι : Type u} [Field k] : FormallySmooth k (FractionRing (MvPolynomial ι k)) :=
+  have : FormallySmooth k (MvPolynomial ι k) := inferInstance
+  have : FormallySmooth (MvPolynomial ι k) (FractionRing (MvPolynomial ι k)) :=
+    .of_isLocalization (nonZeroDivisors _)
+  .comp k (MvPolynomial ι k) (FractionRing (MvPolynomial ι k))
+
+end Algebra

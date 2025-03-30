@@ -7,8 +7,8 @@ open TensorProduct
 universe u
 
 @[mk_iff]
-class Algebra.FiniteEtale (R S : Type u) [CommRing R] [CommRing S] [Algebra R S]
-  extends Algebra.Etale R S, Module.Finite R S : Prop
+class Algebra.FiniteEtale (R S : Type u) [CommRing R] [CommRing S] [Algebra R S] : Prop
+  extends Algebra.Etale R S, Module.Finite R S
 
 lemma Algebra.FiniteEtale.of_equiv {R S S' : Type u} [CommRing R] [CommRing S] [Algebra R S]
     [Algebra.FiniteEtale R S] [CommRing S'] [Algebra R S'] (e : S ≃ₐ[R] S') :
@@ -56,11 +56,6 @@ lemma IsUnit.tmul {R S T : Type*} [CommRing R] [CommRing S]
   rw [isUnit_iff_exists_inv]
   use s⁻¹.val ⊗ₜ t⁻¹.val
   simp [Algebra.TensorProduct.one_def]
-
-lemma Algebra.TensorProduct.tmul_comm {R S T : Type*} [CommRing R] [CommRing S] [CommRing T]
-    [Algebra R S] [Algebra R T] (r : R) :
-    algebraMap R S r ⊗ₜ[R] 1 = 1 ⊗ₜ algebraMap R T r := by
-  rw [algebraMap_eq_smul_one, algebraMap_eq_smul_one, smul_tmul]
 
 lemma Algebra.isLocalization_iff_isPushout {R : Type*} [CommSemiring R]
     {S : Type*} (A : Type*) {B : Type*} [CommSemiring S] [Algebra R S]
