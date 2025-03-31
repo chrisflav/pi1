@@ -358,7 +358,8 @@ lemma tensorToH1Cotangent_tmul (t : T) (x : P.H1Cotangent) :
 set_option maxHeartbeats 0 in
 lemma tensorToH1Cotangent_bijective_of_flat [Module.Flat R T] :
     Function.Bijective (P.tensorToH1Cotangent T) := by
-  apply LinearMap.bijective_of (M₁ := Unit) (N₁ := Unit) (M₂ := Unit) (N₂ := Unit)
+  apply LinearMap.bijective_of_surjective_of_bijective_of_bijective_of_injective (M₁ := Unit)
+      (N₁ := Unit) (M₂ := Unit) (N₂ := Unit)
       (M₄ := T ⊗[R] P.Cotangent) (N₄ := (P.baseChange (T := T)).Cotangent)
       (M₅ := T ⊗[R] P.CotangentSpace) (N₅ := (P.baseChange (T := T)).CotangentSpace)
     0
