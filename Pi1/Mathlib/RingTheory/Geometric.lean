@@ -329,11 +329,6 @@ lemma PrimeSpectrum.isHomeomorph_comap_of_bijective {R S : Type*} [CommRing R]
   convert bot_le
   exact (RingHom.injective_iff_ker_eq_bot _).mp hf.1
 
-lemma IsPurelyInseparable.algebraMap_surjective (F E : Type*)
-    [Field F] [Field E] [Algebra F E] [PerfectField F] [IsPurelyInseparable F E] :
-    Function.Surjective (algebraMap F E) :=
-  fun e ↦ IsPurelyInseparable.inseparable _ _ (IsSeparable.isSeparable _ e)
-
 lemma TensorProduct.flip_mk_surjective (R S T : Type*) [CommSemiring R]
     [Semiring S] [Algebra R S] [Semiring T] [Algebra R T]
     (h : Function.Surjective (algebraMap R T)) :
@@ -392,7 +387,7 @@ lemma PrimeSpectrum.isHomeomorph_comap_of_isPurelyInseparable (k K : Type*) [Fie
     · have : ExpChar k 1 := ringExpChar.of_eq hq
       have : CharZero k := charZero_of_expChar_one' k
       exact ⟨1, Nat.one_pos, (Algebra.TensorProduct.includeLeft_surjective (S := R) <|
-        IsPurelyInseparable.algebraMap_surjective k K) _⟩
+        IsPurelyInseparable.surjective_algebraMap_of_isSeparable k K) _⟩
   · convert bot_le
     rw [← RingHom.injective_iff_ker_eq_bot]
     exact Algebra.TensorProduct.includeLeft_injective (S := R) (algebraMap k K).injective
