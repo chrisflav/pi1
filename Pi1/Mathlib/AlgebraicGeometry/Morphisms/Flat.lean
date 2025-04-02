@@ -3,7 +3,9 @@ import Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Mathlib.AlgebraicGeometry.Morphisms.UniversallyClosed
 import Mathlib.AlgebraicGeometry.Morphisms.UniversallyInjective
 import Mathlib.RingTheory.Ideal.GoingDown
+import Mathlib.RingTheory.Spectrum.Prime.Chevalley
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.RingHomProperties
+import Pi1.Mathlib.CategoryTheory.MorphismProperty.Limits
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
 import Pi1.Mathlib.RingTheory.RingHom.Flat
 
@@ -113,15 +115,6 @@ instance Flat.surjective_descendsAlong_surjective_inf_flat_inf_quasicompact :
     exact Surjective.of_comp f g
   infer_instance
 
-lemma _root_.CategoryTheory.MorphismProperty.universally_mk' {C : Type*} [Category C]
-    (P : MorphismProperty C) [P.RespectsIso] {X Y : C} (g : X ⟶ Y)
-    (H : ∀ {T : C} (f : T ⟶ Y) [HasPullback f g], P (pullback.fst f g)) :
-    universally P g := by
-  introv X' h
-  have := h.hasPullback
-  rw [← h.isoPullback_hom_fst, P.cancel_left_of_respectsIso]
-  exact H ..
-
 instance {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z) [Flat g] : Flat (pullback.fst f g) :=
   pullback_fst _ _ inferInstance
 
@@ -134,6 +127,14 @@ instance {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z) [Surjective g] :
 
 instance {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z) [Surjective f] :
     Surjective (pullback.snd f g) :=
+  pullback_snd _ _ inferInstance
+
+instance {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z) [LocallyOfFinitePresentation g] :
+    LocallyOfFinitePresentation (pullback.fst f g) :=
+  pullback_fst _ _ inferInstance
+
+instance {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z) [LocallyOfFinitePresentation f] :
+    LocallyOfFinitePresentation (pullback.snd f g) :=
   pullback_snd _ _ inferInstance
 
 lemma QuasiCompact.compactSpace_of_compactSpace {X Y : Scheme.{u}} (f : X ⟶ Y) [QuasiCompact f]
@@ -378,10 +379,34 @@ instance Flat.isomorphisms_descendsAlong_surjective_inf_flat_inf_quasicompact :
     · exact h
     · exact hfst
 
--- follows from Chevalley
+lemma _root_.RingHom.Flat.isOpenMap_comap_of_finitePresentation
+    {R S : Type*} [CommRing R] [CommRing S] {f : R →+* S} (hf : f.Flat)
+    (hfin : f.FinitePresentation) :
+    IsOpenMap (PrimeSpectrum.comap f) := by
+  algebraize [f]
+  exact PrimeSpectrum.isOpenMap_comap_of_hasGoingDown_of_finitePresentation
+
 instance (priority := low) Flat.universallyOpen {X Y : Scheme.{u}} (f : X ⟶ Y) [Flat f]
-    [LocallyOfFinitePresentation f] : UniversallyOpen f :=
-  sorry
+    [LocallyOfFinitePresentation f] : UniversallyOpen f := by
+  suffices h : ∀ {X Y : Scheme.{u}} (f : X ⟶ Y) [Flat f] [LocallyOfFinitePresentation f],
+      topologically IsOpenMap f by
+    exact ⟨universally_mk' _ _ fun g _ ↦ h _⟩
+  intro X Y f _ _
+  wlog hY : ∃ R, Y = Spec R
+  · rw [IsLocalAtTarget.iff_of_openCover (P := topologically IsOpenMap) Y.affineCover]
+    intro i
+    dsimp only [Scheme.Cover.pullbackHom]
+    exact this f _ ⟨_, rfl⟩
+  obtain ⟨R, rfl⟩ := hY
+  wlog hX : ∃ S, X = Spec S
+  · rw [IsLocalAtSource.iff_of_openCover (P := topologically IsOpenMap) X.affineCover]
+    intro i
+    exact this f _ _ ⟨_, rfl⟩
+  obtain ⟨S, rfl⟩ := hX
+  obtain ⟨φ, rfl⟩ := Spec.map_surjective f
+  apply RingHom.Flat.isOpenMap_comap_of_finitePresentation
+  rwa [← HasRingHomProperty.Spec_iff (P := @Flat)]
+  rwa [← HasRingHomProperty.Spec_iff (P := @LocallyOfFinitePresentation)]
 
 instance (priority := low) Flat.isIso {X Y : Scheme.{u}} (f : X ⟶ Y) [Flat f]
     [QuasiCompact f] [Surjective f] [Mono f] : IsIso f := by

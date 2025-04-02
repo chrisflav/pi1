@@ -8,14 +8,17 @@ import Pi1.FundamentalGroup.Rank
 import Pi1.Mathlib.Algebra.Module.FinitePresentation
 import Pi1.Mathlib.Algebra.Module.LocalizedModule.Basic
 import Pi1.Mathlib.AlgebraicGeometry.Limits
+import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Constructors
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Etale
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Finite
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.RingHomProperties
+import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
 import Pi1.Mathlib.CategoryTheory.Comma.Over.Basic
 import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.Composition
+import Pi1.Mathlib.CategoryTheory.MorphismProperty.Limits
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.Over
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.UnderAdjunction
 import Pi1.Mathlib.RingTheory.Geometric
