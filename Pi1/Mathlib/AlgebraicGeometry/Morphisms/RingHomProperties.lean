@@ -6,7 +6,7 @@ Authors: Christian Merten
 import Mathlib.AlgebraicGeometry.Morphisms.Affine
 import Mathlib.AlgebraicGeometry.Morphisms.AffineAnd
 import Mathlib.AlgebraicGeometry.Morphisms.RingHomProperties
-import Pi1.Mathlib.CategoryTheory.MorphismProperty.Limits
+import Mathlib.CategoryTheory.MorphismProperty.Descent
 import Pi1.Mathlib.RingTheory.RingHomProperties
 
 /-!

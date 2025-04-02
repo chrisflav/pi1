@@ -60,19 +60,20 @@ def baseChangeFromBaseChange :
       simp only [TensorProduct.algebraMap_apply, id.map_eq_id, RingHom.id_apply, baseChange,
         ofSurjective, AlgHom.toRingHom_eq_coe, MvPolynomial.aeval_map_algebraMap]
       induction x using MvPolynomial.induction_on with
-      | h_C r =>
+      | C r =>
         simp only [MvPolynomial.algHom_C, TensorProduct.algebraMap_apply,
           TensorProduct.tmul_mul_tmul, mul_one, RingHom.algebraMap_toAlgebra,
           AlgHom.toRingHom_eq_coe, RingHom.coe_coe, TensorProduct.map_tmul, AlgHom.coe_id, id_eq]
         rw [mul_comm, ← Algebra.smul_def, ← smul_tmul', ← tmul_smul, Algebra.smul_def, mul_one]
-      | h_X p i hp =>
+      | mul_X p i hp =>
         simp only [map_mul, MvPolynomial.aeval_X]
         rw [← mul_assoc, hp]
         simp [RingHom.algebraMap_toAlgebra]
-      | h_add p q hp hq =>
+      | add p q hp hq =>
         simp only [map_add, mul_add, hp, hq]
         rw [tmul_add, RingHom.map_add]
 
+set_option maxHeartbeats 0 in
 noncomputable
 def baseChangeToBaseChange :
     (P.baseChange (T := T)).toExtension.Hom (P.toExtension.baseChange (T := T)) where

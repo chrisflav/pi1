@@ -22,14 +22,6 @@ lemma Pi.ker_algHom {I : Type*} (R : Type*) (f : I → Type*) [CommSemiring R] [
     (g : ∀ i, A →ₐ[R] f i) : RingHom.ker (Pi.algHom R f g) = ⨅ i, RingHom.ker (g i) :=
   Pi.ker_ringHom _
 
-@[simp]
-lemma RingHom.finitePresentation_algebraMap {R S : Type*} [CommRing R] [CommRing S]
-    [Algebra R S] :
-    (algebraMap R S).FinitePresentation ↔ Algebra.FinitePresentation R S := by
-  dsimp only [FinitePresentation]
-  congr!
-  exact Algebra.algebra_ext _ _ fun _ ↦ rfl
-
 -- TODO: generalize to arbitrary universes
 lemma Algebra.FinitePresentation.of_cover_target {R S : Type u} [CommRing R] [CommRing S]
     [Algebra R S] {ι : Type*} (A : ι → Type u) (s : ι → S) (hs : Ideal.span (Set.range s) = ⊤)
@@ -128,91 +120,9 @@ lemma MvPolynomial.aeval_polynomialEval₂_C {R S : Type*} [CommSemiring R]
     MvPolynomial.aeval f (Polynomial.eval₂ MvPolynomial.C (MvPolynomial.X ()) p) =
       Polynomial.eval₂ (algebraMap R S) (f ()) p := by
   induction p using Polynomial.induction_on with
-  | h_C => simp
-  | h_monomial => simp
-  | h_add p q hp hq => simp [hp, hq]
-
--- #22922
-section
-
-/-- The embedding of `R[X]` into `R[Xᵢ]` as an `R`-algebra homomorphism. -/
-noncomputable def Polynomial.toMvPolynomial {R ι : Type*} [CommSemiring R]
-    (i : ι) : R[X] →ₐ[R] MvPolynomial ι R :=
-  (MvPolynomial.rename (fun _ : Unit ↦ i)).comp (MvPolynomial.pUnitAlgEquiv R).symm
-
-lemma Polynomial.toMvPolynomial_injective {R ι : Type*} [CommSemiring R] (i : ι) :
-    Function.Injective (toMvPolynomial (R := R) i) := by
-  simp only [toMvPolynomial, AlgHom.coe_comp, AlgHom.coe_coe, EquivLike.injective_comp]
-  exact MvPolynomial.rename_injective (fun x ↦ i) fun ⦃a₁ a₂⦄ ↦ congrFun rfl
-
-@[simp]
-lemma Polynomial.toMvPolynomial_C {R ι : Type*} [CommSemiring R]
-    (i : ι) (r : R) :
-    (C r).toMvPolynomial i = MvPolynomial.C r := by
-  simp [toMvPolynomial]
-
-@[simp]
-lemma Polynomial.toMvPolynomial_X {R ι : Type*} [CommSemiring R]
-    (i : ι) :
-    X.toMvPolynomial i = MvPolynomial.X (R := R) i := by
-  simp [toMvPolynomial]
-
-@[simp]
-lemma MvPolynomial.aeval_comp_toMvPolynomial {R S ι : Type*} [CommSemiring R] [CommSemiring S]
-    [Algebra R S] (f : ι → S) (i : ι) :
-    (MvPolynomial.aeval (R := R) f).comp (toMvPolynomial i) = Polynomial.aeval (f i) := by
-  ext
-  simp [toMvPolynomial, MvPolynomial.aeval_rename, Polynomial.aeval_def]
-
-@[simp]
-lemma MvPolynomial.aeval_toMvPolynomial {R S ι : Type*} [CommSemiring R] [CommSemiring S]
-    [Algebra R S] (f : ι → S) (i : ι) (p : R[X]) :
-    MvPolynomial.aeval f (p.toMvPolynomial i) = Polynomial.aeval (f i) p :=
-  DFunLike.congr_fun (aeval_comp_toMvPolynomial ..) p
-
-@[simp]
-lemma MvPolynomial.rename_comp_toMvPolynomial {R α β : Type*} [CommSemiring R]
-    (f : α → β) (a : α) :
-    (MvPolynomial.rename (R := R) f).comp (Polynomial.toMvPolynomial a) =
-      Polynomial.toMvPolynomial (f a) := by
-  ext
-  simp
-
-@[simp]
-lemma MvPolynomial.rename_toMvPolynomial {R α β : Type*} [CommSemiring R]
-    (f : α → β) (a : α) (p : R[X]) :
-    (MvPolynomial.rename (R := R) f) (Polynomial.toMvPolynomial a p) =
-      Polynomial.toMvPolynomial (f a) p :=
-  DFunLike.congr_fun (rename_comp_toMvPolynomial ..) p
-
-end
-
--- #22920
-section
-
-lemma Module.Free.trans (R S M : Type*) [CommSemiring R] [CommSemiring S] [Algebra R S]
-    [AddCommMonoid M] [Module R M] [Module S M] [IsScalarTower R S M]
-    [Module.Free R S] [Module.Free S M] :
-    Module.Free R M :=
-  let e : (ChooseBasisIndex S M →₀ S) ≃ₗ[R] ChooseBasisIndex S M →₀ (ChooseBasisIndex R S →₀ R) :=
-    Finsupp.mapRange.linearEquiv (Module.Free.chooseBasis R S).repr
-  let e : M ≃ₗ[R] ChooseBasisIndex S M →₀ (ChooseBasisIndex R S →₀ R) :=
-    (Module.Free.chooseBasis S M).repr.restrictScalars R ≪≫ₗ e
-  .of_equiv e.symm
-
-lemma AdjoinRoot.free_of_monic {R : Type*} [CommRing R] {f : R[X]} (hf : f.Monic) :
-    Module.Free R (AdjoinRoot f) :=
-  .of_basis (AdjoinRoot.powerBasis' hf).basis
-
-lemma AdjoinRoot.finite_of_monic {R : Type*} [CommRing R] {f : R[X]} (hf : f.Monic) :
-    Module.Finite R (AdjoinRoot f) :=
-  .of_basis (AdjoinRoot.powerBasis' hf).basis
-
-lemma Polynomial.free_quotient_of_monic {R : Type*} [CommRing R] {p : R[X]} (hp : p.Monic) :
-    Module.Free R (R[X] ⧸ Ideal.span {p}) :=
-  AdjoinRoot.free_of_monic hp
-
-end
+  | C => simp
+  | monomial => simp
+  | add p q hp hq => simp [hp, hq]
 
 set_option maxHeartbeats 0 in
 set_option synthInstance.maxHeartbeats 0 in
@@ -260,9 +170,9 @@ private lemma MvPolynomial.free_and_finite_quotient_of_monic {R ι : Type*} [Fin
           ((Ideal.Quotient.mk (Ideal.span (Set.range fun i ↦ toMvPolynomial i (q i)))) (X i))) x =
         Ideal.Quotient.mk _ (toMvPolynomial i x) := by
       induction x using Polynomial.induction_on with
-      | h_C => simp [IsScalarTower.algebraMap_apply R (MvPolynomial (Option α) R)]
-      | h_add x y hx hy => simp [hx, hy]
-      | h_monomial n r hn =>
+      | C => simp [IsScalarTower.algebraMap_apply R (MvPolynomial (Option α) R)]
+      | add x y hx hy => simp [hx, hy]
+      | monomial n r hn =>
         simp only [map_mul, Polynomial.aeval_C, map_pow, Polynomial.aeval_X, toMvPolynomial_C,
           toMvPolynomial_X] at hn
         simp [pow_add, hn, ← mul_assoc]
@@ -281,9 +191,9 @@ private lemma MvPolynomial.free_and_finite_quotient_of_monic {R ι : Type*} [Fin
         ((AdjoinRoot.of P) ((Ideal.Quotient.mk _) (X a)))) x =
           AdjoinRoot.of P (Ideal.Quotient.mk _ (toMvPolynomial a x)) := by
       induction x using Polynomial.induction_on with
-      | h_C => simp; rfl
-      | h_monomial n a h => simp [pow_add, ← mul_assoc, h]
-      | h_add p q hp hq => simp [hp, hq]
+      | C => simp; rfl
+      | monomial n a h => simp [pow_add, ← mul_assoc, h]
+      | add p q hp hq => simp [hp, hq]
     have h0 (a : α) :
         ((Ideal.Quotient.mk (Ideal.span (Set.range fun i ↦ (toMvPolynomial i) (q (some i)))))
           ((toMvPolynomial a) (q (some a)))) = 0 := by
@@ -341,17 +251,13 @@ private lemma MvPolynomial.free_and_finite_quotient_of_monic {R ι : Type*} [Fin
     let e : AdjoinRoot P ≃ₐ[A] B :=
       { __ := u, invFun := v,
         left_inv := DFunLike.congr_fun h1, right_inv := DFunLike.congr_fun h2 }
-    have : Module.Free A (AdjoinRoot P) := by
-      apply AdjoinRoot.free_of_monic
-      exact (hq none).map _
+    have : Module.Free A (AdjoinRoot P) := ((hq none).map _).free_adjoinRoot
     have : Module.Free A B := Module.Free.of_equiv e.toLinearEquiv
     have : IsScalarTower R A B := IsScalarTower.of_algHom f
     have : Module.Finite R A := (hp _ (fun i ↦ hq i)).2
-    have : Module.Finite A (AdjoinRoot P) := by
-      apply AdjoinRoot.finite_of_monic
-      exact (hq none).map _
+    have : Module.Finite A (AdjoinRoot P) := ((hq none).map _).finite_adjoinRoot
     have : Module.Finite A B := Module.Finite.equiv e.toLinearEquiv
-    exact ⟨Module.Free.trans R A B, Module.Finite.trans A B⟩
+    exact ⟨Module.Free.trans (R := R) (S := A) (M := B), Module.Finite.trans A B⟩
 
 lemma MvPolynomial.free_quotient_of_monic {R ι : Type*} [Finite ι] [CommRing R]
     (p : ι → R[X]) (hp : ∀ i, (p i).Monic) :
@@ -371,15 +277,14 @@ instance (priority := 900) {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
   obtain ⟨s, hs⟩ := this
   have (s : S) : IsIntegral R s := Algebra.IsIntegral.isIntegral s
   choose p hm hp using this
-  let q (x : s) : MvPolynomial s R :=
-    MvPolynomial.rename (fun _ : Unit ↦ x) (MvPolynomial.pUnitAlgEquiv R |>.symm <| p x)
+  let q (x : s) : MvPolynomial s R := (p x).toMvPolynomial x
   let S' : Type _ := MvPolynomial s R ⧸ (Ideal.span <| Set.range fun x ↦ q x)
   let f : S' →ₐ[R] S := Ideal.Quotient.liftₐ _ (MvPolynomial.aeval Subtype.val) <| by
     intro a ha
     induction ha using Submodule.span_induction with
     | mem _ h =>
         obtain ⟨x, rfl⟩ := h
-        simp [q, MvPolynomial.aeval_rename, hp]
+        simpa [q] using hp x
     | add _ _ _ _ h1 h2 => simp [h1, h2]
     | smul _ _ _ h => simp [h]
     | zero => simp

@@ -194,7 +194,7 @@ lemma tensorCotangentTo_surjective :
         t • (I.map (algebraMap S (T ⊗[R] S))).toCotangent ((Algebra.idealMap (T ⊗[R] S) I) x) := by
     have : t • (map (algebraMap S (T ⊗[R] S)) I).toCotangent ((Algebra.idealMap (T ⊗[R] S) I) x) =
         (map (algebraMap S (T ⊗[R] S)) I).toCotangent (t • (Algebra.idealMap (T ⊗[R] S) I) x) := by
-      simp
+      rw [LinearMap.map_smul_of_tower]
     rw [this]
     congr
     simp

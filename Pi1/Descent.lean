@@ -1,5 +1,4 @@
 import Mathlib
-import Pi1.Mathlib.CategoryTheory.MorphismProperty.Limits
 import Pi1.Mathlib.RingTheory.RingHomProperties
 
 universe u

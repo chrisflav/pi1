@@ -163,7 +163,7 @@ lemma Γ_isPushout {P : Scheme.{u}} {fst : P ⟶ X} {snd : P ⟶ Y} (h : IsPullb
     IsPushout (f.app ⊤) (g.app ⊤) (fst.app ⊤) (snd.app ⊤) := by
   haveI : IsAffine (pullback f g) := inferInstance
   let iso : P ≅ pullback f g := h.isoPullback
-  haveI : IsAffine P := isAffine_of_isIso iso.hom
+  haveI : IsAffine P := .of_isIso iso.hom
   let h' : IsPullback (AffineScheme.ofHom fst) (AffineScheme.ofHom snd)
       (AffineScheme.ofHom f) (AffineScheme.ofHom g) := by
     apply IsPullback.of_map (F := AffineScheme.forgetToScheme) h.w
@@ -283,8 +283,8 @@ to the over category of `S` viewed as affine scheme. -/
 def toAffineEquiv : Affine S ≌ Over (AffineScheme.mk S inferInstance) where
   functor := toAffine S
   inverse := fromAffine S
-  unitIso := eqToIso _
-  counitIso := eqToIso _
+  unitIso := Iso.refl _
+  counitIso := Iso.refl _
 
 instance : (toAffine S).IsEquivalence := (toAffineEquiv S).isEquivalence_functor
 instance : (fromAffine S).IsEquivalence := (toAffineEquiv S).isEquivalence_inverse
