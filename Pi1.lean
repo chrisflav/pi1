@@ -11,6 +11,7 @@ import Pi1.Mathlib.AlgebraicGeometry.Limits
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Constructors
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Etale
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Finite
+import Pi1.Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.RingHomProperties
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
@@ -28,6 +29,7 @@ import Pi1.Mathlib.RingTheory.RingHom.Etale
 import Pi1.Mathlib.RingTheory.RingHom.Flat
 import Pi1.Mathlib.RingTheory.RingHom.Smooth
 import Pi1.Mathlib.RingTheory.RingHomProperties
+import Pi1.Mathlib.RingTheory.Spectrum.Prime.Topology
 import Pi1.Mathlib.RingTheory.TensorProduct.Basic
 import Pi1.RingTheory.Cotangent.Basic
 import Pi1.RingTheory.Cotangent.SpaceBaseChange

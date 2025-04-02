@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christian Merten
 -/
 import Mathlib.AlgebraicGeometry.Morphisms.Constructors
+import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Constructors
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
 import Mathlib.Topology.LocalAtTarget

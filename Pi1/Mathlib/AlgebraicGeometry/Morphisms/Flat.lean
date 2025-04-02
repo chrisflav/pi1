@@ -5,9 +5,11 @@ import Mathlib.AlgebraicGeometry.Morphisms.UniversallyInjective
 import Mathlib.RingTheory.Ideal.GoingDown
 import Mathlib.RingTheory.Spectrum.Prime.Chevalley
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.RingHomProperties
+import Pi1.Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.Limits
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
 import Pi1.Mathlib.RingTheory.RingHom.Flat
+import Pi1.Mathlib.RingTheory.Spectrum.Prime.Topology
 
 universe u v
 
@@ -129,73 +131,17 @@ instance {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z) [Surjective f] :
     Surjective (pullback.snd f g) :=
   pullback_snd _ _ inferInstance
 
-instance {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z) [LocallyOfFinitePresentation g] :
-    LocallyOfFinitePresentation (pullback.fst f g) :=
-  pullback_fst _ _ inferInstance
-
-instance {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z) [LocallyOfFinitePresentation f] :
-    LocallyOfFinitePresentation (pullback.snd f g) :=
-  pullback_snd _ _ inferInstance
-
 lemma QuasiCompact.compactSpace_of_compactSpace {X Y : Scheme.{u}} (f : X ⟶ Y) [QuasiCompact f]
       [CompactSpace Y] : CompactSpace X := by
-    constructor
-    rw [← Set.preimage_univ (f := f.base)]
-    exact QuasiCompact.isCompact_preimage _ isOpen_univ CompactSpace.isCompact_univ
+  constructor
+  rw [← Set.preimage_univ (f := f.base)]
+  exact QuasiCompact.isCompact_preimage _ isOpen_univ CompactSpace.isCompact_univ
 
-section
-
-open _root_.PrimeSpectrum
-
-variable {R S : Type*} [CommRing R] [CommRing S] {f : R →+* S} (h₁ : Function.Surjective (comap f))
-
-lemma _root_.RingHom.Flat.generalizingMap_comap (hf : f.Flat) : GeneralizingMap (comap f) := by
-  algebraize [f]
-  show GeneralizingMap (comap (algebraMap R S))
-  rw [← Algebra.HasGoingDown.iff_generalizingMap_primeSpectrumComap]
-  infer_instance
-
-include h₁
-
-lemma _root_.PrimeSpectrum.isClosed_preimage_comap_iff_of_specializingMap
-      (h₂ : SpecializingMap (comap f)) {s : Set (PrimeSpectrum R)} :
-    IsClosed ((comap f) ⁻¹' s) ↔ IsClosed s :=
-  ⟨fun hsc ↦ Set.image_preimage_eq s h₁ ▸ isClosed_image_of_stableUnderSpecialization _ _ hsc
-      (h₂.stableUnderSpecialization_image hsc.stableUnderSpecialization),
-    fun hs ↦ hs.preimage (comap f).continuous⟩
-
-lemma _root_.PrimeSpectrum.isOpen_preimage_comap_iff_of_specializingMap
-      (h₂ : SpecializingMap (comap f)) {s : Set (PrimeSpectrum R)} :
-    IsOpen ((comap f) ⁻¹' s) ↔ IsOpen s := by
-  refine ⟨fun hsc ↦ ?_, fun hs ↦ hs.preimage (PrimeSpectrum.comap f).continuous⟩
-  rwa [← isClosed_compl_iff, ← isClosed_preimage_comap_iff_of_specializingMap h₁ h₂,
-    Set.preimage_compl, isClosed_compl_iff]
-
-lemma _root_.PrimeSpectrum.isClosed_preimage_comap_iff_of_generalizingMap
-      (h₂ : GeneralizingMap (comap f))
-      {s : Set (PrimeSpectrum R)} :
-    IsClosed ((comap f) ⁻¹' s) ↔ IsClosed s := by
-  refine ⟨fun hsc ↦ Set.image_preimage_eq s h₁ ▸ ?_, fun hs ↦ hs.preimage (comap f).continuous⟩
-  apply isClosed_image_of_stableUnderSpecialization _ _ hsc
-  rw [Set.image_preimage_eq s h₁, ← stableUnderGeneralization_compl_iff]
-  convert h₂.stableUnderGeneralization_image hsc.isOpen_compl.stableUnderGeneralization
-  rw [← Set.preimage_compl, Set.image_preimage_eq _ h₁]
-
-lemma _root_.PrimeSpectrum.isOpen_preimage_comap_iff_of_generalizingMap
-      (h₂ : GeneralizingMap (comap f))
-      {s : Set (PrimeSpectrum R)} :
-    IsOpen ((comap f) ⁻¹' s) ↔ IsOpen s := by
-  refine ⟨fun hsc ↦ ?_, fun hs ↦ hs.preimage (comap f).continuous⟩
-  rwa [← isClosed_compl_iff, ← isClosed_preimage_comap_iff_of_generalizingMap h₁ h₂,
-    Set.preimage_compl, isClosed_compl_iff]
-
-end
-
-@[stacks 02JY "for open sets"]
-lemma Flat.isOpen_preimage_iff_isOpen {X Y : Scheme.{u}} (f : X ⟶ Y) [Flat f] [QuasiCompact f]
-    [Surjective f] (s : Set Y) :
-    IsOpen (f.base ⁻¹' s) ↔ IsOpen s := by
-  refine ⟨fun hs ↦ ?_, fun hs ↦ hs.preimage f.continuous⟩
+@[stacks 02JY]
+lemma Flat.isQuotientMap_of_surjective {X Y : Scheme.{u}} (f : X ⟶ Y) [Flat f] [QuasiCompact f]
+    [Surjective f] : Topology.IsQuotientMap f.base := by
+  rw [Topology.isQuotientMap_iff]
+  refine ⟨f.surjective, fun s ↦ ⟨fun hs ↦ hs.preimage f.continuous, fun hs ↦ ?_⟩⟩
   wlog hY : ∃ R, Y = Spec R
   · let 𝒰 := Y.affineCover
     rw [𝒰.isOpenCover_opensRange.isOpen_iff_inter]
@@ -225,17 +171,10 @@ lemma Flat.isOpen_preimage_iff_isOpen {X Y : Scheme.{u}} (f : X ⟶ Y) [Flat f] 
     exact hs.preimage (T.isoSpec.inv ≫ p).continuous
   obtain ⟨S, rfl⟩ := hX
   obtain ⟨φ, rfl⟩ := Spec.map_surjective f
-  refine (PrimeSpectrum.isOpen_preimage_comap_iff_of_generalizingMap ?_ ?_).mp hs
+  refine ((PrimeSpectrum.isQuotientMap_of_generalizingMap ?_ ?_).isOpen_preimage).mp hs
   exact (surjective_iff (Spec.map φ)).mp inferInstance
   apply RingHom.Flat.generalizingMap_comap
   rwa [← HasRingHomProperty.Spec_iff (P := @Flat)]
-
-@[stacks 02JY "for closed sets"]
-lemma Flat.isClosed_preimage_iff_isClosed {X Y : Scheme.{u}} (f : X ⟶ Y) [Flat f] [QuasiCompact f]
-    [Surjective f] (s : Set Y) :
-    IsClosed (f.base ⁻¹' s) ↔ IsClosed s := by
-  refine ⟨fun hs ↦ ?_, fun hs ↦ hs.preimage f.continuous⟩
-  rwa [← isOpen_compl_iff, ← isOpen_preimage_iff_isOpen f, Set.preimage_compl, isOpen_compl_iff]
 
 lemma _root_.CategoryTheory.Limits.isPullback_map_snd_snd {C : Type*} [Category C] [HasPullbacks C]
     {X Y Z S : C} (f : X ⟶ S) (g : Y ⟶ S) (h : Z ⟶ S) :
@@ -272,7 +211,7 @@ instance Flat.universallyClosed_descendsAlong_surjective_inf_flat_inf_quasicompa
   have : IsClosed ((pullback.snd (Spec.map φ) f).base ⁻¹' ((pullback.fst f g).base '' s)) := by
     rw [← image_preimage_eq_of_isPullback (isPullback_map_snd_snd ..)]
     exact p.isClosedMap _ (hs.preimage r.continuous)
-  rwa [Flat.isClosed_preimage_iff_isClosed] at this
+  rwa [(Flat.isQuotientMap_of_surjective _).isClosed_preimage] at this
 
 /-- Universally open satisfies fpqc descent. -/
 @[stacks 02KT]
@@ -289,7 +228,7 @@ instance Flat.universallyOpen_descendsAlong_surjective_inf_flat_inf_quasicompact
   have : IsOpen ((pullback.snd (Spec.map φ) f).base ⁻¹' ((pullback.fst f g).base '' s)) := by
     rw [← image_preimage_eq_of_isPullback (isPullback_map_snd_snd ..)]
     exact p.isOpenMap _ (hs.preimage r.continuous)
-  rwa [Flat.isOpen_preimage_iff_isOpen] at this
+  rwa [(Flat.isQuotientMap_of_surjective _).isOpen_preimage] at this
 
 lemma flat_and_surjective_SpecMap_iff {R S : CommRingCat.{u}} (f : R ⟶ S) :
     Flat (Spec.map f) ∧ Surjective (Spec.map f) ↔ f.hom.FaithfullyFlat := by
@@ -386,27 +325,44 @@ lemma _root_.RingHom.Flat.isOpenMap_comap_of_finitePresentation
   algebraize [f]
   exact PrimeSpectrum.isOpenMap_comap_of_hasGoingDown_of_finitePresentation
 
-instance (priority := low) Flat.universallyOpen {X Y : Scheme.{u}} (f : X ⟶ Y) [Flat f]
-    [LocallyOfFinitePresentation f] : UniversallyOpen f := by
-  suffices h : ∀ {X Y : Scheme.{u}} (f : X ⟶ Y) [Flat f] [LocallyOfFinitePresentation f],
-      topologically IsOpenMap f by
-    exact ⟨universally_mk' _ _ fun g _ ↦ h _⟩
-  intro X Y f _ _
+lemma of_generalizingMap {X Y : Scheme.{u}} (f : X ⟶ Y) [LocallyOfFinitePresentation f]
+    (hf : GeneralizingMap f.base) : IsOpenMap f.base := by
+  show topologically IsOpenMap f
   wlog hY : ∃ R, Y = Spec R
   · rw [IsLocalAtTarget.iff_of_openCover (P := topologically IsOpenMap) Y.affineCover]
     intro i
     dsimp only [Scheme.Cover.pullbackHom]
-    exact this f _ ⟨_, rfl⟩
+    refine this _ ?_ ⟨_, rfl⟩
+    exact IsLocalAtTarget.of_isPullback (P := topologically GeneralizingMap)
+      (iY := Y.affineCover.map i) (IsPullback.of_hasPullback ..) hf
   obtain ⟨R, rfl⟩ := hY
   wlog hX : ∃ S, X = Spec S
   · rw [IsLocalAtSource.iff_of_openCover (P := topologically IsOpenMap) X.affineCover]
     intro i
-    exact this f _ _ ⟨_, rfl⟩
+    refine this _ _ ?_ ⟨_, rfl⟩
+    exact IsLocalAtSource.comp (P := topologically GeneralizingMap) hf _
   obtain ⟨S, rfl⟩ := hX
   obtain ⟨φ, rfl⟩ := Spec.map_surjective f
-  apply RingHom.Flat.isOpenMap_comap_of_finitePresentation
-  rwa [← HasRingHomProperty.Spec_iff (P := @Flat)]
-  rwa [← HasRingHomProperty.Spec_iff (P := @LocallyOfFinitePresentation)]
+  algebraize [φ.hom]
+  convert PrimeSpectrum.isOpenMap_comap_of_hasGoingDown_of_finitePresentation
+  · rwa [Algebra.HasGoingDown.iff_generalizingMap_primeSpectrumComap]
+  · apply (HasRingHomProperty.Spec_iff (P := @LocallyOfFinitePresentation)).mp inferInstance
+
+lemma Flat.generalizingMap {X Y : Scheme.{u}} (f : X ⟶ Y) [hf : Flat f] :
+    GeneralizingMap f.base := by
+  have := HasRingHomProperty.of_isLocalAtSource_of_isLocalAtTarget.{u}
+    (topologically GeneralizingMap)
+  show topologically GeneralizingMap f
+  rw [HasRingHomProperty.iff_appLE (P := topologically GeneralizingMap)]
+  intro U V e
+  algebraize [(f.appLE U V e).hom]
+  apply Algebra.HasGoingDown.iff_generalizingMap_primeSpectrumComap.mp
+  convert Algebra.HasGoingDown.of_flat
+  exact hf.1 U V e
+
+instance (priority := low) Flat.universallyOpen {X Y : Scheme.{u}} (f : X ⟶ Y) [Flat f]
+    [LocallyOfFinitePresentation f] : UniversallyOpen f :=
+  ⟨universally_mk' _ _ fun _ _ ↦ of_generalizingMap _ (Flat.generalizingMap _)⟩
 
 instance (priority := low) Flat.isIso {X Y : Scheme.{u}} (f : X ⟶ Y) [Flat f]
     [QuasiCompact f] [Surjective f] [Mono f] : IsIso f := by

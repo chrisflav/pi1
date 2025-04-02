@@ -55,5 +55,4 @@ theorem universally_isLocalAtSource (P : MorphismProperty Scheme)
     rw [𝒰.pullbackCover_map, ← pullbackLeftPullbackSndIso_hom_fst, P.cancel_left_of_respectsIso]
     exact hf i _ _ _ (IsPullback.of_hasPullback ..)
 
-
 end AlgebraicGeometry
