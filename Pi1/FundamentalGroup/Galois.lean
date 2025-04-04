@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christian Merten
 -/
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Etale
+import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Pi1.Mathlib.AlgebraicGeometry.Limits
 import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
 import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
@@ -404,17 +405,11 @@ variable {ξ} in
 def fiberPt {A : FiniteEtale X} (x : (fiber ξ).obj A) : A.left :=
   (pullback.fst A.hom ξ).base x
 
-instance (A : FiniteEtale X) [Nonempty A.left] : Nonempty ((fiber ξ).obj A) := sorry
-
 instance [IsSepClosed Ω] : PreservesFiniteLimits (pullback ξ) := by
   dsimp [pullback]
   apply AffineAnd.preservesFiniteLimits_pullback
 
 instance [IsSepClosed Ω] : PreservesFiniteColimits (pullback ξ) :=
-  sorry
-
-lemma card_fiber_eq_finrank [ConnectedSpace X] (Y : FiniteEtale X) :
-    Fintype.card ((fiber ξ).obj Y) = finrank Y.hom :=
   sorry
 
 -- TODO: move this somewhere else
@@ -428,63 +423,144 @@ instance {X Y : Scheme.{u}} (f : X ⟶ Y) [IsSmooth f] : Flat f := by
   show Module.Flat _ _
   infer_instance
 
-lemma finrank_fiberPt_eq [ConnectedSpace X] [IsSepClosed Ω]
-    (A B : FiniteEtale X)
-    {f : A ⟶ B} (b : (fiber ξ).obj B) :
-    finrank f.left (fiberPt b) = ((fiber ξ).map f ⁻¹' {b}).ncard :=
-  sorry
+def _root_.AlgebraicGeometry.Scheme.connCompOpen {X : Scheme.{u}} [Finite (ConnectedComponents X)]
+    (i : ConnectedComponents X) : X.Opens :=
+  ⟨ConnectedComponents.mk ⁻¹' {i}, by
+    rw [ConnectedComponents.isQuotientMap_coe.isOpen_preimage]
+    exact isOpen_discrete {i}⟩
 
-def geomFiber {X Y : Scheme.{u}} (f : X ⟶ Y) (y : Spec (.of Ω) ⟶ Y) :
-    Set (Spec (.of Ω) ⟶ X) :=
-  (fun x : Spec (.of Ω) ⟶ X ↦ x ≫ f) ⁻¹' {y}
-
-lemma finrank_eq_ncard_geomFiber {X Y : Scheme.{u}} (f : X ⟶ Y) (y : Spec (.of Ω) ⟶ Y)
-    [ConnectedSpace Y] [IsFiniteEtale f] :
-    finrank f (y.base default) = (geomFiber f y).ncard :=
-  sorry
-
-lemma isIso_aux [ConnectedSpace X] [IsSepClosed Ω]
-    (A B : FiniteEtale X)
-    {f : A ⟶ B} [ConnectedSpace B.left]
-    [IsIso ((fiber ξ).map f)] : IsIso f := by
-  have : IsIso ((forget X ⋙ Over.forget X).map f) := by
-    show IsIso f.left
-    rw [isIso_iff_rank_eq]
-    ext b
-    simp only [Pi.one_apply]
-    let f' := (fiber ξ).map f
-    have : Nonempty ((fiber ξ).obj B) := inferInstance
-    obtain ⟨b'⟩ := this
-    rw [finrank_eq_const_of_preconnectedSpace _ _ (fiberPt b'), finrank_fiberPt_eq]
-    have : Function.Bijective ((fiber ξ).map f) :=
-      CategoryTheory.ConcreteCategory.bijective_of_isIso
-        ((fiber ξ).map f)
-    rw [← ENat.coe_inj, Set.Finite.cast_ncard_eq (Set.toFinite _)]
-    simpa using Set.encard_preimage_of_bijective this {b'}
-  apply isIso_of_reflects_iso _ (FiniteEtale.forget X ⋙ Over.forget X)
-
-def _root_.AlgebraicGeometry.Scheme.connectedComponents (X : Scheme.{u}) : X.OpenCover where
+-- TODO: find the correct assumptions
+def _root_.AlgebraicGeometry.Scheme.connectedComponents (X : Scheme.{u})
+      [Finite (ConnectedComponents X)] :
+    X.OpenCover where
   J := ConnectedComponents X
-  obj c := sorry
-  map := sorry
-  f := sorry
-  covers := sorry
-  map_prop := sorry
+  obj c := X.connCompOpen c
+  map c := (X.connCompOpen c).ι
+  f x := ConnectedComponents.mk x
+  covers x := by simp [Scheme.connCompOpen]
 
-instance [ConnectedSpace X] [IsSepClosed Ω] : (fiber ξ).ReflectsIsomorphisms := by
+instance {X : Scheme.{u}} [Finite (ConnectedComponents X)] (i : ConnectedComponents X) :
+    ConnectedSpace (X.connectedComponents.obj i) := by
+  --simp [Scheme.connectedComponents, Scheme.connCompOpen]
+  rw [connectedSpace_iff_univ]
+  sorry
+
+instance {X : Scheme.{u}} [Finite (ConnectedComponents X)] (i : ConnectedComponents X) :
+    IsClosedImmersion (X.connectedComponents.map i) where
+  base_closed := ⟨(X.connectedComponents.map i).isOpenEmbedding.isEmbedding, by
+    simp [Scheme.connectedComponents, Scheme.connCompOpen,
+      ConnectedComponents.isQuotientMap_coe.isClosed_preimage]⟩
+
+lemma _root_.AlgebraicGeometry.IsFiniteEtale.isIso_of_isIso_snd {X Y Z : Scheme.{u}} (f : X ⟶ Z)
+    (g : Y ⟶ Z) [IsFiniteEtale f] [PreconnectedSpace Z] [Nonempty Y]
+    [IsIso (pullback.snd f g)] : IsIso f := by
+  rw [isIso_iff_rank_eq]
+  obtain ⟨y⟩ := ‹Nonempty Y›
+  ext z
+  rw [finrank_eq_const_of_preconnectedSpace f z (g.base y), ← finrank_pullback_snd,
+    finrank_eq_one_of_isIso, Pi.one_apply, Pi.one_apply]
+
+instance {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z) [IsFiniteEtale g] :
+    IsFiniteEtale (pullback.fst f g) :=
+  MorphismProperty.pullback_fst _ _ ‹_›
+
+instance {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z) [IsFiniteEtale f] :
+    IsFiniteEtale (pullback.snd f g) :=
+  MorphismProperty.pullback_snd _ _ ‹_›
+
+instance _root_.AlgebraicGeometry.IsFiniteEtale.surjective {X Y : Scheme.{u}} (f : X ⟶ Y)
+    [PreconnectedSpace Y] [Nonempty X] [IsFiniteEtale f] :
+    Surjective f := by
+  rw [← one_le_finrank_iff_surjective]
+  obtain ⟨x⟩ := ‹Nonempty X›
+  intro y
+  rw [finrank_eq_const_of_preconnectedSpace _ _ (f.base x)]
+  apply one_le_finrank_map
+
+lemma _root_.AlgebraicGeometry.IsFiniteEtale.isIso_of_isIso_snd' {X Y Z : Scheme.{u}} (f : X ⟶ Z)
+    (g : Y ⟶ Z) [IsFiniteEtale f] [Finite (ConnectedComponents Z)]
+    [∀ i : ConnectedComponents Z, Nonempty ↑(Limits.pullback g (Z.connectedComponents.map i))]
+    [IsIso (pullback.snd f g)] : IsIso f := by
+  show MorphismProperty.isomorphisms _ _
+  rw [IsLocalAtTarget.iff_of_openCover (P := MorphismProperty.isomorphisms Scheme.{u})
+    Z.connectedComponents]
+  intro i
+  simp
+  dsimp [Scheme.Cover.pullbackHom]
+  let g' := pullback.snd g (Z.connectedComponents.map i)
+  have : pullback.snd (pullback.snd f (Z.connectedComponents.map i)) g' =
+      (pullbackLeftPullbackSndIso f (Z.connectedComponents.map i) g').hom ≫
+      (pullback.congrHom rfl pullback.condition.symm).hom ≫
+      (pullbackAssoc f g g (Z.connectedComponents.map i)).inv ≫
+      (pullback.map _ _ _ _ (pullback.snd _ _) (𝟙 _) (𝟙 _) rfl rfl) := by
+    apply pullback.hom_ext <;> simp [g']
+  have : IsIso (pullback.snd (pullback.snd f (Z.connectedComponents.map i)) g') := by
+    rw [this]
+    infer_instance
+  apply IsFiniteEtale.isIso_of_isIso_snd _ g'
+
+lemma isIso_of_isIso_left {A B : FiniteEtale X} (f : A ⟶ B) [IsIso f.left] : IsIso f := by
+  have : IsIso ((forget X ⋙ Over.forget X).map f) := ‹_›
+  exact isIso_of_reflects_iso f (forget X ⋙ Over.forget X)
+
+@[stacks 07VB]
+lemma finite_connectedComponents_of_isOpenMap_of_isClosedMap {X Y : Type*} [TopologicalSpace X]
+    [TopologicalSpace Y] [ConnectedSpace Y]
+    (f : X → Y) (hfc : Continuous f) (hf₁ : IsOpenMap f) (hf₂ : IsClosedMap f)
+    (y : Y) (hy : (f ⁻¹' {y}).Finite) :
+    Finite (ConnectedComponents X) :=
+  sorry
+
+instance [ConnectedSpace X] (Y : FiniteEtale X) : Finite (ConnectedComponents Y.left) := by
+  have : ConnectedSpace ↑↑((Functor.fromPUnit X).obj Y.right).toPresheafedSpace := by
+    dsimp
+    infer_instance
+  obtain ⟨x⟩ := (inferInstanceAs <| Nonempty X)
+  exact finite_connectedComponents_of_isOpenMap_of_isClosedMap Y.hom.base Y.hom.continuous
+    Y.hom.isOpenMap Y.hom.isClosedMap x (IsFinite.finite_preimage_singleton _ x)
+
+open MorphismProperty
+
+instance {Y : Scheme.{u}} [Nonempty Y] (g : Y ⟶ X) [ConnectedSpace X] :
+    (pullback g).ReflectsIsomorphisms := by
   constructor
   intro A B f hf
-  show MorphismProperty.isomorphisms _ f
-  have : IsIso ((forget X ⋙ Over.forget X).map f) := by
-    show MorphismProperty.isomorphisms Scheme f.left
-    rw [IsLocalAtTarget.iff_of_openCover (P := MorphismProperty.isomorphisms Scheme)
-      B.left.connectedComponents]
-    intro c
-    simp
-    sorry
-  --wlog h : ConnectedSpace B.left
-  --· sorry
-  sorry
+  have : IsIso f.left := by
+    have : (pullbackRightPullbackFstIso B.hom g f.left).inv ≫
+        pullback.snd f.left (pullback.fst B.hom g) =
+          (pullback.congrHom (by simp) rfl).hom ≫ ((pullback g).map f).left := by
+      apply pullback.hom_ext <;> simp
+    have : IsIso (pullback.snd f.left (pullback.fst B.hom g)) := by
+      rw [← isomorphisms.iff, ← cancel_left_of_respectsIso (.isomorphisms _)
+        (pullbackRightPullbackFstIso B.hom g f.left).inv, isomorphisms.iff, this]
+      infer_instance
+    have (i : _root_.ConnectedComponents B.left) :
+        Nonempty ↑(Limits.pullback (pullback.fst B.hom g) (B.left.connectedComponents.map i)) := by
+      let e := pullbackRightPullbackFstIso B.hom g (B.left.connectedComponents.map i)
+      have : Nonempty ↑(Limits.pullback (B.left.connectedComponents.map i ≫ B.hom) g) := by
+        obtain ⟨y⟩ := ‹Nonempty Y›
+        have : IsFiniteEtale (B.left.connectedComponents.map i ≫ B.hom) := by
+          apply MorphismProperty.comp_mem
+          constructor
+          infer_instance
+        have : Nonempty (B.left.connectedComponents.obj i) := inferInstance
+        have : Surjective (B.left.connectedComponents.map i ≫ B.hom) := by
+          convert IsFiniteEtale.surjective _
+          simp
+          infer_instance
+          infer_instance
+          infer_instance
+        obtain ⟨z, hz⟩ := (B.left.connectedComponents.map i ≫ B.hom).surjective (g.base y)
+        obtain ⟨o, _⟩ := Scheme.Pullback.exists_preimage_pullback _ _ hz
+        use o
+      exact ((pullbackSymmetry _ _).hom ≫ (pullbackRightPullbackFstIso B.hom g
+        (B.left.connectedComponents.map i)).hom).homeomorph.nonempty
+    apply IsFiniteEtale.isIso_of_isIso_snd' f.left (pullback.fst B.hom g)
+  apply isIso_of_isIso_left
+
+instance [ConnectedSpace X] [IsSepClosed Ω] : (fiber ξ).ReflectsIsomorphisms := by
+  dsimp [fiber]
+  infer_instance
 
 instance [IsSepClosed Ω] : PreservesFiniteColimits (fiber ξ) := by
   dsimp [fiber]
