@@ -31,6 +31,7 @@ import Pi1.Mathlib.RingTheory.RingHom.Smooth
 import Pi1.Mathlib.RingTheory.RingHomProperties
 import Pi1.Mathlib.RingTheory.Spectrum.Prime.Topology
 import Pi1.Mathlib.RingTheory.TensorProduct.Basic
+import Pi1.Mathlib.Topology.Connected.Clopen
 import Pi1.RingTheory.Cotangent.Basic
 import Pi1.RingTheory.Cotangent.SpaceBaseChange
 import Pi1.RingTheory.CotangentBaseChange
