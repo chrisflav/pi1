@@ -3,6 +3,8 @@ import Pi1.RingTheory.RankAtStalk
 import Pi1.RingTheory.FinitePresentation
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Pi1.Mathlib.RingTheory.RingHom.Finite
+import Pi1.Mathlib.RingTheory.IsTensorProduct
+import Pi1.Mathlib.RingTheory.TensorProduct.Basic
 
 open CategoryTheory Limits TopologicalSpace TensorProduct
 
@@ -21,16 +23,6 @@ lemma finrank_algebraMap {R S : Type*} [CommRing R] [CommRing S] [Algebra R S] :
   congr!
   exact Algebra.algebra_ext _ _ fun _ ↦ rfl
 
-lemma RingHom.finrank_comp_left_of_bijective {R S T : Type*} [CommRing R] [CommRing S] [CommRing T]
-    (f : R →+* S) (g : S →+* T) (hf : Function.Bijective g) (x : PrimeSpectrum R) :
-    (g.comp f).finrank x = f.finrank x := by
-  sorry
-
-lemma RingHom.finrank_comp_right_of_bijective {R S T : Type*} [CommRing R] [CommRing S] [CommRing T]
-    (f : R →+* S) (g : S →+* T) (hg : Function.Bijective f) (x : PrimeSpectrum S) :
-    (g.comp f).finrank (f.specComap x) = g.finrank x := by
-  sorry
-
 lemma Algebra.rankAtStalk_eq_of_isPushout (R S : Type*) [CommRing R] [CommRing S] [Algebra R S]
     (R' S' : Type*) [CommRing R'] [CommRing S'] [Algebra R R'] [Algebra S S'] [Algebra R' S']
     [Algebra R S'] [IsScalarTower R R' S'] [IsScalarTower R S S']
@@ -42,14 +34,84 @@ lemma Algebra.rankAtStalk_eq_of_isPushout (R S : Type*) [CommRing R] [CommRing S
     Module.rankAtStalk_tensorProduct]
   rfl
 
+lemma Algebra.IsPushout.of_bijective_left (R S T : Type*) [CommRing R] [CommRing S] [Algebra R S]
+    [CommRing T] [Algebra R T] [Algebra S T] [IsScalarTower R S T]
+    (H : Function.Bijective (algebraMap R S)) :
+    Algebra.IsPushout R T S T := by
+  have : IsLocalization (algebraMapSubmonoid T <| IsUnit.submonoid R) T := by
+    apply IsLocalization.at_units _ _
+    rintro x ⟨a, ha, rfl⟩
+    exact ha.map _
+  have : IsLocalization (IsUnit.submonoid R) S := by
+    rw [← IsLocalization.isLocalization_iff_of_algEquiv _ (.ofBijective (Algebra.ofId R S) H)]
+    exact IsLocalization.at_units (IsUnit.submonoid R) le_rfl
+  apply Algebra.isPushout_of_isLocalization (IsUnit.submonoid R)
+
+lemma Algebra.IsPushout.of_bijective_right (R S T : Type*) [CommRing R] [CommRing S] [Algebra R S]
+    [CommRing T] [Algebra R T] [Algebra S T] [IsScalarTower R S T]
+    (H : Function.Bijective (algebraMap S T)) :
+    Algebra.IsPushout R S R T := by
+  have : IsLocalization (algebraMapSubmonoid S (IsUnit.submonoid R)) T := by
+    rw [← IsLocalization.isLocalization_iff_of_algEquiv _ (.ofBijective (Algebra.ofId S T) H)]
+    refine IsLocalization.at_units _ (fun x ↦ ?_)
+    rintro ⟨a, ha, rfl⟩
+    exact ha.map _
+  have : IsLocalization (IsUnit.submonoid R) R :=
+    IsLocalization.at_units _ le_rfl
+  apply Algebra.isPushout_of_isLocalization (IsUnit.submonoid R)
+
+lemma RingHom.finrank_comp_left_of_bijective {R S T : Type*} [CommRing R] [CommRing S] [CommRing T]
+    (f : R →+* S) (g : S →+* T) (hf : Function.Bijective g) (h1 : f.Finite) (h2 : f.Flat)
+    (x : PrimeSpectrum R) : (g.comp f).finrank x = f.finrank x := by
+  algebraize [f, g, (g.comp f)]
+  have : Algebra.IsPushout R S R T := .of_bijective_right _ _ _ hf
+  apply Algebra.rankAtStalk_eq_of_isPushout
+
+attribute [local instance] Algebra.TensorProduct.rightAlgebra
+lemma RingHom.finrank_comp_right_of_bijective {R S T : Type*} [CommRing R] [CommRing S] [CommRing T]
+    (f : R →+* S) (g : S →+* T) (hg : Function.Bijective f) (h1 : g.Finite) (h2 : g.Flat)
+    (x : PrimeSpectrum S) :
+    (g.comp f).finrank (f.specComap x) = g.finrank x := by
+  algebraize [f, g, (g.comp f)]
+  have : Module.Finite R T := h1.comp <| .of_surjective _ hg.2
+  have : Module.Flat R T := (RingHom.Flat.of_bijective hg).comp h2
+  have : Algebra.IsPushout R T S T := .of_bijective_left _ _ _ hg
+  exact (Algebra.rankAtStalk_eq_of_isPushout _ _ _ _ _).symm
+
+attribute [local instance] Algebra.TensorProduct.rightAlgebra in
 lemma CommRingCat.isPushout_iff_isPushout {R S : Type u} [CommRing R] [CommRing S] [Algebra R S]
     {R' S' : Type u} [CommRing R'] [CommRing S'] [Algebra R R'] [Algebra S S'] [Algebra R' S']
     [Algebra R S'] [IsScalarTower R R' S'] [IsScalarTower R S S'] :
     IsPushout (ofHom <| algebraMap R R') (ofHom <| algebraMap R S)
       (ofHom <| algebraMap R' S') (ofHom <| algebraMap S S') ↔ Algebra.IsPushout R R' S S' := by
-  refine ⟨?_, fun h ↦ isPushout_of_isPushout ..⟩
-  --refine Algebra.IsPushout.of_equiv ?_ -- does not exist :(
-  sorry
+  refine ⟨fun h ↦ ?_, fun h ↦ isPushout_of_isPushout ..⟩
+  let e := ((CommRingCat.isPushout_tensorProduct R R' S).isoPushout ≪≫
+      h.isoPushout.symm).commRingCatIsoToRingEquiv
+  dsimp at e
+  have h2 (r : R') : (CommRingCat.isPushout_tensorProduct R R' S).isoPushout.hom
+      (r ⊗ₜ 1) = (pushout.inl (ofHom _) (ofHom _)) r :=
+    congr($((CommRingCat.isPushout_tensorProduct R R' S).inl_isoPushout_hom).hom r)
+  let e' : R' ⊗[R] S ≃ₐ[R'] S' := {
+    __ := e
+    commutes' r := by
+      simp only [Iso.commRingCatIsoToRingEquiv, AlgHom.toRingHom_eq_coe, Iso.trans_hom,
+        Iso.symm_hom, hom_comp, Iso.trans_inv, Iso.symm_inv, RingEquiv.toEquiv_eq_coe,
+        Algebra.TensorProduct.algebraMap_apply, Algebra.id.map_eq_id, RingHom.id_apply,
+        Equiv.toFun_as_coe, EquivLike.coe_coe, RingEquiv.ofHomInv_apply, RingHom.coe_comp,
+        Function.comp_apply, h2, e]
+      rw [← CommRingCat.comp_apply]
+      simp }
+  refine Algebra.IsPushout.of_equiv _ e' ?_
+  ext s
+  have h1 : (CommRingCat.isPushout_tensorProduct R R' S).isoPushout.hom
+      (algebraMap S (R' ⊗[R] S) s) = (pushout.inr (ofHom _) (ofHom _)) s :=
+    congr($((CommRingCat.isPushout_tensorProduct R R' S).inr_isoPushout_hom).hom s)
+  simp only [Iso.commRingCatIsoToRingEquiv, AlgHom.toRingHom_eq_coe, Iso.trans_hom, Iso.symm_hom,
+    hom_comp, Iso.trans_inv, Iso.symm_inv, RingEquiv.toEquiv_eq_coe, AlgEquiv.toRingEquiv_eq_coe,
+    RingEquiv.toRingHom_eq_coe, AlgEquiv.toRingEquiv_toRingHom, RingHom.coe_comp, RingHom.coe_coe,
+    AlgEquiv.coe_mk, EquivLike.coe_coe, Function.comp_apply, RingEquiv.ofHomInv_apply, h1, e', e]
+  rw [← CommRingCat.comp_apply]
+  simp
 
 lemma CommRingCat.finrank_eq_of_isPushout {R S T P : CommRingCat.{u}} {f : R ⟶ S} {g : R ⟶ T}
     {inl : S ⟶ P} {inr : T ⟶ P} (h : IsPushout f g inl inr) (hf : f.hom.Flat) (hfin : f.hom.Finite)
@@ -162,6 +224,9 @@ lemma finrank_eq_of_isAffine [IsAffine S] [Flat f] [IsFinite f] (s : S) :
 lemma finrank_SpecMap_eq_finrank {R S : CommRingCat.{u}} (f : R ⟶ S) [IsFinite (Spec.map f)]
     [Flat (Spec.map f)] :
     finrank (Spec.map f) = f.hom.finrank := by
+  have hf : (Spec.map f).appTop.hom.Finite :=
+    ((HasAffineProperty.iff_of_isAffine (P := @IsFinite)).mp ‹_›).2
+  have hf2 := HasRingHomProperty.appTop (P := @Flat) _ ‹_›
   ext x
   rw [finrank_eq_of_isAffine]
   dsimp only [IsAffine.finrank]
@@ -171,13 +236,18 @@ lemma finrank_SpecMap_eq_finrank {R S : CommRingCat.{u}} (f : R ⟶ S) [IsFinite
   have : Function.Bijective (Scheme.ΓSpecIso S).hom :=
     ConcreteCategory.bijective_of_isIso (Scheme.ΓSpecIso S).hom
   rw [← RingHom.finrank_comp_right_of_bijective (Scheme.ΓSpecIso R).inv.hom _
-    (ConcreteCategory.bijective_of_isIso (Scheme.ΓSpecIso R).inv)]
-  rw [CommRingCat.hom_comp, CommRingCat.hom_comp, RingHom.finrank_comp_left_of_bijective _ _ this]
+    (ConcreteCategory.bijective_of_isIso (Scheme.ΓSpecIso R).inv) hf hf2]
+  rw [CommRingCat.hom_comp, CommRingCat.hom_comp,
+    RingHom.finrank_comp_left_of_bijective _ _ this (hf.comp _) (.comp _ hf2)]
   congr
   simp only [Scheme.isoSpec_Spec_hom]
   show (Spec.map _).base _ = _
   rw [← Scheme.comp_base_apply, ← Spec.map_comp]
   simp
+  apply (HasAffineProperty.SpecMap_iff_of_affineAnd
+    (P := @IsFinite) (Q := RingHom.Finite) inferInstance RingHom.finite_respectsIso _).mp
+    inferInstance
+  apply (HasRingHomProperty.Spec_iff (P := @Flat)).mp inferInstance
 
 lemma rank_SpecMap_algebraMap (R S : Type u) [CommRing R] [CommRing S] [Algebra R S]
     [Module.Finite R S] [Module.Flat R S] (x : PrimeSpectrum R) :
