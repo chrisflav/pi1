@@ -8,6 +8,7 @@ import Mathlib.AlgebraicGeometry.Morphisms.AffineAnd
 import Mathlib.AlgebraicGeometry.Morphisms.RingHomProperties
 import Mathlib.CategoryTheory.MorphismProperty.Descent
 import Pi1.Mathlib.RingTheory.RingHomProperties
+import Pi1.Mathlib.AlgebraicGeometry.Morphisms.AffineAnd
 
 /-!
 # Descent of morphism properties
@@ -122,15 +123,6 @@ lemma IsStableUnderBaseChange.of_pullback_fst_of_isAffine [P'.RespectsIso]
         P.cancel_left_of_respectsIso]
     exact P.pullback_fst _ _ hf
 
--- move me
-lemma SpecMap_iff_of_affineAnd (hP : HasAffineProperty P (affineAnd Q))
-    (hQi : RingHom.RespectsIso Q) {R S : CommRingCat.{u}} (f : R ⟶ S) :
-    P (Spec.map f) ↔ Q f.hom := by
-  have := RingHom.toMorphismProperty_respectsIso_iff.mp hQi
-  rw [HasAffineProperty.iff_of_isAffine (P := P), affineAnd, and_iff_right]
-  exacts [MorphismProperty.arrow_mk_iso_iff (RingHom.toMorphismProperty Q)
-    (arrowIsoΓSpecOfIsAffine f).symm, inferInstance]
-
 open Opposite
 
 variable [P'.IsStableUnderComposition] [P.IsStableUnderBaseChange]
@@ -217,6 +209,6 @@ nonrec lemma HasAffineProperty.descendsAlong_of_affineAnd
     rwa [heq, P.cancel_left_of_respectsIso]
   obtain ⟨Y, rfl⟩ := hY
   apply of_pullback_fst_Spec_of_codescendsAlong _ _ hQQ' H₂ _ h hf
-  simp [SpecMap_iff_of_affineAnd _ _ _ hQ]
+  simp [SpecMap_iff_of_affineAnd _ hQ]
 
 end AlgebraicGeometry

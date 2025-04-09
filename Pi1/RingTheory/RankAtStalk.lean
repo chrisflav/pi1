@@ -183,4 +183,9 @@ lemma Algebra.rankAtStalk_pos_iff_specComap_surjective :
   simp_rw [rankAtStalk_pos_iff_mem_range_specComap, ← Set.range_eq_univ,
     Set.eq_univ_iff_forall]
 
+lemma Algebra.bijective_of_rankAtStalk {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
+    [Module.Finite R S] [Module.Flat R S] (h : Module.rankAtStalk (R := R) S = 1) :
+    Function.Bijective (algebraMap R S) :=
+  sorry
+
 end rankAtStalk

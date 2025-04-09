@@ -8,6 +8,7 @@ import Pi1.FundamentalGroup.Rank
 import Pi1.Mathlib.Algebra.Module.FinitePresentation
 import Pi1.Mathlib.Algebra.Module.LocalizedModule.Basic
 import Pi1.Mathlib.AlgebraicGeometry.Limits
+import Pi1.Mathlib.AlgebraicGeometry.Morphisms.AffineAnd
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Constructors
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Etale
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Finite
@@ -26,6 +27,7 @@ import Pi1.Mathlib.RingTheory.Geometric
 import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
 import Pi1.Mathlib.RingTheory.RingHom.And
 import Pi1.Mathlib.RingTheory.RingHom.Etale
+import Pi1.Mathlib.RingTheory.RingHom.Finite
 import Pi1.Mathlib.RingTheory.RingHom.Flat
 import Pi1.Mathlib.RingTheory.RingHom.Smooth
 import Pi1.Mathlib.RingTheory.RingHomProperties

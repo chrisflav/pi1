@@ -1,6 +1,7 @@
 import Mathlib
 import Pi1.RingTheory.TotallySplit
 import Pi1.Mathlib.RingTheory.RingHom.Etale
+import Pi1.Mathlib.RingTheory.RingHom.Finite
 
 open TensorProduct
 
@@ -122,15 +123,6 @@ lemma Algebra.Etale.of_exists_of_isPrime {R S : Type u} [CommRing R] [CommRing S
   · intro p hp
     obtain ⟨r, hr, hf⟩ := H p
     use r, hr
-
-lemma RingHom.finite_algebraMap_iff {R S : Type u} [CommRing R] [CommRing S]
-    [Algebra R S] :
-    (algebraMap R S).Finite ↔ Module.Finite R S := by
-  simp only [RingHom.Finite]
-  congr!
-  ext r s
-  congr
-  exact Algebra.algebra_ext _ _ fun _ ↦ rfl
 
 lemma Module.Finite.of_exists_of_isPrime {R S : Type u} [CommRing R] [CommRing S]
     [Algebra R S] (H : ∀ (p : Ideal R) [p.IsPrime], ∃ r ∉ p,
