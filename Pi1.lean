@@ -30,6 +30,7 @@ import Pi1.Mathlib.RingTheory.RingHom.And
 import Pi1.Mathlib.RingTheory.RingHom.Etale
 import Pi1.Mathlib.RingTheory.RingHom.Finite
 import Pi1.Mathlib.RingTheory.RingHom.Flat
+import Pi1.Mathlib.RingTheory.RingHom.Integral
 import Pi1.Mathlib.RingTheory.RingHom.Smooth
 import Pi1.Mathlib.RingTheory.RingHomProperties
 import Pi1.Mathlib.RingTheory.Spectrum.Prime.Topology

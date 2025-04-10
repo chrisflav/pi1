@@ -1,6 +1,7 @@
 import Mathlib
 import Pi1.Mathlib.RingTheory.TensorProduct.Basic
 import Pi1.Mathlib.RingTheory.RingHom.Flat
+import Pi1.Mathlib.RingTheory.RingHom.Integral
 
 universe u v w
 
@@ -178,15 +179,6 @@ lemma PrimeSpectrum.irreducibleSpace_iff {R : Type*} [CommSemiring R] :
   have h2 := (minimalPrimes.equivIrreducibleComponents R).symm.nonempty_congr
   simp only [Set.nonempty_coe_sort, OrderDual] at h2
   rw [h1, h2]
-
-lemma RingHom.IsIntegral.specComap_surjective {R S : Type*} [CommRing R] [CommRing S]
-    {f : R →+* S} (hf : f.IsIntegral) (hinj : Function.Injective f) :
-    Function.Surjective f.specComap := by
-  algebraize [f]
-  intro ⟨p, hp⟩
-  obtain ⟨Q, _, hQ, rfl⟩ := Ideal.exists_ideal_over_prime_of_isIntegral p (⊥ : Ideal S)
-    (by simp [Ideal.comap_bot_of_injective (algebraMap R S) hinj])
-  exact ⟨⟨Q, hQ⟩, rfl⟩
 
 lemma Ideal.IsPrime.nontrivial {R : Type*} [Semiring R]
     {I : Ideal R} (hI : I.IsPrime) : Nontrivial R :=

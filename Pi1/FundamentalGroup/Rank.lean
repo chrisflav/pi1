@@ -67,7 +67,7 @@ lemma RingHom.finrank_comp_left_of_bijective {R S T : Type*} [CommRing R] [CommR
   have : Algebra.IsPushout R S R T := .of_bijective_right _ _ _ hf
   apply Algebra.rankAtStalk_eq_of_isPushout
 
-attribute [local instance] Algebra.TensorProduct.rightAlgebra
+attribute [local instance] Algebra.TensorProduct.rightAlgebra in
 lemma RingHom.finrank_comp_right_of_bijective {R S T : Type*} [CommRing R] [CommRing S] [CommRing T]
     (f : R →+* S) (g : S →+* T) (hg : Function.Bijective f) (h1 : g.Finite) (h2 : g.Flat)
     (x : PrimeSpectrum S) :
