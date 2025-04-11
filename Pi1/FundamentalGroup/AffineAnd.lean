@@ -277,22 +277,67 @@ theorem preservesFiniteLimits_pullback
     PreservesFiniteLimits (MorphismProperty.Over.pullback P ⊤ f) := by
   infer_instance
 
-theorem preservesFiniteColimits_pullback' (hQi : RingHom.RespectsIso Q)
+nonrec theorem preservesFiniteColimits_pullback' (hQi : RingHom.RespectsIso Q)
     (hQp : RingHom.HasFiniteProducts Q) (hQe : RingHom.HasEqualizers Q)
     [(RingHom.toMorphismProperty Q).IsStableUnderCobaseChange]
     [∀ (R S : CommRingCat.{u}) (f : R ⟶ S), PreservesFiniteLimits
       (Under.pushout (RingHom.toMorphismProperty Q) ⊤ f)]
     {Y : Scheme.{u}} (f : X ⟶ Y) :
     PreservesFiniteColimits (Over.pullback P ⊤ f) := by
+  have (S : Scheme.{u}) : HasFiniteColimits (P.Over ⊤ S) := hasFiniteColimits P hQi hQp hQe
   constructor
   intro J _ _
+  constructor
+  intro D
+  suffices h : IsIso (colimit.post D (MorphismProperty.Over.pullback P ⊤ f)).left by
+    have : IsIso (colimit.post D (MorphismProperty.Over.pullback P ⊤ f)) := by
+      convert isIso_of_reflects_iso _ (Over.forget P ⊤ X ⋙ Over.forget X)
+      exact h
+    apply preservesColimit_of_isIso_post
+  show isomorphisms Scheme.{u} _
+  wlog hY : ∃ R, Y = Spec R generalizing X Y D f
+  · let c := (Over.pullback P ⊤ f).mapCocone (colimit.cocone D)
+    let g : colimit (D ⋙ Over.pullback P ⊤ f) ⟶ c.pt := colimit.desc _ c
+    let 𝒰 : (pullback (colimit D).hom f).OpenCover :=
+      Scheme.Pullback.openCoverOfBase Y.affineCover _ _
+    rw [IsLocalAtTarget.iff_of_openCover (P := isomorphisms _) 𝒰]
+    intro i
+    simp [Scheme.Cover.pullbackHom]
+    let uᵢ : Y.affineCover.obj i ⟶ Y := Y.affineCover.map i
+    let Dᵢ : J ⥤ P.Over ⊤ (Y.affineCover.obj i) := D ⋙ Over.pullback P ⊤ uᵢ
+    let gᵢ := colimit.post Dᵢ (MorphismProperty.Over.pullback P ⊤ (pullback.snd f uᵢ))
+    let e₁ : pullback g.left (𝒰.map i) ≅
+        (colimit (Dᵢ ⋙ Over.pullback P ⊤ (pullback.snd f uᵢ))).left := by
+      --show pullback g.left (pullback.map _ _ _ _ _ _ _ _ _) ≅ _
+      dsimp [𝒰]
+      sorry
+    have _ : 𝒰.obj i = pullback (pullback.snd (colimit D).hom uᵢ) (pullback.snd f uᵢ) := rfl
+    have _ : IsIso (colimit.post D (MorphismProperty.Over.pullback P ⊤ uᵢ)).left :=
+      -- because `uᵢ` is an open immersion with affine source
+      sorry
+    let e₀ : (colimit Dᵢ).left ≅ pullback (colimit D).hom (Y.affineCover.map i) :=
+      asIso (colimit.post D <| (Over.pullback P ⊤ uᵢ)).left
+    let e₂ : pullback (colimit Dᵢ).hom (pullback.snd f uᵢ) ≅ 𝒰.obj i :=
+      asIso <| pullback.map _ _ _ _ e₀.hom (𝟙 _) (𝟙 _) (sorry) (by simp [uᵢ])
+    have heq : pullback.snd g.left (𝒰.map i) = e₁.hom ≫ gᵢ.left ≫ e₂.hom :=
+      sorry
+    show IsIso (pullback.snd g.left _)
+    rw [heq]
+    have : IsIso gᵢ.left := this _ ⟨_, rfl⟩
+    infer_instance
+  obtain ⟨R, rfl⟩ := hY
+  wlog hX : ∃ S, X = Spec S generalizing X D f
+  · sorry
+  obtain ⟨S, rfl⟩ := hX
+  obtain ⟨φ, rfl⟩ := Spec.map_surjective f
   sorry
 
-theorem preservesFiniteColimits_pullback (hQi : RingHom.RespectsIso Q) (hQp : RingHom.HasFiniteProducts Q)
+theorem preservesFiniteColimits_pullback (hQi : RingHom.RespectsIso Q)
+    (hQp : RingHom.HasFiniteProducts Q)
     (hQe : RingHom.HasEqualizers Q)
     [P.IsStableUnderComposition] [P.ContainsIdentities]
     [P.IsStableUnderBaseChange] [P.HasOfPostcompProperty P]
-    {Y : Scheme.{u}} (f : X ⟶ Y) :
+    {Y : Scheme.{u}} (f : X ⟶ Y) [IsAffineHom f] :
     PreservesFiniteColimits (MorphismProperty.Over.pullback P ⊤ f) := by
   constructor
   intro J _ _
@@ -302,7 +347,8 @@ theorem preservesFiniteColimits_pullback (hQi : RingHom.RespectsIso Q) (hQp : Ri
   have : PreservesFiniteColimits (toAffine P Y) :=
     preservesFiniteColimits_toAffine P (X := Y) hQi hQp hQe
   -- this is wrong (!), since `f` is not necessarily flat
-  have : PreservesFiniteColimits (Affine.pullback f) :=
+  have : PreservesFiniteColimits (Affine.pullback f) := by
+    have : (Affine.pullback f).IsRightAdjoint := inferInstance
     sorry
   have : PreservesColimitsOfShape J (MorphismProperty.Over.pullback P ⊤ f ⋙ toAffine P X) := by
     rw [heq]
