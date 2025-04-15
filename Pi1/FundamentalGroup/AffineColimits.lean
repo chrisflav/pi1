@@ -174,29 +174,29 @@ lemma Γ_isPushout {P : Scheme.{u}} {fst : P ⟶ X} {snd : P ⟶ Y} (h : IsPullb
 
 variable (f g)
 
-def ΓpullbackIsoPushout : Γ(pullback f g, ⊤) ≅ pushout (f.app ⊤) (g.app ⊤) :=
+def ΓpullbackIsoPushout : Γ(pullback f g, ⊤) ≅ pushout f.appTop g.appTop :=
   IsPushout.isoPushout (Γ_isPushout (f := f) (g := g) <| IsPullback.of_hasPullback f g)
 
 @[reassoc (attr := simp)]
 def inl_ΓpullbackIsoPushout_inv :
-    pushout.inl (f.app ⊤) (g.app ⊤) ≫ (ΓpullbackIsoPushout f g).inv = (pullback.fst f g).app ⊤ := by
+    pushout.inl f.appTop g.appTop ≫ (ΓpullbackIsoPushout f g).inv = (pullback.fst f g).appTop := by
   simp [ΓpullbackIsoPushout]
 
 @[reassoc (attr := simp)]
 def inr_ΓpullbackIsoPushout_inv :
-    pushout.inr (f.app ⊤) (g.app ⊤) ≫ (ΓpullbackIsoPushout f g).inv = (pullback.snd f g).app ⊤ := by
+    pushout.inr f.appTop g.appTop ≫ (ΓpullbackIsoPushout f g).inv = (pullback.snd f g).appTop := by
   simp [ΓpullbackIsoPushout]
 
 @[reassoc (attr := simp)]
 def app_fst_ΓpullbackIsoPushout_hom :
-     (pullback.fst f g).app ⊤ ≫ (ΓpullbackIsoPushout f g).hom =
-        pushout.inl (f.app ⊤) (g.app ⊤) := by
+     (pullback.fst f g).appTop ≫ (ΓpullbackIsoPushout f g).hom =
+        pushout.inl f.appTop g.appTop := by
   simp [ΓpullbackIsoPushout]
 
 @[reassoc (attr := simp)]
 def app_snd_ΓpullbackIsoPushout_hom :
-     (pullback.snd f g).app ⊤ ≫ (ΓpullbackIsoPushout f g).hom =
-        pushout.inr (f.app ⊤) (g.app ⊤) := by
+     (pullback.snd f g).appTop ≫ (ΓpullbackIsoPushout f g).hom =
+        pushout.inr f.appTop g.appTop := by
   simp [ΓpullbackIsoPushout]
 
 end

@@ -11,7 +11,9 @@ import Pi1.Mathlib.CategoryTheory.MorphismProperty.UnderAdjunction
 import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Etale
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Finite
+import Pi1.Mathlib.AlgebraicGeometry.Morphisms.AffineAnd
 import Pi1.FundamentalGroup.AffineColimits
+import Pi1.Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
 import Mathlib.CategoryTheory.Limits.MorphismProperty
 
 /-!
@@ -21,6 +23,144 @@ import Mathlib.CategoryTheory.Limits.MorphismProperty
 universe u
 
 open CategoryTheory Limits
+
+namespace CategoryTheory.MorphismProperty
+
+variable {A : Type*} [Category A]
+  {B : Type*} [Category B] {T : Type*} [Category T] {L L₁ L₂ L₃ : A ⥤ T} {P : MorphismProperty T}
+  {Q : MorphismProperty A} {W : MorphismProperty B} [Q.IsMultiplicative] [W.IsMultiplicative]
+  {R R₁ R₂ R₃ : B ⥤ T}
+
+variable (L)
+
+/-- The functor `Comma L R ⥤ Comma L R` induced by the identity natural transformation on `R` is
+    naturally isomorphic to the identity functor. -/
+@[simps!]
+def Comma.mapRightId [Q.RespectsIso] [W.RespectsIso] :
+    mapRight (P := P) (Q := Q) (W := W) L (𝟙 R) (fun X ↦ by simpa using X.prop) ≅ 𝟭 _ :=
+  NatIso.ofComponents (fun X => isoMk (Iso.refl _) (Iso.refl _))
+
+/-- The functor `Comma L R₁ ⥤ Comma L R₃` induced by the composition of the natural transformations
+    `r : R₁ ⟶ R₂` and `r' : R₂ ⟶ R₃` is naturally isomorphic to the composition of the functors
+    induced by these natural transformations. -/
+@[simps!]
+def Comma.mapRightComp [Q.RespectsIso] [W.RespectsIso] (r : R₁ ⟶ R₂) (r' : R₂ ⟶ R₃)
+    (hr : ∀ (X : P.Comma L R₁ Q W), P (X.hom ≫ r.app X.right))
+    (hr' : ∀ (X : P.Comma L R₂ Q W), P (X.hom ≫ r'.app X.right))
+    (hrr' : ∀ (X : P.Comma L R₁ Q W), P (X.hom ≫ (r ≫ r').app X.right)) :
+    mapRight (P := P) (Q := Q) (W := W) L (r ≫ r') hrr' ≅
+      mapRight L r hr ⋙ mapRight L r' hr' :=
+  NatIso.ofComponents (fun X => isoMk (Iso.refl _) (Iso.refl _))
+
+/-- Two equal natural transformations `R₁ ⟶ R₂` yield naturally isomorphic functors
+    `Comma L R₁ ⥤ Comma L R₂`. -/
+@[simps!]
+def Comma.mapRightEq [Q.RespectsIso] [W.RespectsIso] (r r' : R₁ ⟶ R₂) (h : r = r')
+    (hr : ∀ (X : P.Comma L R₁ Q W), P (X.hom ≫ r.app X.right)) :
+    mapRight L r hr ≅ mapRight L r' (h ▸ hr) :=
+  NatIso.ofComponents (fun X => isoMk (Iso.refl _) (Iso.refl _))
+
+def Comma.mapRightIso [P.RespectsIso] [Q.RespectsIso] [W.RespectsIso]
+      (e : R₁ ≅ R₂) :
+    P.Comma L R₁ Q W ≌ P.Comma L R₂ Q W where
+  functor := Comma.mapRight L e.hom (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop) 
+  inverse := Comma.mapRight L e.inv (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop)
+  unitIso := (mapRightId _).symm ≪≫
+    mapRightEq _ _ _ e.hom_inv_id.symm (fun X ↦ by simpa using X.prop) ≪≫
+    mapRightComp _ _ _
+      (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop)
+      (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop)
+      (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop)
+  counitIso :=
+    (mapRightComp _ _ _
+      (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop)
+      (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop)
+      (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop)).symm ≪≫
+    mapRightEq _ _ _ e.inv_hom_id
+      (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop) ≪≫
+    mapRightId _
+
+variable {L} (R)
+
+/-- The functor `Comma L R ⥤ Comma L R` induced by the identity natural transformation on `R` is
+    naturally isomorphic to the identity functor. -/
+@[simps!]
+def Comma.mapLeftId [Q.RespectsIso] [W.RespectsIso] :
+    mapLeft (P := P) (Q := Q) (W := W) R (𝟙 L) (fun X ↦ by simpa using X.prop) ≅ 𝟭 _ :=
+  NatIso.ofComponents (fun X => isoMk (Iso.refl _) (Iso.refl _))
+
+/-- The functor `Comma L R₁ ⥤ Comma L R₃` induced by the composition of the natural transformations
+    `r : R₁ ⟶ R₂` and `r' : R₂ ⟶ R₃` is naturally isomorphic to the composition of the functors
+    induced by these natural transformations. -/
+@[simps!]
+def Comma.mapLeftComp [Q.RespectsIso] [W.RespectsIso] (l : L₁ ⟶ L₂) (l' : L₂ ⟶ L₃)
+    (hl : ∀ (X : P.Comma L₂ R Q W), P (l.app X.left ≫ X.hom))
+    (hl' : ∀ (X : P.Comma L₃ R Q W), P (l'.app X.left ≫ X.hom))
+    (hll' : ∀ (X : P.Comma L₃ R Q W), P ((l ≫ l').app X.left ≫ X.hom)) :
+    mapLeft (P := P) (Q := Q) (W := W) R (l ≫ l') hll' ≅
+      mapLeft R l' hl' ⋙ mapLeft R l hl :=
+  NatIso.ofComponents (fun X => isoMk (Iso.refl _) (Iso.refl _))
+
+/-- Two equal natural transformations `R₁ ⟶ R₂` yield naturally isomorphic functors
+    `Comma L R₁ ⥤ Comma L R₂`. -/
+@[simps!]
+def Comma.mapLeftEq [Q.RespectsIso] [W.RespectsIso] (l l' : L₁ ⟶ L₂) (h : l = l')
+    (hl : ∀ (X : P.Comma L₂ R Q W), P (l.app X.left ≫ X.hom)) :
+    mapLeft R l hl ≅ mapLeft R l' (h ▸ hl) :=
+  NatIso.ofComponents (fun X => isoMk (Iso.refl _) (Iso.refl _))
+
+@[simps!]
+def Comma.mapLeftIso [P.RespectsIso] [Q.RespectsIso] [W.RespectsIso]
+      (e : L₁ ≅ L₂) :
+    P.Comma L₁ R Q W ≌ P.Comma L₂ R Q W where
+  functor := Comma.mapLeft R e.inv (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop) 
+  inverse := Comma.mapLeft R e.hom (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop)
+  unitIso := (mapLeftId _).symm ≪≫
+    mapLeftEq _ _ _ e.hom_inv_id.symm (fun X ↦ by simpa using X.prop) ≪≫
+    mapLeftComp _ _ _
+      (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop)
+      (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop)
+      (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop)
+  counitIso :=
+    (mapLeftComp _ _ _
+      (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop)
+      (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop)
+      (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop)).symm ≪≫
+    mapLeftEq _ _ _ e.inv_hom_id
+      (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop) ≪≫
+    mapLeftId _
+
+variable {C : Type*} [Category C] (P Q : MorphismProperty C) [Q.IsMultiplicative]
+
+def Over.congr [P.RespectsIso] [Q.RespectsIso] {X Y : C} (e : X ≅ Y) :
+    P.Over Q X ≌ P.Over Q Y :=
+  Comma.mapRightIso _ (Discrete.natIso fun _ ↦ e)
+
+@[simps!]
+def Under.congr [P.RespectsIso] [Q.RespectsIso] {X Y : C} (e : X ≅ Y) :
+    P.Under Q X ≌ P.Under Q Y :=
+  Comma.mapLeftIso _ (Discrete.natIso fun _ ↦ e)
+
+@[simps]
+noncomputable def pushoutIsoOfIso [HasPushouts C] {X Y X' Y' Z : C} {f : X ⟶ Y} {f' : X' ⟶ Y'}
+    (e : Arrow.mk f ≅ Arrow.mk f') (g : X ⟶ Z) :
+    pushout g f ≅ pushout (e.inv.left ≫ g) f' where
+  hom := pushout.map _ _ _ _ (𝟙 Z) e.hom.right e.hom.left (by simp) (by simp)
+  inv := pushout.map _ _ _ _ (𝟙 Z) e.inv.right e.inv.left (by simp) (by simp)
+
+noncomputable
+def Under.congrPushoutIso [HasPushouts C] [P.IsStableUnderCobaseChange] [Q.RespectsIso]
+    {X X' Y Y' : C} (f : X ⟶ Y) (f' : X' ⟶ Y') (eX : X ≅ X') (eY : Y ≅ Y')
+    (h : f ≫ eY.hom = eX.hom ≫ f') :
+    (Under.congr P Q eX).functor ⋙ Under.pushout P Q f' ≅
+      Under.pushout P Q f ⋙ (Under.congr P Q eY).functor :=
+  NatIso.ofComponents
+    (fun A ↦ Under.isoMk ((pushoutIsoOfIso (Arrow.isoMk eX eY h.symm) A.hom).symm)) <|
+    fun {A B} g ↦ by
+      ext
+      apply pushout.hom_ext <;> simp [Under.pushout]
+
+end CategoryTheory.MorphismProperty
 
 section
 
@@ -277,7 +417,365 @@ theorem preservesFiniteLimits_pullback
     PreservesFiniteLimits (MorphismProperty.Over.pullback P ⊤ f) := by
   infer_instance
 
-nonrec theorem preservesFiniteColimits_pullback' (hQi : RingHom.RespectsIso Q)
+@[simps!]
+def _root_.AlgebraicGeometry.IsAffineOpen.ΓProp
+    (hQi : RingHom.RespectsIso Q)
+    {S : Scheme.{u}} {U : S.Opens} (hU : IsAffineOpen U) :
+    (P.Over ⊤ S)ᵒᵖ ⥤ (RingHom.toMorphismProperty Q).Under ⊤ Γ(S, U) where
+  obj X := MorphismProperty.Under.mk _ (X.unop.hom.app U) <| by
+    have : targetAffineLocally (affineAnd Q) X.unop.hom := by
+      rw [← HasAffineProperty.eq_targetAffineLocally P]
+      exact X.unop.prop
+    rw [targetAffineLocally_affineAnd_iff hQi] at this
+    exact (this U hU).2
+  map {X Y} f := MorphismProperty.Under.homMk
+      (f.unop.left.appLE (X.unop.hom ⁻¹ᵁ U) (Y.unop.hom ⁻¹ᵁ U)
+      (by rw [← Scheme.preimage_comp, CategoryTheory.Over.w])) <| by
+    simp [Scheme.Hom.app_eq_appLE, Scheme.appLE_comp_appLE]
+  map_id X := by
+    ext : 1
+    simp only [Functor.id_obj, Functor.const_obj_obj, id_eq, eq_mpr_eq_cast, eq_mp_eq_cast,
+      Scheme.comp_coeBase, TopologicalSpace.Opens.map_comp_obj, cast_eq, Scheme.Hom.appLE,
+      homOfLE_leOfHom, homOfLE_refl, op_id, Scheme.comp_app, unop_id, Comma.id_hom,
+      CategoryTheory.Comma.id_left, Scheme.id.base, Scheme.id_app, Category.id_comp,
+      Under.homMk_hom, Under.homMk_right, CategoryTheory.Comma.id_right]
+    apply CategoryTheory.Functor.map_id
+  map_comp {X Y Z} f g := by
+    ext : 1
+    show Scheme.Hom.appLE (g.unop.left ≫ f.unop.left) _ _ _ =
+      Scheme.Hom.appLE _ _ _ _ ≫ Scheme.Hom.appLE _ _ _ _
+    rw [Scheme.appLE_comp_appLE]
+
+@[simps! obj_hom]
+def ΓProp (hQi : RingHom.RespectsIso Q) (S : Scheme.{u}) [IsAffine S] :
+    (P.Over ⊤ S)ᵒᵖ ⥤ (RingHom.toMorphismProperty Q).Under ⊤ Γ(S, ⊤) :=
+  (isAffineOpen_top S).ΓProp P hQi
+
+omit [P.IsStableUnderBaseChange] in
+-- `simps` generates this with `appLE` on the RHS
+@[simp]
+lemma ΓProp_map_right (hQi : RingHom.RespectsIso Q) (S : Scheme.{u}) [IsAffine S]
+    {X Y : (P.Over ⊤ S)ᵒᵖ} (f : X ⟶ Y) :
+    ((ΓProp P hQi S).map f).right = f.unop.left.appTop := by
+  simpa [ΓProp, IsAffineOpen.ΓProp, Scheme.Hom.appTop] using
+    (Scheme.Hom.app_eq_appLE ..).symm
+
+lemma _root_.AlgebraicGeometry.Scheme.Hom.appTop_bijective_of_isAffine
+      {X Y : Scheme.{u}} [IsAffine X] [IsAffine Y] :
+    Function.Bijective (fun (f : X ⟶ Y) ↦ f.appTop) := by
+  refine ⟨fun f g (hfg : f.appTop = g.appTop) ↦ ?_, fun f ↦ ?_⟩
+  · have (f : X ⟶ Y) : f = X.isoSpec.hom ≫ Spec.map f.appTop ≫ Y.isoSpec.inv := by
+      simp [Scheme.isoSpec_hom_naturality_assoc]
+    rw [this f, this g, hfg]
+  · use X.isoSpec.hom ≫ Spec.map f ≫ Y.isoSpec.inv
+    simp [Scheme.isoSpec]
+
+omit [P.IsStableUnderBaseChange] in
+lemma faithful_ΓProp (hQi : RingHom.RespectsIso Q) {S : Scheme.{u}} [IsAffine S] :
+    (ΓProp P hQi S).Faithful where
+  map_injective := by
+    intro ⟨X⟩ ⟨Y⟩ ⟨f⟩ ⟨g⟩ hfg
+    have : f = g := by
+      ext : 1
+      have : IsAffine X.left := isAffine_of_isAffineHom (Y := S) X.hom
+      have : IsAffine Y.left := isAffine_of_isAffineHom (Y := S) Y.hom
+      apply AlgebraicGeometry.Scheme.Hom.appTop_bijective_of_isAffine.injective
+      simpa using congr($(hfg).right)
+    rw [this]
+
+omit [P.IsStableUnderBaseChange] in
+lemma full_ΓProp (hQi : RingHom.RespectsIso Q) {S : Scheme.{u}} [IsAffine S] :
+    (ΓProp P hQi S).Full where
+  map_surjective := by
+    intro ⟨X⟩ ⟨Y⟩ f
+    have : IsAffine ((𝟭 Scheme).obj X.left) := isAffine_of_isAffineHom (Y := S) X.hom
+    have : IsAffine ((𝟭 Scheme).obj Y.left) := isAffine_of_isAffineHom (Y := S) Y.hom
+    have : IsAffine ((Functor.fromPUnit S).obj X.right) := inferInstanceAs <| IsAffine S
+    have : IsAffine Y.left := isAffine_of_isAffineHom (Y := S) Y.hom
+    obtain ⟨f', h⟩ := AlgebraicGeometry.Scheme.Hom.appTop_bijective_of_isAffine.surjective f.right
+    use (MorphismProperty.Over.homMk f' <| by
+      apply AlgebraicGeometry.Scheme.Hom.appTop_bijective_of_isAffine.injective
+      simpa [h] using f.w.symm).op
+    ext : 1
+    simpa using h
+
+omit [P.IsStableUnderBaseChange] in
+lemma essSurj_ΓProp (hQi : RingHom.RespectsIso Q) {S : Scheme.{u}} [IsAffine S] :
+    (ΓProp P hQi S).EssSurj where
+  mem_essImage R := by
+    let X : P.Over ⊤ S := MorphismProperty.Over.mk ⊤ (Spec.map R.hom ≫ S.isoSpec.inv) <| by
+      rw [P.cancel_right_of_respectsIso, HasAffineProperty.SpecMap_iff_of_affineAnd (P := P) _ hQi]
+      exact R.prop
+      infer_instance
+    refine ⟨⟨X⟩, ⟨Under.isoMk (Scheme.ΓSpecIso _) ?_⟩⟩
+    simp [X, Scheme.isoSpec]
+
+omit [P.IsStableUnderBaseChange] in
+lemma isEquivalence_ΓProp (hQi : RingHom.RespectsIso Q) {S : Scheme.{u}} [IsAffine S] :
+    (ΓProp P hQi S).IsEquivalence where
+  faithful := faithful_ΓProp ..
+  full := full_ΓProp ..
+  essSurj := essSurj_ΓProp ..
+
+attribute [reassoc (attr := simp)] Scheme.appLE_comp_appLE
+
+noncomputable
+def pullbackΓPropIso [(RingHom.toMorphismProperty Q).IsStableUnderCobaseChange]
+    (hQi : RingHom.RespectsIso Q) {S T : Scheme.{u}} [IsAffine S]
+    [IsAffine T] (f : S ⟶ T) :
+    (Over.pullback P ⊤ f).op ⋙ ΓProp P hQi S ≅
+      ΓProp P hQi T ⋙ Under.pushout _ ⊤ f.appTop :=
+  NatIso.ofComponents
+    (fun X ↦
+      haveI : IsAffine X.unop.left := isAffine_of_isAffineHom (Y := T) X.unop.hom
+      Under.isoMk (ΓpullbackIsoPushout (X := X.unop.left) (Y := S) (S := T)
+        (X.unop.hom : X.unop.left ⟶ T) f) <| by simp) <| fun {X Y} g ↦ by
+    ext : 1
+    dsimp [MorphismProperty.Under.pushout]
+    have : IsAffine ((𝟭 Scheme).obj (Opposite.unop X).left) :=
+      isAffine_of_isAffineHom (Y := T) X.unop.hom
+    have : IsAffine ((Functor.fromPUnit T).obj (Opposite.unop X).right) :=
+      inferInstanceAs <| IsAffine T
+    rw [← cancel_epi (ΓpullbackIsoPushout (X.unop).hom f).inv]
+    apply pushout.hom_ext
+    · simp [← Scheme.comp_appTop_assoc]
+    · simp [← Scheme.comp_appTop_assoc]
+
+@[simps!]
+noncomputable
+def overSpecEquivUnder (hQi : RingHom.RespectsIso Q) (R : CommRingCat.{u}) :
+    (P.Over ⊤ (Spec R))ᵒᵖ ≌ (RingHom.toMorphismProperty Q).Under ⊤ R :=
+  have : (RingHom.toMorphismProperty Q).RespectsIso :=
+    RingHom.toMorphismProperty_respectsIso_iff.mp hQi
+  have : (ΓProp P hQi (Spec R)).IsEquivalence :=
+    isEquivalence_ΓProp P hQi
+  (ΓProp P hQi (Spec R)).asEquivalence.trans <| Under.congr _ ⊤ (Scheme.ΓSpecIso R)
+
+noncomputable
+def overSpecEquivUnderCompPushoutIso (hQi : RingHom.RespectsIso Q) {R S : CommRingCat.{u}}
+    (f : R ⟶ S)
+    [(RingHom.toMorphismProperty Q).IsStableUnderCobaseChange] :
+    (overSpecEquivUnder P hQi R).functor ⋙
+      (MorphismProperty.Under.pushout (RingHom.toMorphismProperty Q) ⊤ f) ≅
+      (Over.pullback P ⊤ (Spec.map f)).op ⋙ (overSpecEquivUnder P hQi S).functor :=
+  Functor.associator _ _ _ ≪≫
+    isoWhiskerLeft _ (Under.congrPushoutIso _ ⊤
+      (Spec.map f).appTop f (Scheme.ΓSpecIso R) (Scheme.ΓSpecIso S) (by simp)) ≪≫
+      (Functor.associator _ _ _).symm ≪≫
+      isoWhiskerRight (pullbackΓPropIso P hQi _).symm _ ≪≫
+      Functor.associator _ _ _
+
+lemma preservesColimitsOfShape_pullback_iff_preservesLimitsOfShape (hQi : RingHom.RespectsIso Q)
+    {R S : CommRingCat.{u}} (f : R ⟶ S) {J : Type*} [Category J]
+    [(RingHom.toMorphismProperty Q).IsStableUnderCobaseChange] :
+    PreservesColimitsOfShape J (Over.pullback P ⊤ (Spec.map f)) ↔
+      PreservesLimitsOfShape Jᵒᵖ
+        (MorphismProperty.Under.pushout (RingHom.toMorphismProperty Q) ⊤ f) := by
+  let iso : (overSpecEquivUnder P hQi R).functor ⋙
+      (Under.pushout (RingHom.toMorphismProperty Q) ⊤ f) ⋙
+      (overSpecEquivUnder P hQi S).inverse ≅ (Over.pullback P ⊤ (Spec.map f)).op :=
+    (Functor.associator _ _ _).symm ≪≫
+      isoWhiskerRight (overSpecEquivUnderCompPushoutIso P hQi f) _ ≪≫
+      Functor.associator _ _ _ ≪≫ isoWhiskerLeft _ (overSpecEquivUnder P hQi S).unitIso.symm ≪≫
+      Functor.rightUnitor _
+  let iso' : ((overSpecEquivUnder P hQi R).functor.rightOp ⋙
+      (Under.pushout (RingHom.toMorphismProperty Q) ⊤ f).op ⋙
+      (overSpecEquivUnder P hQi S).inverse.leftOp).op ≅ (Over.pullback P ⊤ (Spec.map f)).op :=
+    iso
+  let foo := NatIso.removeOp iso'
+  let e' : _ ≅ (overSpecEquivUnder P (Q := Q) hQi R).inverse.leftOp ⋙
+      (overSpecEquivUnder P (Q := Q) hQi R).functor.rightOp :=
+   (NatIso.op <| (overSpecEquivUnder P (Q := Q) hQi R).counitIso)
+  let e'' : _ ≅ (overSpecEquivUnder P hQi S).inverse.leftOp ⋙
+      (overSpecEquivUnder P hQi S).functor.rightOp :=
+   (NatIso.op <| (overSpecEquivUnder P hQi S).counitIso)
+  let iso2 : (Under.pushout (RingHom.toMorphismProperty Q) ⊤ f).op ≅
+      (overSpecEquivUnder P hQi R).inverse.leftOp ⋙ Over.pullback P ⊤ (Spec.map f) ⋙
+      (overSpecEquivUnder P hQi S).functor.rightOp :=
+    (Functor.rightUnitor _).symm ≪≫
+      isoWhiskerLeft _ e'' ≪≫
+      (Functor.associator _ _ _).symm ≪≫
+      isoWhiskerRight (Functor.leftUnitor _).symm _ ≪≫
+      isoWhiskerRight (isoWhiskerRight e' _) _ ≪≫
+      isoWhiskerRight (Functor.associator _ _ _) _ ≪≫
+      isoWhiskerRight (isoWhiskerLeft _ foo.symm) _ ≪≫ Functor.associator _ _ _
+  refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
+  · convert preservesLimitsOfShape_of_op _ _
+    convert preservesColimitsOfShape_of_natIso iso2.symm
+    exact preservesColimitsOfShape_of_equiv (opOpEquivalence J).symm _
+  · convert preservesColimitsOfShape_of_op _ _
+    exact preservesLimitsOfShape_of_natIso iso
+
+instance preservesColimitsOfShape_pullback_of_toAffine {J : Type*} [Category J]
+      {Y : Scheme.{u}} (f : X ⟶ Y)
+      [PreservesColimitsOfShape J (toAffine P Y)]
+      [PreservesColimitsOfShape J (Affine.pullback f)] :
+    PreservesColimitsOfShape J (Over.pullback P ⊤ f) := by
+  have heq : MorphismProperty.Over.pullback P ⊤ f ⋙ toAffine P X =
+      toAffine P Y ⋙ Affine.pullback f :=
+    rfl
+  have : PreservesColimitsOfShape J (MorphismProperty.Over.pullback P ⊤ f ⋙ toAffine P X) := by
+    rw [heq]
+    infer_instance
+  apply preservesColimitsOfShape_of_reflects_of_preserves
+    (MorphismProperty.Over.pullback P ⊤ f) (toAffine P X)
+
+lemma isPullback_openCoverOfBase_map {X Y Z T : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z)
+    (h : T ⟶ pullback f g) (𝒰 : Z.OpenCover) (i : 𝒰.J) :
+    IsPullback (pullback.fst (h ≫ pullback.fst _ _) (pullback.fst f (𝒰.map i)))
+      (pullback.lift
+        (pullback.map _ _ _ _ (h ≫ pullback.fst _ _) (pullback.snd _ _) f
+          (by simp) pullback.condition)
+        (pullback.map _ _ _ _ (h ≫ pullback.snd _ _) (pullback.snd _ _) f
+          (by simp [pullback.condition]) pullback.condition)
+        (by simp))
+      h ((Scheme.Pullback.openCoverOfBase 𝒰 f g).map i) := by
+  refine ⟨⟨?_⟩, ⟨PullbackCone.IsLimit.mk _ ?_ ?_ ?_ ?_⟩⟩
+  · apply pullback.hom_ext <;> simp
+  · intro c
+    refine pullback.lift c.fst
+      (pullback.lift (c.snd ≫ pullback.fst _ _ ≫ pullback.fst _ _)
+        (c.snd ≫ pullback.fst _ _ ≫ pullback.snd _ _)
+        (by simp; rw [pullback.condition]))
+        (by rw [pullback.lift_fst, c.condition_assoc]; simp)
+  · intro c
+    rw [pullback.lift_fst]
+  · intro c
+    refine pullback.hom_ext ?_ ?_
+    · simp only [Scheme.Pullback.openCoverOfBase_map, PullbackCone.π_app_left,
+      PullbackCone.π_app_right, Category.assoc, limit.lift_π, PullbackCone.mk_pt, cospan_right,
+      PullbackCone.mk_π_app, Functor.const_obj_obj, cospan_one]
+      apply pullback.hom_ext
+      · simp only [pullback.map]
+        simp_rw [Category.assoc, pullback.lift_fst, pullback.lift_fst_assoc, c.condition_assoc]
+        simp
+      · simp_rw [Category.assoc, pullback.lift_snd, pullback.lift_snd_assoc, pullback.lift_snd]
+    · apply pullback.hom_ext
+      · simp_rw [Category.assoc, pullback.lift_snd_assoc, pullback.lift_fst,
+          pullback.lift_fst_assoc]
+        simp [c.condition_assoc]
+      · simp_rw [Category.assoc, pullback.lift_snd_assoc, pullback.lift_snd,
+          pullback.lift_snd_assoc, pullback.lift_snd, pullback.condition]
+  · intro c m hfst hsnd
+    apply pullback.hom_ext
+    rw [hfst, pullback.lift_fst]
+    apply pullback.hom_ext
+    rw [pullback.lift_snd, pullback.lift_fst, ← hsnd]
+    simp [pullback.condition]
+    rw [pullback.lift_snd, pullback.lift_snd, ← hsnd]
+    simp
+
+section
+
+variable {T : Type*} [Category T] (P Q : MorphismProperty T) [Q.IsMultiplicative] [Q.RespectsIso]
+variable {X Y Z : T} (f : X ⟶ Z) (g : Y ⟶ Z)
+variable [HasPullbacks T] [P.IsStableUnderBaseChange] [Q.IsStableUnderBaseChange]
+
+noncomputable
+def _root_.CategoryTheory.IsPullback.arrowMkSndIso
+    {C : Type*} [Category C] {P X Y Z : C}
+    {fst : P ⟶ X} {snd : P ⟶ Y} {f : X ⟶ Z} {g : Y ⟶ Z}
+    {P' : C} {fst' : P' ⟶ X} {snd' : P' ⟶ Y} (h : IsPullback fst snd f g)
+    (h' : IsPullback fst' snd' f g) :
+    Arrow.mk snd ≅ Arrow.mk snd' :=
+  Arrow.isoMk (h.isoIsPullback _ _ h') (Iso.refl _) (by simp)
+
+noncomputable
+def _root_.CategoryTheory.IsPullback.arrowMkFstIso
+    {C : Type*} [Category C] {P X Y Z : C}
+    {fst : P ⟶ X} {snd : P ⟶ Y} {f : X ⟶ Z} {g : Y ⟶ Z}
+    {P' : C} {fst' : P' ⟶ X} {snd' : P' ⟶ Y} (h : IsPullback fst snd f g)
+    (h' : IsPullback fst' snd' f g) :
+    Arrow.mk fst ≅ Arrow.mk fst' :=
+  Arrow.isoMk (h.isoIsPullback _ _ h') (Iso.refl _) (by simp)
+
+noncomputable
+def _root_.CategoryTheory.MorphismProperty.Over.pullbackCondition :
+    Over.pullback P Q f ⋙ Over.pullback P Q (pullback.fst f g) ≅
+        Over.pullback P Q g ⋙ Over.pullback P Q (pullback.snd f g) :=
+  (MorphismProperty.Over.pullbackComp _ _).symm ≪≫
+    MorphismProperty.Over.pullbackCongr pullback.condition ≪≫
+    MorphismProperty.Over.pullbackComp _ _
+
+lemma _root_.CategoryTheory.MorphismProperty.Over.colimit_post_pullback
+  {J : Type*} [Category J] (D : J ⥤ P.Over Q Z) [HasColimit D]
+  [HasColimit (D ⋙ Over.pullback P Q f)]
+  [HasColimit ((D ⋙ Over.pullback P Q f) ⋙ Over.pullback P Q (pullback.fst f g))]
+  [HasColimit (D ⋙ MorphismProperty.Over.pullback P Q g)]
+  [HasColimit ((D ⋙ MorphismProperty.Over.pullback P Q g) ⋙
+    MorphismProperty.Over.pullback P Q (pullback.snd f g))]
+  [HasColimit (D ⋙ MorphismProperty.Over.pullback P Q f ⋙
+    MorphismProperty.Over.pullback P Q (pullback.fst f g))] :
+    colimit.post (D ⋙ Over.pullback P Q f) (Over.pullback P Q (pullback.fst f g)) ≫
+    (Over.pullback P Q (pullback.fst f g)).map (colimit.post D (Over.pullback P Q f)) =
+    (HasColimit.isoOfNatIso
+      (Functor.associator _ _ _ ≪≫ isoWhiskerLeft D (Over.pullbackCondition P Q f g) ≪≫
+        (Functor.associator _ _ _).symm)).hom ≫
+      colimit.post (D ⋙ Over.pullback P Q g) _ ≫
+      (MorphismProperty.Over.pullback P Q (pullback.snd f g)).map
+        (colimit.post D (MorphismProperty.Over.pullback P Q g)) ≫
+      ((Over.pullbackCondition P Q f g).app (colimit D)).inv := by
+  simp only [colimit.post_post, Functor.comp_obj, Iso.app_inv]
+  apply colimit.hom_ext
+  intro j
+  simp only [Functor.comp_obj, colimit.ι_post, Functor.comp_map, HasColimit.isoOfNatIso_ι_hom_assoc,
+    Iso.trans_hom, isoWhiskerLeft_hom, Iso.symm_hom, NatTrans.comp_app, Functor.associator_hom_app,
+    whiskerLeft_app, Functor.associator_inv_app, Category.comp_id, Category.id_comp,
+    colimit.ι_post_assoc]
+  rw [← Functor.map_comp_assoc, colimit.ι_post, ← Functor.comp_map, ← Functor.comp_map]
+  rw [NatTrans.naturality]
+  simp
+
+/-- If `F` is naturally isomorphic to `F'` they induce isomorphic `colimit.post` maps. -/
+noncomputable
+def _root_.CategoryTheory.Limits.colimit.arrowMkPostIsoOfIso {J C D : Type*} [Category J]
+    [Category C] [Category D] (K : J ⥤ C) (F F' : C ⥤ D)
+    (e : F ≅ F') [HasColimit K] [HasColimit (K ⋙ F)] [HasColimit (K ⋙ F')] :
+    Arrow.mk (colimit.post K F) ≅ Arrow.mk (colimit.post K F') :=
+  Arrow.isoMk (HasColimit.isoOfNatIso <| isoWhiskerLeft K e) (e.app _)
+    (by apply colimit.hom_ext; simp)
+
+end
+
+section
+
+variable (P : MorphismProperty Scheme.{u}) [IsLocalAtTarget P]
+
+lemma _root_.AlgebraicGeometry.IsLocalAtTarget.iff_of_openCover_of_over
+    {X Y S : Scheme.{u}} [X.Over S] [Y.Over S]
+    (f : X ⟶ Y) [f.IsOver S] (𝒰 : S.OpenCover) :
+    P f ↔ ∀ i : 𝒰.J,
+      P (pullback.map (X ↘ S) (𝒰.map i) (Y ↘ S) (𝒰.map i) f (𝟙 _) (𝟙 _) (by simp) (by simp)) := by
+  have heq (i : 𝒰.J) : ((Scheme.Cover.pullbackCover 𝒰 (Y ↘ S)).pullbackHom f i) =
+      (pullbackRightPullbackFstIso _ _ _).hom ≫ (pullback.congrHom (by simp) rfl).hom ≫
+      pullback.map (X ↘ S) (𝒰.map i) (Y ↘ S) (𝒰.map i) f (𝟙 _) (𝟙 _) (by simp) (by simp) := by
+    apply pullback.hom_ext <;> simp [Scheme.Cover.pullbackHom, pullback.condition]
+  refine ⟨fun hf i ↦ ?_, fun H ↦ ?_⟩
+  · have : P ((Scheme.Cover.pullbackCover 𝒰 (Y ↘ S)).pullbackHom f i) :=
+      IsLocalAtTarget.of_isPullback (.of_hasPullback _ _) hf
+    rwa [heq, P.cancel_left_of_respectsIso, P.cancel_left_of_respectsIso] at this
+  · rw [IsLocalAtTarget.iff_of_openCover (P := P) (𝒰.pullbackCover (Y ↘ S))]
+    intro i
+    have heq : ((Scheme.Cover.pullbackCover 𝒰 (Y ↘ S)).pullbackHom f i) =
+        (pullbackRightPullbackFstIso _ _ _).hom ≫ (pullback.congrHom (by simp) rfl).hom ≫
+        pullback.map (X ↘ S) (𝒰.map i) (Y ↘ S) (𝒰.map i) f (𝟙 _) (𝟙 _) (by simp) (by simp) := by
+      apply pullback.hom_ext <;> simp [Scheme.Cover.pullbackHom, pullback.condition]
+    rw [heq, P.cancel_left_of_respectsIso, P.cancel_left_of_respectsIso]
+    exact H i
+
+variable {W Q : MorphismProperty Scheme.{u}} [Q.IsMultiplicative]
+variable [W.IsStableUnderBaseChange] [Q.IsStableUnderBaseChange]
+
+variable {P} in
+lemma _root_.AlgebraicGeometry.IsLocalAtTarget.left_iff_of_openCover
+    {S : Scheme.{u}} {X Y : W.Over Q S} {f : X ⟶ Y} (𝒰 : S.OpenCover) :
+    P f.left ↔ ∀ i : 𝒰.J,
+      P ((MorphismProperty.Over.pullback W Q (𝒰.map i)).map f).left :=
+  AlgebraicGeometry.IsLocalAtTarget.iff_of_openCover_of_over ..
+
+end
+
+nonrec theorem preservesFiniteColimits_pullback (hQi : RingHom.RespectsIso Q)
     (hQp : RingHom.HasFiniteProducts Q) (hQe : RingHom.HasEqualizers Q)
     [(RingHom.toMorphismProperty Q).IsStableUnderCobaseChange]
     [∀ (R S : CommRingCat.{u}) (f : R ⟶ S), PreservesFiniteLimits
@@ -295,66 +793,48 @@ nonrec theorem preservesFiniteColimits_pullback' (hQi : RingHom.RespectsIso Q)
       exact h
     apply preservesColimit_of_isIso_post
   show isomorphisms Scheme.{u} _
-  wlog hY : ∃ R, Y = Spec R generalizing X Y D f
-  · let c := (Over.pullback P ⊤ f).mapCocone (colimit.cocone D)
-    let g : colimit (D ⋙ Over.pullback P ⊤ f) ⟶ c.pt := colimit.desc _ c
-    let 𝒰 : (pullback (colimit D).hom f).OpenCover :=
-      Scheme.Pullback.openCoverOfBase Y.affineCover _ _
-    rw [IsLocalAtTarget.iff_of_openCover (P := isomorphisms _) 𝒰]
+  wlog H : (∃ R, Y = Spec R) ∧ ∃ S, X = Spec S generalizing X Y D f
+  · let 𝒰X : X.OpenCover :=
+      (Scheme.OpenCover.affineRefinement (Y.affineCover.pullbackCover f)).openCover
+    rw [IsLocalAtTarget.left_iff_of_openCover (P := isomorphisms Scheme) 𝒰X]
     intro i
-    simp [Scheme.Cover.pullbackHom]
-    let uᵢ : Y.affineCover.obj i ⟶ Y := Y.affineCover.map i
-    let Dᵢ : J ⥤ P.Over ⊤ (Y.affineCover.obj i) := D ⋙ Over.pullback P ⊤ uᵢ
-    let gᵢ := colimit.post Dᵢ (MorphismProperty.Over.pullback P ⊤ (pullback.snd f uᵢ))
-    let e₁ : pullback g.left (𝒰.map i) ≅
-        (colimit (Dᵢ ⋙ Over.pullback P ⊤ (pullback.snd f uᵢ))).left := by
-      --show pullback g.left (pullback.map _ _ _ _ _ _ _ _ _) ≅ _
-      dsimp [𝒰]
-      sorry
-    have _ : 𝒰.obj i = pullback (pullback.snd (colimit D).hom uᵢ) (pullback.snd f uᵢ) := rfl
-    have _ : IsIso (colimit.post D (MorphismProperty.Over.pullback P ⊤ uᵢ)).left :=
-      -- because `uᵢ` is an open immersion with affine source
-      sorry
-    let e₀ : (colimit Dᵢ).left ≅ pullback (colimit D).hom (Y.affineCover.map i) :=
-      asIso (colimit.post D <| (Over.pullback P ⊤ uᵢ)).left
-    let e₂ : pullback (colimit Dᵢ).hom (pullback.snd f uᵢ) ≅ 𝒰.obj i :=
-      asIso <| pullback.map _ _ _ _ e₀.hom (𝟙 _) (𝟙 _) (sorry) (by simp [uᵢ])
-    have heq : pullback.snd g.left (𝒰.map i) = e₁.hom ≫ gᵢ.left ≫ e₂.hom :=
-      sorry
-    show IsIso (pullback.snd g.left _)
-    rw [heq]
-    have : IsIso gᵢ.left := this _ ⟨_, rfl⟩
+    let uᵢ : Y.affineCover.obj i.1 ⟶ Y := Y.affineCover.map i.1
+    have _ : PreservesFiniteColimits (toAffine P X) :=
+      preservesFiniteColimits_toAffine P hQi hQp hQe
+    have _ : PreservesFiniteColimits (toAffine P Y) :=
+      preservesFiniteColimits_toAffine P hQi hQp hQe
+    rw [← cancel_left_of_respectsIso (isomorphisms Scheme)
+      (colimit.post (D ⋙ Over.pullback P ⊤ f) (Over.pullback P ⊤ (𝒰X.map i))).left]
+    erw [← MorphismProperty.Comma.comp_left]
+    simp only [MorphismProperty.Over.pullback_obj_left, MorphismProperty.Over.pullback_obj_hom,
+      colimit.post_post]
+    have heq : 𝒰X.map i = (Scheme.OpenCover.fromAffineRefinement _).app i ≫ pullback.fst f uᵢ := by
+      convert (Scheme.OpenCover.fromAffineRefinement (Y.affineCover.pullbackCover f)).w i
+    let natiso :
+        Over.pullback P ⊤ f ⋙ Over.pullback P ⊤ (𝒰X.map i) ≅
+          Over.pullback P ⊤ uᵢ ⋙
+            Over.pullback P ⊤
+              ((Scheme.OpenCover.fromAffineRefinement _).app i ≫ pullback.snd f uᵢ) :=
+      (MorphismProperty.Over.pullbackComp _ _).symm ≪≫
+        MorphismProperty.Over.pullbackCongr
+        (by rw [Category.assoc, ← pullback.condition, heq, Category.assoc]) ≪≫
+        (MorphismProperty.Over.pullbackComp _ _)
+    let e := colimit.arrowMkPostIsoOfIso D _ _ natiso
+    have : IsIso ((colimit.post D (Over.pullback P ⊤ f ⋙ Over.pullback P ⊤ (𝒰X.map i)))) := by
+      show isomorphisms _ _
+      rw [(isomorphisms _).arrow_mk_iso_iff e, ← colimit.post_post,
+        (isomorphisms _).cancel_right_of_respectsIso]
+      convert isIso_of_reflects_iso _ (Over.forget P ⊤ _ ⋙ Over.forget _)
+      exact this _ ⟨⟨_, rfl⟩, ⟨_, rfl⟩⟩
+    simp only [isomorphisms.iff]
     infer_instance
-  obtain ⟨R, rfl⟩ := hY
-  wlog hX : ∃ S, X = Spec S generalizing X D f
-  · sorry
-  obtain ⟨S, rfl⟩ := hX
+  obtain ⟨⟨R, rfl⟩, ⟨S, rfl⟩⟩ := H
   obtain ⟨φ, rfl⟩ := Spec.map_surjective f
-  sorry
-
-theorem preservesFiniteColimits_pullback (hQi : RingHom.RespectsIso Q)
-    (hQp : RingHom.HasFiniteProducts Q)
-    (hQe : RingHom.HasEqualizers Q)
-    [P.IsStableUnderComposition] [P.ContainsIdentities]
-    [P.IsStableUnderBaseChange] [P.HasOfPostcompProperty P]
-    {Y : Scheme.{u}} (f : X ⟶ Y) [IsAffineHom f] :
-    PreservesFiniteColimits (MorphismProperty.Over.pullback P ⊤ f) := by
-  constructor
-  intro J _ _
-  have heq : MorphismProperty.Over.pullback P ⊤ f ⋙ toAffine P X =
-      toAffine P Y ⋙ Affine.pullback f :=
-    rfl
-  have : PreservesFiniteColimits (toAffine P Y) :=
-    preservesFiniteColimits_toAffine P (X := Y) hQi hQp hQe
-  -- this is wrong (!), since `f` is not necessarily flat
-  have : PreservesFiniteColimits (Affine.pullback f) := by
-    have : (Affine.pullback f).IsRightAdjoint := inferInstance
-    sorry
-  have : PreservesColimitsOfShape J (MorphismProperty.Over.pullback P ⊤ f ⋙ toAffine P X) := by
-    rw [heq]
+  have : PreservesColimitsOfShape J (MorphismProperty.Over.pullback P ⊤ (Spec.map φ)) := by
+    rw [preservesColimitsOfShape_pullback_iff_preservesLimitsOfShape _ hQi]
     infer_instance
-  apply preservesColimitsOfShape_of_reflects_of_preserves
-    (MorphismProperty.Over.pullback P ⊤ f) (toAffine P X)
+  simp only [isomorphisms.iff]
+  infer_instance
 
 end AffineAnd
 
