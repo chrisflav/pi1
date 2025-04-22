@@ -19,10 +19,12 @@ import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
 import Pi1.Mathlib.CategoryTheory.Comma.Over.Basic
 import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
+import Pi1.Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.Composition
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.Limits
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.Over
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.UnderAdjunction
+import Pi1.Mathlib.RingTheory.Flat.Equalizer
 import Pi1.Mathlib.RingTheory.Geometric
 import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
 import Pi1.Mathlib.RingTheory.IsTensorProduct
@@ -45,6 +47,7 @@ import Pi1.RingTheory.FiniteEtale.Equalizer
 import Pi1.RingTheory.FinitePresentation
 import Pi1.RingTheory.FiveLemma
 import Pi1.RingTheory.KaehlerBaseChange
+import Pi1.RingTheory.KerTensor
 import Pi1.RingTheory.RankAtStalk
 import Pi1.RingTheory.SmoothDescent
 import Pi1.RingTheory.SmoothFlat

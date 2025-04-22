@@ -406,7 +406,7 @@ lemma Algebra.FiniteEtale.equalizer_of_rankAtStalk_eq {R S T : Type u} [CommRing
     (f g : S →ₐ[R] T) :
     Algebra.FiniteEtale R (AlgHom.equalizer f g) := by
   wlog hS : Algebra.IsSplitOfRank n R S
-  · obtain ⟨A, _, _, _, hA⟩ := Algebra.IsSplitOfRank.exists_isSplitOfRank_tensorProduct hn
+  · obtain ⟨A, _, _, _, _, hA⟩ := Algebra.IsSplitOfRank.exists_isSplitOfRank_tensorProduct hn
     let f' : A ⊗[R] S →ₐ[A] A ⊗[R] T := Algebra.TensorProduct.map (AlgHom.id _ _) f
     let g' : A ⊗[R] S →ₐ[A] A ⊗[R] T := Algebra.TensorProduct.map (AlgHom.id _ _) g
     let cong : A ⊗[R] AlgHom.equalizer f g ≃ₐ[A] AlgHom.equalizer f' g' :=
@@ -425,7 +425,7 @@ lemma Algebra.FiniteEtale.equalizer_of_rankAtStalk_eq {R S T : Type u} [CommRing
     exact Algebra.FiniteEtale.of_finiteEtale_tensorProduct_of_faithfullyFlat A
   clear hn
   wlog hT : Algebra.IsSplitOfRank m R T
-  · obtain ⟨A, _, _, _, hA⟩ := Algebra.IsSplitOfRank.exists_isSplitOfRank_tensorProduct hm
+  · obtain ⟨A, _, _, _, _, hA⟩ := Algebra.IsSplitOfRank.exists_isSplitOfRank_tensorProduct hm
     let f' : A ⊗[R] S →ₐ[A] A ⊗[R] T := Algebra.TensorProduct.map (AlgHom.id _ _) f
     let g' : A ⊗[R] S →ₐ[A] A ⊗[R] T := Algebra.TensorProduct.map (AlgHom.id _ _) g
     let cong : A ⊗[R] AlgHom.equalizer f g ≃ₐ[A] AlgHom.equalizer f' g' :=

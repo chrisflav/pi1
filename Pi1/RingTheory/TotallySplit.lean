@@ -230,11 +230,12 @@ instance [IsSplitOfRank n R S] : Etale R S := by
 
 lemma exists_isSplitOfRank_tensorProduct [Etale R S] [Module.Finite R S] {n : ℕ}
     (hn : Module.rankAtStalk (R := R) S = n) :
-    ∃ (T : Type u) (_ : CommRing T) (_ : Algebra R T) (_ : Module.FaithfullyFlat R T),
+    ∃ (T : Type u) (_ : CommRing T) (_ : Algebra R T) (_ : Module.FaithfullyFlat R T)
+      (_ : Algebra.Etale R T),
       IsSplitOfRank n T (T ⊗[R] S) := by
   induction n generalizing R S with
   | zero =>
-      use R, inferInstance, inferInstance, inferInstance
+      use R, inferInstance, inferInstance, inferInstance, inferInstance
       let e : R ⊗[R] S ≃ₐ[R] S := TensorProduct.lid R S
       have : IsSplitOfRank 0 R S := by
         rw [iff_subsingleton_of_isEmpty]
@@ -244,7 +245,7 @@ lemma exists_isSplitOfRank_tensorProduct [Etale R S] [Module.Finite R S] {n : �
       apply IsSplitOfRank.of_equiv e.symm
   | succ n ih =>
       cases subsingleton_or_nontrivial R
-      · use R, inferInstance, inferInstance, inferInstance
+      · use R, inferInstance, inferInstance, inferInstance, inferInstance
         have : IsSplitOfRank (n + 1) R S := .of_subsingleton
         apply IsSplitOfRank.of_equiv (TensorProduct.lid R S).symm
       have : Nontrivial S := by
@@ -270,7 +271,7 @@ lemma exists_isSplitOfRank_tensorProduct [Etale R S] [Module.Finite R S] {n : �
         simp only [Pi.natCast_def, Nat.cast_id]
         have := this p
         omega
-      obtain ⟨V, _, _, _, hV⟩ := ih this
+      obtain ⟨V, _, _, _, _, hV⟩ := ih this
       obtain ⟨f⟩ := hV.nonempty_algEquiv_fun
       algebraize [(algebraMap S V).comp (algebraMap R S)]
       let e₁ : V ⊗[R] S ≃ₐ[V] V ⊗[S] (S ⊗[R] S) :=
@@ -285,16 +286,15 @@ lemma exists_isSplitOfRank_tensorProduct [Etale R S] [Module.Finite R S] {n : �
         AlgEquiv.trans (AlgEquiv.prodCongr (AlgEquiv.funUnique _ _ _).symm AlgEquiv.refl)
           (Algebra.prodPiEquiv V V Unit (Fin n)).symm
       let e := e₁.trans <| e₂.trans <| e₃.trans <| e₄.trans e₅
-      refine ⟨V, inferInstance, inferInstance, ?_, ?_⟩
+      refine ⟨V, inferInstance, inferInstance, ?_, ?_, ?_⟩
       · have : Module.FaithfullyFlat R S := by
           apply Algebra.Etale.faithfullyFlat_of_rankAtStalk_pos
           intro p
           simp [hn]
         exact Module.FaithfullyFlat.trans R S V
+      · exact Algebra.Etale.comp R S V
       · exact IsSplitOfRank.of_card_eq (ι := Unit ⊕ Fin n) (by simp [add_comm]) e
 
 end
 
 end Algebra.IsSplitOfRank
-
-class Algebra.IsSplit (R S : Type*) [CommRing R] [CommRing S] [Algebra R S] : Prop where
