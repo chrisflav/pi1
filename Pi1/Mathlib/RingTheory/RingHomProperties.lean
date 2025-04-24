@@ -1,4 +1,5 @@
 import Mathlib.RingTheory.RingHomProperties
+import Mathlib.CategoryTheory.MorphismProperty.Limits
 import Mathlib.Algebra.MvPolynomial.CommRing
 
 open TensorProduct
@@ -44,5 +45,9 @@ lemma CodescendsAlong.includeRight (hPQ : CodescendsAlong P Q) (h : Q (algebraMa
     P (algebraMap R S) := by
   let _ : Algebra T (S ⊗[R] T) := Algebra.TensorProduct.rightAlgebra
   apply hPQ R S T (S ⊗[R] T) h H
+
+lemma isStableUnderCobaseChange_toMorphismProperty_iff :
+    (toMorphismProperty P).IsStableUnderCobaseChange ↔ IsStableUnderBaseChange P :=
+  sorry
 
 end RingHom

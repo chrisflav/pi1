@@ -38,6 +38,14 @@ lemma StableUnderComposition.and
   introv R hf hg
   exact ⟨hP f g hf.1 hg.1, hQ f g hf.2 hg.2⟩
 
+lemma RespectsIso.and (hP : RespectsIso P) (hQ : RespectsIso Q) :
+    RespectsIso (fun f ↦ P f ∧ Q f) := by
+  refine ⟨?_, ?_⟩
+  · introv hf
+    exact ⟨hP.1 f e hf.1, hQ.1 f e hf.2⟩
+  · introv hf
+    exact ⟨hP.2 f e hf.1, hQ.2 f e hf.2⟩
+
 
 lemma PropertyIsLocal.and (hP : PropertyIsLocal P)
     (hQ : PropertyIsLocal Q) :

@@ -8,6 +8,7 @@ import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
 import Mathlib.CategoryTheory.Limits.MorphismProperty
 import Mathlib.CategoryTheory.MorphismProperty.Limits
 import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
+import Pi1.Mathlib.RingTheory.RingHom.Etale
 
 universe u
 
@@ -67,6 +68,9 @@ instance : MorphismProperty.HasOfPostcompProperty @IsEtale @IsEtale := by
 instance : HasPullbacks (Etale X) := by
   unfold Etale
   infer_instance
+
+instance : HasRingHomProperty @IsEtale RingHom.Etale :=
+  sorry
 
 instance isOpenImmersion_of_mono {X Y : Scheme.{u}} (f : X ⟶ Y) [IsEtale f] [Mono f] :
     IsOpenImmersion f :=

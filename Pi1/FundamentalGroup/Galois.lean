@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christian Merten
 -/
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Etale
+import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Smooth
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Pi1.Mathlib.AlgebraicGeometry.Limits
 import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
@@ -81,9 +82,6 @@ instance (X : Scheme.{u}) : PreGaloisCategory (FiniteEtale X) where
       ext : 1
       simp [U, A]
 
-instance : HasRingHomProperty @IsEtale RingHom.Etale :=
-  sorry
-
 lemma finite_of_isEtale_of_isAffineHom (X : Scheme.{u}) {Ω : Type u} [Field Ω]
     (f : X ⟶ Spec (.of Ω)) [IsEtale f] [IsAffineHom f] :
     Finite X := by
@@ -120,17 +118,17 @@ variable (Ω : Type u) [Field Ω]
 
 lemma _root_.AlgebraicGeometry.IsFiniteEtale.SpecMap_iff {R S : CommRingCat.{u}}
     {f : R ⟶ S} :
-    IsFiniteEtale (Spec.map f) ↔ f.hom.IsFiniteEtale := by
-  have := RingHom.toMorphismProperty_respectsIso_iff.mp RingHom.IsFiniteEtale.respectsIso
+    IsFiniteEtale (Spec.map f) ↔ f.hom.FiniteEtale := by
+  have := RingHom.toMorphismProperty_respectsIso_iff.mp RingHom.FiniteEtale.respectsIso
   simp only [HasAffineProperty.iff_of_isAffine (P := @IsFiniteEtale), affineAnd, and_iff_right]
-  exact MorphismProperty.arrow_mk_iso_iff (RingHom.toMorphismProperty RingHom.IsFiniteEtale)
+  exact MorphismProperty.arrow_mk_iso_iff (RingHom.toMorphismProperty RingHom.FiniteEtale)
     (arrowIsoΓSpecOfIsAffine f).symm
 
 instance {ι : Type u} [Finite ι] (R : Type u) [CommRing R] :
     IsFiniteEtale (Spec.map <| CommRingCat.ofHom <| algebraMap R (ι → R)) := by
   rw [IsFiniteEtale.SpecMap_iff]
   simp
-  rw [RingHom.isFiniteEtale_algebraMap_iff]
+  rw [RingHom.finiteEtale_algebraMap_iff]
   constructor
 
 @[simps]
@@ -405,20 +403,6 @@ def fiberPt {A : FiniteEtale X} (x : (fiber ξ).obj A) : A.left :=
 instance [IsSepClosed Ω] : PreservesFiniteLimits (pullback ξ) := by
   dsimp [pullback]
   apply AffineAnd.preservesFiniteLimits_pullback
-
-instance [IsSepClosed Ω] : PreservesFiniteColimits (pullback ξ) :=
-  sorry
-
--- TODO: move this somewhere else
-instance {X Y : Scheme.{u}} (f : X ⟶ Y) [IsSmooth f] : Flat f := by
-  rw [HasRingHomProperty.iff_appLE (P := @Flat)]
-  intro U V e
-  have := HasRingHomProperty.appLE @IsSmooth f inferInstance U V e
-  rw [RingHom.locally_isStandardSmooth_iff_smooth] at this
-  algebraize [(Scheme.Hom.appLE f U V e).hom]
-  have : Algebra.Smooth Γ(Y, U) Γ(X, V) := this
-  show Module.Flat _ _
-  infer_instance
 
 instance (X : Type*) [TopologicalSpace X] [LocallyConnectedSpace X] :
     DiscreteTopology (ConnectedComponents X) := by

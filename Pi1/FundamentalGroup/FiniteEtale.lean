@@ -4,9 +4,11 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christian Merten
 -/
 import Pi1.Mathlib.RingTheory.RingHom.Etale
+import Pi1.Mathlib.RingTheory.RingHomProperties
 import Pi1.FundamentalGroup.AffineAnd
 import Pi1.RingTheory.StableProperties
 import Pi1.RingTheory.FiniteEtale.Equalizer
+import Pi1.RingTheory.KerTensor
 
 /-!
 # Finite étale morphisms
@@ -23,46 +25,62 @@ open CategoryTheory Limits
 
 namespace Algebra
 
-/-- A finite étale algebra is a finite and étale algebra. -/
-@[mk_iff]
-class IsFiniteEtale (R S : Type u) [CommRing R] [CommRing S] [Algebra R S] : Prop
-    extends Module.Finite R S, Algebra.Etale R S
-
 end Algebra
 
 namespace RingHom
 
 /-- A ring homomorphism is finite étale if the induced algebra is finite étale. -/
-def IsFiniteEtale {R S : Type u} [CommRing R] [CommRing S] (f : R →+* S) : Prop :=
+def FiniteEtale {R S : Type u} [CommRing R] [CommRing S] (f : R →+* S) : Prop :=
   letI := f.toAlgebra
-  Algebra.IsFiniteEtale R S
+  Algebra.FiniteEtale R S
 
-lemma isFiniteEtale_algebraMap_iff {R S : Type u} [CommRing R] [CommRing S] [Algebra R S] :
-    (algebraMap R S).IsFiniteEtale ↔ Algebra.IsFiniteEtale R S := by
-  simp only [RingHom.IsFiniteEtale]
+lemma finiteEtale_algebraMap_iff {R S : Type u} [CommRing R] [CommRing S] [Algebra R S] :
+    (algebraMap R S).FiniteEtale ↔ Algebra.FiniteEtale R S := by
+  simp only [RingHom.FiniteEtale]
   congr!
   exact Algebra.algebra_ext _ _ fun _ ↦ rfl
 
-namespace IsFiniteEtale
+namespace FiniteEtale
 
 lemma iff_finite_and_etale
     {R S : Type u} [CommRing R] [CommRing S] (f : R →+* S) :
-    f.IsFiniteEtale ↔ f.Finite ∧ f.Etale := by
-  rw [IsFiniteEtale, Finite, Etale]
-  rw [Algebra.isFiniteEtale_iff]
+    f.FiniteEtale ↔ f.Etale ∧ f.Finite := by
+  rw [FiniteEtale, Finite, Etale]
+  rw [Algebra.finiteEtale_iff]
 
-lemma respectsIso : RespectsIso IsFiniteEtale := sorry
+lemma eq_and :
+    @FiniteEtale = (fun R S (_ : CommRing R) (_ : CommRing S) f ↦ f.Etale ∧ f.Finite) := by
+  ext
+  rw [iff_finite_and_etale]
 
-lemma hasFiniteProducts : HasFiniteProducts IsFiniteEtale := by
+lemma isStableUnderBaseChange : IsStableUnderBaseChange FiniteEtale := by
+  rw [eq_and]
+  exact Etale.isStableUnderBaseChange.and finite_isStableUnderBaseChange
+
+lemma respectsIso : RespectsIso FiniteEtale := by
+  rw [eq_and]
+  apply Etale.respectsIso.and finite_respectsIso
+
+lemma hasFiniteProducts : HasFiniteProducts FiniteEtale := by
   introv R _ hf
-  simp_rw [isFiniteEtale_algebraMap_iff] at hf ⊢
-  sorry
+  simp_rw [finiteEtale_algebraMap_iff] at hf ⊢
+  constructor
 
-lemma hasEqualizers : HasEqualizers IsFiniteEtale := sorry
+lemma hasEqualizers : HasEqualizers FiniteEtale := by
+  introv R hS hT
+  rw [finiteEtale_algebraMap_iff] at hS hT ⊢
+  apply Algebra.Etale.equalizer
 
-lemma hasStableEqualizers : HasStableEqualizers IsFiniteEtale := sorry
+lemma hasStableEqualizers : HasStableEqualizers FiniteEtale := by
+  introv R hA hB
+  rw [finiteEtale_algebraMap_iff] at hA hB
+  exact Algebra.tensorEqualizer_bijective_of_finite_of_etale f g
 
-end IsFiniteEtale
+instance : (toMorphismProperty RingHom.FiniteEtale).IsStableUnderCobaseChange := by
+  rw [isStableUnderCobaseChange_toMorphismProperty_iff]
+  exact isStableUnderBaseChange
+
+end FiniteEtale
 
 end RingHom
 
@@ -100,18 +118,17 @@ instance : HasOfPostcompProperty @IsFiniteEtale @IsFiniteEtale := by
   rw [eq_inf]
   infer_instance
 
-instance : HasAffineProperty @IsFiniteEtale (affineAnd RingHom.IsFiniteEtale) := by
+instance : HasAffineProperty @IsFiniteEtale (affineAnd RingHom.FiniteEtale) := by
   rw [HasAffineProperty.iff, eq_inf]
   constructor
   · infer_instance
   · ext X Y f _
-    simp only [affineAnd_apply, RingHom.IsFiniteEtale.iff_finite_and_etale]
+    simp only [affineAnd_apply, RingHom.FiniteEtale.iff_finite_and_etale]
     show _ ↔ IsFinite f ∧ IsEtale f
     simp only [HasAffineProperty.iff_of_isAffine (P := @IsFinite), and_assoc, and_congr_right_iff]
     intro h
     rw [HasRingHomProperty.iff_of_isAffine (P := @IsEtale)]
-    intro h
-    rw [RingHom.Etale.iff_locally_isStandardSmoothOfRelativeDimension]
+    rw [RingHom.Etale.iff_locally_isStandardSmoothOfRelativeDimension, and_comm]
 
 instance {X Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) [IsFiniteEtale f] [IsFiniteEtale g] :
     IsFiniteEtale (f ≫ g) where
@@ -172,9 +189,9 @@ instance : (toAffine X).Full := (toAffineFullyFaithful X).full
 
 instance : HasFiniteColimits (FiniteEtale X) :=
   AffineAnd.hasFiniteColimits _
-    RingHom.IsFiniteEtale.respectsIso
-    RingHom.IsFiniteEtale.hasFiniteProducts
-    RingHom.IsFiniteEtale.hasEqualizers
+    RingHom.FiniteEtale.respectsIso
+    RingHom.FiniteEtale.hasFiniteProducts
+    RingHom.FiniteEtale.hasEqualizers
 
 instance (f g : FiniteEtale X) (i : f ⟶ g) : IsFiniteEtale i.hom.left := by
   apply MorphismProperty.of_postcomp @IsFiniteEtale (W' := @IsFiniteEtale) _ g.hom
@@ -206,21 +223,18 @@ lemma mk_left {T : Scheme.{u}} (f : T ⟶ X) [IsFiniteEtale f] : (mk f).left = T
 open RingHom in
 instance {Y : Scheme.{u}} (f : X ⟶ Y) :
     PreservesFiniteColimits (pullback f) := by
-  have : (toMorphismProperty RingHom.IsFiniteEtale).IsStableUnderCobaseChange :=
-    sorry
   have (R S : CommRingCat.{u}) (f : R ⟶ S) :
       PreservesFiniteLimits (MorphismProperty.Under.pushout
-        (RingHom.toMorphismProperty RingHom.IsFiniteEtale) ⊤ f) := by
+        (RingHom.toMorphismProperty RingHom.FiniteEtale) ⊤ f) := by
     apply CommRingCat.preservesFiniteLimits_pushout_of_hasStableEqualizers
-    · exact IsFiniteEtale.respectsIso
-    · exact IsFiniteEtale.hasFiniteProducts
-    · exact IsFiniteEtale.hasEqualizers
-    · exact IsFiniteEtale.hasStableEqualizers
+    · exact FiniteEtale.respectsIso
+    · exact FiniteEtale.hasFiniteProducts
+    · exact FiniteEtale.hasEqualizers
+    · exact FiniteEtale.hasStableEqualizers
   apply AffineAnd.preservesFiniteColimits_pullback
-  · exact IsFiniteEtale.respectsIso
-  · exact IsFiniteEtale.hasFiniteProducts
-  · exact IsFiniteEtale.hasEqualizers
+  · exact FiniteEtale.respectsIso
+  · exact FiniteEtale.hasFiniteProducts
+  · exact FiniteEtale.hasEqualizers
 
 end FiniteEtale
 
-end AlgebraicGeometry
