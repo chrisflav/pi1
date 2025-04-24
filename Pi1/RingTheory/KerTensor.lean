@@ -117,6 +117,31 @@ lemma CodescendsAlong.of_forall_exists_flat {R S : Type u} [CommRing R] [CommRin
   choose T h1 h2 hmem _ ho hT using H
   exact hP.of_forall_flat _ hPi hPl T ho (Set.iUnion_eq_univ_iff.mpr fun p ↦ ⟨p, hmem p⟩) hT
 
+open AlgebraicGeometry CategoryTheory Limits in
+lemma PrimeSpectrum.range_comap_tensorProduct (R S T : Type u) [CommRing R]
+    [CommRing S] [CommRing T] [Algebra R S] [Algebra R T] :
+    Set.range (PrimeSpectrum.comap <| algebraMap S (S ⊗[R] T)) =
+      (PrimeSpectrum.comap (algebraMap R S)) ⁻¹'
+        (Set.range <| PrimeSpectrum.comap (algebraMap R T)) := by
+  ext p
+  refine ⟨?_, ?_⟩
+  · rintro ⟨p, rfl⟩
+    use PrimeSpectrum.comap Algebra.TensorProduct.includeRight.toRingHom p
+    have : (algebraMap S (S ⊗[R] T)).comp (algebraMap R S) =
+        Algebra.TensorProduct.includeRight.toRingHom.comp (algebraMap R T) := by ext; simp
+    exact congr(PrimeSpectrum.comap $(this) p).symm
+  · rintro ⟨q, hp⟩
+    obtain ⟨z, hz⟩ := AlgebraicGeometry.Scheme.Pullback.exists_preimage_pullback
+      (X := Spec <| .of S) (Y := Spec <| .of T) (S := Spec <| .of R)
+        (f := Spec.map <| CommRingCat.ofHom (algebraMap R S))
+        (g := Spec.map <| CommRingCat.ofHom (algebraMap R T)) p q hp.symm
+    let e : pullback (Spec.map (CommRingCat.ofHom (algebraMap R S)))
+        (Spec.map (CommRingCat.ofHom (algebraMap R T))) ≅ Spec (.of <| S ⊗[R] T) :=
+      pullbackSpecIso R S T
+    use e.hom.base z
+    rw [← hz.1, ← pullbackSpecIso_hom_fst]
+    rfl
+
 set_option maxHeartbeats 0 in
 lemma CodescendsAlong.algHom_of_forall_exists_flat {R A B : Type u} [CommRing R]
     [CommRing A] [CommRing B] [Algebra R A] [Algebra R B]
@@ -135,8 +160,7 @@ lemma CodescendsAlong.algHom_of_forall_exists_flat {R A B : Type u} [CommRing R]
   have heq : Set.range (algebraMap A (A ⊗[R] T)).specComap =
       (PrimeSpectrum.comap (algebraMap R A)) ⁻¹'
         (Set.range <| PrimeSpectrum.comap (algebraMap R T)) :=
-    -- needs pullback carrier or similar
-    sorry
+    PrimeSpectrum.range_comap_tensorProduct R A T
   let e : T ⊗[R] B ≃ₐ[R] (A ⊗[R] T) ⊗[A] B :=
     .trans ((Algebra.TensorProduct.comm _ _ _).restrictScalars R)
       (.trans
@@ -295,8 +319,6 @@ lemma RingHom.Bijective.ofLocalizationSpan :
     simp [f']
   rw [heq]
   exact hf r
-
-#exit
 
 namespace Algebra
 
