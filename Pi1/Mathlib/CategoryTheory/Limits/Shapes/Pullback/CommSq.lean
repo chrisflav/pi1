@@ -25,19 +25,6 @@ lemma Limits.isPullback_map_snd_snd {C : Type*} [Category C] [HasPullbacks C]
     · simpa
     · apply pullback.hom_ext <;> simp [← hsnd, pullback.condition, ← hfst]
 
-/-
-pullback g.left
-    (pullback.map (pullback.snd (colimit D).hom (Y.affineCover.map i)) (pullback.snd f (Y.affineCover.map i))
-      (colimit D).hom f (pullback.fst (colimit D).hom (Y.affineCover.map i)) (pullback.fst f (Y.affineCover.map i))
-      (Y.affineCover.map i) ⋯ ⋯)
--/
---def Limits.isPullback_map_snd_snd' {C : Type*} [Category C] [HasPullbacks C]
---    {X Y Z S T : C} (f : X ⟶ Y) (u : T ⟶ Y) (h : S ⟶ Y) (g : Z ⟶ pullback h f) :
---    IsPullback _ _ g (pullback.map (pullback.snd h u) (pullback.snd f u)
---      h f (pullback.fst h u) (pullback.fst f u)
---      u pullback.condition.symm pullback.condition.symm) :=
---  sorry
-
 lemma Limits.isPullback_map_fst_fst {C : Type*} [Category C] [HasPullbacks C]
     {X Y Z U S : C} (f : X ⟶ S) (g : Y ⟶ S) (i : Z ⟶ S) (h : U ⟶ pullback i g) :
     IsPullback
