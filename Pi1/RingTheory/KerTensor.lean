@@ -25,13 +25,39 @@ namespace RingHom
 
 variable (P : ∀ {R S : Type u} [CommRing R] [CommRing S], (R →+* S) → Prop)
 
+variable {P} in
 lemma OfLocalizationSpan.pi (hP : OfLocalizationSpan P)
+    (hPi : RespectsIso P)
     {ι : Type u} [_root_.Finite ι]
     (R : ι → Type u) (S : ι → Type u) [∀ i, CommRing (R i)]
     [∀ i, CommRing (S i)] (f : ∀ i, R i →+* S i)
     (hf : ∀ i, P (f i)) :
-    P (Pi.ringHom <| fun i ↦ (f i).comp <| Pi.evalRingHom R i) :=
-  sorry
+    P (Pi.ringHom <| fun i ↦ (f i).comp <| Pi.evalRingHom R i) := by
+  classical
+  have := Ideal.span_single_eq_top R
+  apply hP.ofIsLocalization hPi _ _ this
+  rintro ⟨r, i, rfl⟩
+  let i₁ : Algebra (∀ i, R i) (R i) := (Pi.evalRingHom R i).toAlgebra
+  let i₂ : Algebra (∀ i, S i) (S i) := (Pi.evalRingHom S i).toAlgebra
+  refine ⟨R i, S i, inferInstance, inferInstance, i₁, i₂, ?_, ?_, f i, ?_, hf i⟩
+  · refine IsLocalization.away_of_isIdempotentElem ?_ (RingHom.ker_evalRingHom _ _)
+      ((Pi.evalRingHom R i).surjective)
+    simp [IsIdempotentElem, ← Pi.single_mul_left]
+  · have : (Pi.ringHom fun i ↦ (f i).comp <| Pi.evalRingHom R i)
+        (Pi.single i 1) = Pi.single i 1 := by
+      ext j
+      simp only [Pi.single, Pi.ringHom_apply, coe_comp, Function.comp_apply, Pi.evalRingHom_apply,
+        Function.update, Pi.zero_apply]
+      by_cases h : j = i
+      · subst h
+        simp
+      · simp [h]
+    simp [this]
+    refine IsLocalization.away_of_isIdempotentElem ?_ (RingHom.ker_evalRingHom _ _)
+      ((Pi.evalRingHom S i).surjective)
+    simp [IsIdempotentElem, ← Pi.single_mul_left]
+  · ext j x
+    simp [RingHom.algebraMap_toAlgebra]
 
 lemma _root_.Pi.algebraMap_instAlgebraForall_apply {ι : Type*} (A : ι → Type*)
     [∀ i, Semiring (A i)] (S : ι → Type*) [∀ i, CommSemiring (S i)]
@@ -78,7 +104,7 @@ lemma CodescendsAlong.of_forall_flat {R S : Type u} [CommRing R] [CommRing S] [A
       AlgEquiv.piCongrRight, Algebra.TensorProduct.piRight]
   rw [this]
   apply hPi.1
-  exact hPl.pi _ _ _ _ (fun i ↦ H i.1)
+  exact hPl.pi hPi _ _ _ (fun i ↦ H i.1)
 
 lemma CodescendsAlong.of_forall_exists_flat {R S : Type u} [CommRing R] [CommRing S] [Algebra R S]
     (hPi : RespectsIso P) (hPl : OfLocalizationSpan P)
@@ -91,6 +117,7 @@ lemma CodescendsAlong.of_forall_exists_flat {R S : Type u} [CommRing R] [CommRin
   choose T h1 h2 hmem _ ho hT using H
   exact hP.of_forall_flat _ hPi hPl T ho (Set.iUnion_eq_univ_iff.mpr fun p ↦ ⟨p, hmem p⟩) hT
 
+set_option maxHeartbeats 0 in
 lemma CodescendsAlong.algHom_of_forall_exists_flat {R A B : Type u} [CommRing R]
     [CommRing A] [CommRing B] [Algebra R A] [Algebra R B]
     (hPi : RespectsIso P) (hPl : OfLocalizationSpan P)
@@ -105,10 +132,40 @@ lemma CodescendsAlong.algHom_of_forall_exists_flat {R A B : Type u} [CommRing R]
   apply hP.of_forall_exists_flat _ hPi hPl
   intro p
   obtain ⟨T, _, _, ⟨q, hq⟩, hflat, ho, hp⟩ := H ((algebraMap R A).specComap p)
+  have heq : Set.range (algebraMap A (A ⊗[R] T)).specComap =
+      (PrimeSpectrum.comap (algebraMap R A)) ⁻¹'
+        (Set.range <| PrimeSpectrum.comap (algebraMap R T)) :=
+    -- needs pullback carrier or similar
+    sorry
+  let e : T ⊗[R] B ≃ₐ[R] (A ⊗[R] T) ⊗[A] B :=
+    .trans ((Algebra.TensorProduct.comm _ _ _).restrictScalars R)
+      (.trans
+        ((Algebra.TensorProduct.cancelBaseChange R A A B T).symm.restrictScalars R)
+        ((Algebra.TensorProduct.comm _ _ _).restrictScalars R))
+  have hdiag' :
+    IsScalarTower.toAlgHom R (A ⊗[R] T) ((A ⊗[R] T) ⊗[A] B) =
+      (AlgHom.comp e.toAlgHom
+        ((Algebra.TensorProduct.map (AlgHom.id T T) f).restrictScalars R)).comp
+        (Algebra.TensorProduct.comm _ _ _).toAlgHom := by
+    ext a
+    · suffices h : (a ⊗ₜ[R] (1 : T)) ⊗ₜ[A] (1 : B) = (1 ⊗ₜ[R] 1) ⊗ₜ[A] f a by
+        simp [e, h]
+      rw [← mul_one a, ← smul_eq_mul, ← TensorProduct.smul_tmul', TensorProduct.smul_tmul,
+        Algebra.smul_def, mul_one, RingHom.algebraMap_toAlgebra, smul_eq_mul, mul_one,
+        AlgHom.toRingHom_eq_coe, coe_coe]
+    · simp [e]
+  replace hdiag' := congr($(hdiag').toRingHom)
+  simp only [AlgHom.toRingHom_eq_coe, IsScalarTower.coe_toAlgHom,
+    AlgEquiv.toAlgHom_eq_coe, AlgHom.comp_toRingHom] at hdiag'
   refine ⟨A ⊗[R] T, inferInstance, inferInstance, ?_, inferInstance, ?_, ?_⟩
-  · sorry
-  · sorry
-  · sorry
+  · rw [heq]
+    use q
+    exact hq
+  · rw [heq]
+    exact ho.preimage (PrimeSpectrum.comap (algebraMap R A)).2
+  · rw [hdiag']
+    exact hPi.2 _ (Algebra.TensorProduct.comm R A T).toRingEquiv
+      (hPi.1 _ e.toRingEquiv hp)
 
 end RingHom
 
@@ -133,24 +190,26 @@ def AlgHom.IsSplit (f : A →ₐ[R] B) : Prop :=
     (σ : Fin m → Fin n),
     f = eB.symm.toAlgHom.comp ((AlgHom.compRight R R σ).comp eA)
 
-variable (S) in
-lemma AlgHom.IsSplit.tensorProductMap {f : A →ₐ[R] B} (hf : f.IsSplit) :
-    (Algebra.TensorProduct.map (.id S S) f).IsSplit :=
-  sorry
-
-variable (S) in
-lemma AlgHom.IsSplit.iff_of_isScalarTower
-    (T : Type u) [CommRing T] [Algebra R T] [Algebra S T]
-    [IsScalarTower R S T] (f : A →ₐ[R] B) :
-    (Algebra.TensorProduct.map (.id T T) f).IsSplit ↔
-      (Algebra.TensorProduct.map (.id T T)
-        (Algebra.TensorProduct.map (.id S S) f)).IsSplit :=
-  sorry
-
-namespace Algebra
+lemma AlgHom.IsSplit.mk (f : A →ₐ[R] B) {E F : Type*} [_root_.Finite E] [_root_.Finite F]
+    (eA : A ≃ₐ[R] (E → R)) (eB : B ≃ₐ[R] (F → R)) (σ : F → E)
+    (h : eB.toAlgHom.comp f = (AlgHom.compRight R R σ).comp eA.toAlgHom) :
+    f.IsSplit := by
+  cases nonempty_fintype E
+  cases nonempty_fintype F
+  let eE := Fintype.equivFin E
+  let eF := Fintype.equivFin F
+  refine ⟨Fintype.card E, Fintype.card F, eA.trans ?_, eB.trans ?_, eE ∘ σ ∘ eF.symm, ?_⟩
+  · exact AlgEquiv.piCongrLeft R (fun _ ↦ R) eE
+  · exact AlgEquiv.piCongrLeft R (fun _ ↦ R) eF
+  · ext x
+    apply eB.injective
+    have := DFunLike.congr_fun h x
+    simp only [AlgEquiv.toAlgHom_eq_coe, coe_comp, AlgHom.coe_coe, Function.comp_apply] at this
+    ext i
+    simp [this, AlgHom.compRight, AlgEquiv.piCongrLeft, AlgEquiv.piCongrLeft']
 
 noncomputable
-def TensorProduct.piScalarRight (R S A : Type*) [CommSemiring R] [CommSemiring S]
+def Algebra.TensorProduct.piScalarRight (R S A : Type*) [CommSemiring R] [CommSemiring S]
     [Algebra R S] [CommSemiring A] [Algebra R A] [Algebra S A] [IsScalarTower R S A]
     (ι : Type*) [Fintype ι] [DecidableEq ι] :
     A ⊗[R] (ι → R) ≃ₐ[S] ι → A :=
@@ -158,12 +217,88 @@ def TensorProduct.piScalarRight (R S A : Type*) [CommSemiring R] [CommSemiring S
     AlgEquiv.piCongrRight (fun _ ↦ Algebra.TensorProduct.rid R S A)
 
 @[simp]
-lemma TensorProduct.piScalarRight_tmul (R S A : Type*) [CommSemiring R] [CommSemiring S]
+lemma Algebra.TensorProduct.piScalarRight_tmul (R S A : Type*) [CommSemiring R] [CommSemiring S]
     [Algebra R S] [CommSemiring A] [Algebra R A] [Algebra S A] [IsScalarTower R S A]
     (ι : Type*) [Fintype ι] [DecidableEq ι]
     (x : A) (y : ι → R) :
     piScalarRight R S A ι (x ⊗ₜ y) = fun i ↦ y i • x :=
   rfl
+
+lemma AlgHom.compRight_apply' {E F : Type*} (R S : Type*) [CommRing R] [CommRing S] [Algebra R S]
+    (σ : E → F) (x : F → S) :
+    AlgHom.compRight R S σ x = fun i ↦ x (σ i) :=
+  rfl
+
+variable (S) in
+lemma AlgHom.IsSplit.tensorProductMap {f : A →ₐ[R] B} (hf : f.IsSplit) :
+    (Algebra.TensorProduct.map (.id S S) f).IsSplit := by
+  obtain ⟨n, m, eA, eB, σ, hf⟩ := hf
+  refine AlgHom.IsSplit.mk (E := Fin n) (F := Fin m) _
+    ((Algebra.TensorProduct.congr .refl eA).trans (Algebra.TensorProduct.piScalarRight ..))
+    ((Algebra.TensorProduct.congr .refl eB).trans (Algebra.TensorProduct.piScalarRight ..)) σ ?_
+  ext a
+  simp [hf]
+
+variable (S) in
+lemma AlgHom.IsSplit.iff_of_isScalarTower
+    (T : Type u) [CommRing T] [Algebra R T] [Algebra S T]
+    [IsScalarTower R S T] (f : A →ₐ[R] B) :
+    (Algebra.TensorProduct.map (.id T T) f).IsSplit ↔
+      (Algebra.TensorProduct.map (.id T T)
+        (Algebra.TensorProduct.map (.id S S) f)).IsSplit := by
+  refine ⟨?_, ?_⟩
+  · rintro ⟨n, m, eA, eB, σ, hf⟩
+    refine AlgHom.IsSplit.mk (E := Fin n) (F := Fin m) _ ?_ ?_ σ ?_
+    exact (Algebra.TensorProduct.cancelBaseChange _ _ _ _ _).trans eA
+    exact (Algebra.TensorProduct.cancelBaseChange _ _ _ _ _).trans eB
+    ext a i
+    have := DFunLike.congr_fun hf (1 ⊗ₜ a)
+    simp only [Algebra.TensorProduct.map_tmul, coe_id, id_eq, AlgEquiv.toAlgHom_eq_coe, coe_comp,
+      AlgHom.coe_coe, Function.comp_apply] at this
+    simp [this]
+  · rintro ⟨n, m, eA, eB, σ, hf⟩
+    refine AlgHom.IsSplit.mk (E := Fin n) (F := Fin m) _ ?_ ?_ σ ?_
+    exact (Algebra.TensorProduct.cancelBaseChange _ _ _ _ _).symm.trans eA
+    exact (Algebra.TensorProduct.cancelBaseChange _ _ _ _ _).symm.trans eB
+    ext a i
+    have := DFunLike.congr_fun hf (1 ⊗ₜ (1 ⊗ₜ a))
+    simp only [Algebra.TensorProduct.map_tmul, coe_id, id_eq, AlgEquiv.toAlgHom_eq_coe, coe_comp,
+      AlgHom.coe_coe, Function.comp_apply] at this
+    simp [this]
+
+lemma RingHom.Bijective.ofLocalizationSpan :
+    RingHom.OfLocalizationSpan (fun f ↦ Function.Bijective f) := by
+  introv R hs hf
+  algebraize [f]
+  let f' (r : s) :=
+    (IsScalarTower.toAlgHom R S (Localization.Away (Algebra.ofId R S <| r.val))).toLinearMap
+  have (r : s) : IsLocalizedModule (Submonoid.powers r.val) (f' r) := by
+    rw [isLocalizedModule_iff_isLocalization]
+    have : Algebra.algebraMapSubmonoid S (.powers r.val) = .powers (Algebra.ofId R S <| r.val) :=
+      Submonoid.map_powers _ r.val
+    rw [this]
+    infer_instance
+  apply bijective_of_isLocalized_span s hs (F := Algebra.linearMap R S)
+    (fun x : s ↦ Localization.Away x.val) (fun x : s ↦ Algebra.linearMap _ _) _ f'
+  intro r
+  let fr := (Localization.awayMapₐ (Algebra.ofId R S) r.val).toLinearMap
+  have heq :
+      (IsLocalizedModule.map (.powers r.val) (Algebra.linearMap R (Localization.Away r.val))
+      (f' r))
+        (Algebra.linearMap R S) =
+        (Localization.awayMapₐ (Algebra.ofId R S) r.val).toLinearMap := by
+    apply IsLocalizedModule.linearMap_ext (.powers r.val)
+      (f := (Algebra.linearMap R (Localization.Away r.val)))
+      (f' := f' r)
+    rw [IsLocalizedModule.map_comp]
+    ext
+    simp [f']
+  rw [heq]
+  exact hf r
+
+#exit
+
+namespace Algebra
 
 lemma exists_isSplitOfRank [Module.Finite R A] [Algebra.Etale R A]
     (p : PrimeSpectrum R) :
@@ -174,23 +309,23 @@ lemma exists_isSplitOfRank [Module.Finite R A] [Algebra.Etale R A]
       Algebra.IsSplitOfRank n S (S ⊗[R] A) := by
   wlog h : ∃ (n : ℕ), Module.rankAtStalk (R := R) A = n
   · obtain ⟨r, hr, hn⟩ := Algebra.exists_cover_rankAtStalk_eq A p.asIdeal
-    let p' : PrimeSpectrum (Localization.Away r) := sorry
-    obtain ⟨S, _, _, n, _, ho, hmem, h⟩ := this p' ⟨_, hn⟩
+    obtain ⟨p', rfl⟩ : p ∈ Set.range
+        (PrimeSpectrum.comap <| algebraMap R (Localization.Away r)) := by
+      rwa [PrimeSpectrum.localization_away_comap_range _ r]
+    obtain ⟨S, _, _, n, _, ho, ⟨q, rfl⟩, h⟩ := this p' ⟨_, hn⟩
     let _ : Algebra R S := Algebra.compHom S (algebraMap R (Localization.Away r))
     have : IsScalarTower R (Localization.Away r) S := IsScalarTower.of_algebraMap_eq' rfl
     let e : S ⊗[Localization.Away r] Localization.Away r ⊗[R] A ≃ₐ[S] S ⊗[R] A :=
       TensorProduct.cancelBaseChange ..
-    refine ⟨S, inferInstance, inferInstance, n, ?_, ?_, ?_, ?_⟩
+    refine ⟨S, inferInstance, inferInstance, n, ?_, ?_, ⟨q, rfl⟩, ?_⟩
     · exact Module.Flat.trans R (Localization.Away r) S
     · rw [IsScalarTower.algebraMap_eq R (Localization.Away r) S, PrimeSpectrum.comap_comp,
         ContinuousMap.coe_comp]
       exact (PrimeSpectrum.localization_away_isOpenEmbedding _ r).isOpenMap.comp ho
-    · sorry
     · exact IsSplitOfRank.of_equiv (S := S ⊗[Localization.Away r] Localization.Away r ⊗[R] A) e
   obtain ⟨n, hn⟩ := h
   obtain ⟨S, _, _, _, _, hS⟩ := Algebra.IsSplitOfRank.exists_isSplitOfRank_tensorProduct hn
   obtain ⟨p, rfl⟩ := PrimeSpectrum.specComap_surjective_of_faithfullyFlat (B := S) p
-  have hr : Module.rankAtStalk (R := S) (S ⊗[R] A) = ↑n := sorry
   have homap : IsOpenMap (PrimeSpectrum.comap (algebraMap R S)) :=
     PrimeSpectrum.isOpenMap_comap_of_hasGoingDown_of_finitePresentation
   refine ⟨S, inferInstance, inferInstance, n, ?_, homap, ⟨p, rfl⟩, hS⟩
@@ -231,16 +366,16 @@ lemma exists_isSplit [Module.Finite R A] [Algebra.Etale R A]
   let f' : (Fin n → R) →ₐ[R] Fin m → R := eB.toAlgHom.comp (f.comp eA.symm.toAlgHom)
   obtain ⟨r, hr, σ, hσ⟩ := AlgHom.exists_cover_eq_compRight'' f' p.asIdeal
   refine ⟨Localization.Away r, inferInstance, inferInstance, inferInstance,
-      ?_, ?_, n, m, ?_, ?_, ?_, ?_⟩
+      ?_, ?_, ?_⟩
   · exact (PrimeSpectrum.localization_away_isOpenEmbedding _ r).isOpenMap
-  · -- use hr
-    sorry
-  · exact TensorProduct.congr .refl eA |>.trans (TensorProduct.piScalarRight ..)
-  · exact TensorProduct.congr .refl eB |>.trans (TensorProduct.piScalarRight ..)
-  · exact σ
-  · ext a
-    -- use hσ
-    sorry
+  · show p ∈ Set.range (PrimeSpectrum.comap <| algebraMap R (Localization.Away r))
+    rwa [PrimeSpectrum.localization_away_comap_range _ r]
+  · let e := TensorProduct.piScalarRight R (Localization.Away r) (Localization.Away r) (Fin m)
+    apply AlgHom.IsSplit.mk (E := Fin n) (F := Fin m) _
+      (TensorProduct.congr .refl eA |>.trans (TensorProduct.piScalarRight ..))
+      (TensorProduct.congr .refl eB |>.trans (TensorProduct.piScalarRight ..)) σ
+    ext a : 2
+    simpa [f', e] using congr(e ($(hσ) (1 ⊗ₜ eA a)))
 
 local notation f " ≟ₐ " g => AlgHom.equalizer f g
 local notation S " ⊗ₘ " f => Algebra.TensorProduct.map (AlgHom.id S S) f
@@ -283,10 +418,6 @@ lemma tensorEqualizer_compRight_bijective {E F : Type*} [Finite E] [Finite F]
   rw [this]
   dsimp
   exact eq₃.symm.bijective.comp (e₂.symm.bijective.comp <| eq₂.bijective.comp eq₁.bijective)
-
-lemma _root_.RingHom.Bijective.ofLocalizationSpan :
-    RingHom.OfLocalizationSpan (fun f ↦ Function.Bijective f) :=
-  sorry
 
 lemma TensorProduct.map_bijective_of_bijective {R S A B C D : Type*} [CommSemiring R]
     [CommSemiring S] [Algebra R S]
