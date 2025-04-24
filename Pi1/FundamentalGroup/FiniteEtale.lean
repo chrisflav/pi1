@@ -5,6 +5,8 @@ Authors: Christian Merten
 -/
 import Pi1.Mathlib.RingTheory.RingHom.Etale
 import Pi1.FundamentalGroup.AffineAnd
+import Pi1.RingTheory.StableProperties
+import Pi1.RingTheory.FiniteEtale.Equalizer
 
 /-!
 # Finite étale morphisms
@@ -41,19 +43,24 @@ lemma isFiniteEtale_algebraMap_iff {R S : Type u} [CommRing R] [CommRing S] [Alg
   congr!
   exact Algebra.algebra_ext _ _ fun _ ↦ rfl
 
-lemma IsFiniteEtale.iff_finite_and_etale
+namespace IsFiniteEtale
+
+lemma iff_finite_and_etale
     {R S : Type u} [CommRing R] [CommRing S] (f : R →+* S) :
     f.IsFiniteEtale ↔ f.Finite ∧ f.Etale := by
   rw [IsFiniteEtale, Finite, Etale]
   rw [Algebra.isFiniteEtale_iff]
 
-namespace IsFiniteEtale
+lemma respectsIso : RespectsIso IsFiniteEtale := sorry
 
-lemma hasFiniteProducts : HasFiniteProducts IsFiniteEtale := sorry
+lemma hasFiniteProducts : HasFiniteProducts IsFiniteEtale := by
+  introv R _ hf
+  simp_rw [isFiniteEtale_algebraMap_iff] at hf ⊢
+  sorry
 
 lemma hasEqualizers : HasEqualizers IsFiniteEtale := sorry
 
-lemma respectsIso : RespectsIso IsFiniteEtale := sorry
+lemma hasStableEqualizers : HasStableEqualizers IsFiniteEtale := sorry
 
 end IsFiniteEtale
 
@@ -195,6 +202,24 @@ lemma mk_hom {T : Scheme.{u}} (f : T ⟶ X) [IsFiniteEtale f] : (mk f).hom = f :
 
 @[simp]
 lemma mk_left {T : Scheme.{u}} (f : T ⟶ X) [IsFiniteEtale f] : (mk f).left = T := rfl
+
+open RingHom in
+instance {Y : Scheme.{u}} (f : X ⟶ Y) :
+    PreservesFiniteColimits (pullback f) := by
+  have : (toMorphismProperty RingHom.IsFiniteEtale).IsStableUnderCobaseChange :=
+    sorry
+  have (R S : CommRingCat.{u}) (f : R ⟶ S) :
+      PreservesFiniteLimits (MorphismProperty.Under.pushout
+        (RingHom.toMorphismProperty RingHom.IsFiniteEtale) ⊤ f) := by
+    apply CommRingCat.preservesFiniteLimits_pushout_of_hasStableEqualizers
+    · exact IsFiniteEtale.respectsIso
+    · exact IsFiniteEtale.hasFiniteProducts
+    · exact IsFiniteEtale.hasEqualizers
+    · exact IsFiniteEtale.hasStableEqualizers
+  apply AffineAnd.preservesFiniteColimits_pullback
+  · exact IsFiniteEtale.respectsIso
+  · exact IsFiniteEtale.hasFiniteProducts
+  · exact IsFiniteEtale.hasEqualizers
 
 end FiniteEtale
 

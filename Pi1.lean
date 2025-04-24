@@ -51,5 +51,6 @@ import Pi1.RingTheory.KerTensor
 import Pi1.RingTheory.RankAtStalk
 import Pi1.RingTheory.SmoothDescent
 import Pi1.RingTheory.SmoothFlat
+import Pi1.RingTheory.StableProperties
 import Pi1.RingTheory.TotallySplit
 import Pi1.RingTheory.Transcendence
