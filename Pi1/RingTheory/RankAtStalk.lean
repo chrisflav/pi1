@@ -1,11 +1,11 @@
-import Mathlib.LinearAlgebra.FreeModule.PID
+import Mathlib.LinearAlgebra.FreeModule.Finite.Matrix
+import Mathlib.LinearAlgebra.Trace
 import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.LocalProperties.Exactness
 import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
 import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
 import Mathlib.RingTheory.Support
-import Mathlib.RingTheory.LocalProperties.Exactness
-import Mathlib.LinearAlgebra.Trace
-import Pi1.Mathlib.Algebra.Module.LocalizedModule.Basic
+import Mathlib.RingTheory.TensorProduct.IsBaseChangePi
 import Pi1.Mathlib.RingTheory.RingHom.Integral
 
 universe u

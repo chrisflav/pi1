@@ -20,7 +20,7 @@ namespace IsEtale
 instance (priority := 900) {X Y : Scheme.{u}} (f : X ⟶ Y) [IsEtale f] :
     FormallyUnramified f where
   formallyUnramified_of_affine_subset U V e := by
-    have : RingHom.Locally (RingHom.IsStandardSmoothOfRelativeDimension.{0, 0} 0)
+    have : RingHom.Locally (RingHom.IsStandardSmoothOfRelativeDimension 0)
         (f.appLE (↑U) (↑V) e).hom := by
       apply HasRingHomProperty.appLE (P := @IsSmoothOfRelativeDimension 0)
       infer_instance
@@ -29,7 +29,7 @@ instance (priority := 900) {X Y : Scheme.{u}} (f : X ⟶ Y) [IsEtale f] :
       intro R S _ _ f hf
       algebraize [f]
       rw [RingHom.FormallyUnramified]
-      have : Algebra.IsStandardSmoothOfRelativeDimension.{0, 0} 0 R S := hf
+      have : Algebra.IsStandardSmoothOfRelativeDimension 0 R S := hf
       infer_instance
     rwa [← RingHom.locally_iff_of_localizationSpanTarget
       RingHom.FormallyUnramified.respectsIso

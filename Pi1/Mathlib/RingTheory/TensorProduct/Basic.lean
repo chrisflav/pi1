@@ -23,35 +23,3 @@ lemma Algebra.TensorProduct.map_mul_of_map_mul_tmul {R S A B C : Type*} [CommRin
       | zero => simp
       | add c d hc hd => simp [hc, hd, mul_add]
       | tmul => apply hf
-
-noncomputable
-def Algebra.TensorProduct.cancelBaseChange (R S T A B : Type*)
-    [CommRing R] [CommRing S] [CommRing T] [CommRing A] [CommRing B]
-    [Algebra R S] [Algebra R T] [Algebra R A] [Algebra R B]
-    [Algebra T A] [IsScalarTower R T A] [Algebra S A]
-    [IsScalarTower R S A] [Algebra S T] [IsScalarTower S T A] :
-    A ⊗[S] (S ⊗[R] B) ≃ₐ[T] A ⊗[R] B :=
-  AlgEquiv.symm <| AlgEquiv.ofLinearEquiv
-    (TensorProduct.AlgebraTensorModule.cancelBaseChange R S T A B).symm
-    (by simp [Algebra.TensorProduct.one_def]) <|
-      map_mul_of_map_mul_tmul (fun _ _ _ _ ↦ by simp)
-
-@[simp]
-lemma Algebra.TensorProduct.cancelBaseChange_tmul (R S T A B : Type*)
-    [CommRing R] [CommRing S] [CommRing T] [CommRing A] [CommRing B]
-    [Algebra R S] [Algebra R T] [Algebra R A] [Algebra R B]
-    [Algebra T A] [IsScalarTower R T A] [Algebra S A]
-    [IsScalarTower R S A] [Algebra S T] [IsScalarTower S T A]
-    (a : A) (s : S) (b : B) :
-    Algebra.TensorProduct.cancelBaseChange R S T A B (a ⊗ₜ (s ⊗ₜ b)) = (s • a) ⊗ₜ b :=
-  TensorProduct.AlgebraTensorModule.cancelBaseChange_tmul R S T a b s
-
-@[simp]
-lemma Algebra.TensorProduct.cancelBaseChange_symm_tmul (R S T A B : Type*)
-    [CommRing R] [CommRing S] [CommRing T] [CommRing A] [CommRing B]
-    [Algebra R S] [Algebra R T] [Algebra R A] [Algebra R B]
-    [Algebra T A] [IsScalarTower R T A] [Algebra S A]
-    [IsScalarTower R S A] [Algebra S T] [IsScalarTower S T A]
-    (a : A) (b : B) :
-    (Algebra.TensorProduct.cancelBaseChange R S T A B).symm (a ⊗ₜ b) = a ⊗ₜ (1 ⊗ₜ b) :=
-  TensorProduct.AlgebraTensorModule.cancelBaseChange_symm_tmul R S T a b

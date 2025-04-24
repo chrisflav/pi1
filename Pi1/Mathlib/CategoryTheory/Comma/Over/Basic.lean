@@ -30,9 +30,4 @@ instance [F.Full] [F.EssSurj] : (Over.post (X := X) F).EssSurj where
     use Over.mk f
     exact ⟨Over.isoMk e⟩
 
-def CategoryTheory.Functor.FullyFaithful.over (h : F.FullyFaithful) :
-    (Over.post (X := X) F).FullyFaithful where
-  preimage {A B} f := Over.homMk (h.preimage f.left) <|
-    h.map_injective (by simpa using Over.w f)
-
 instance [F.IsEquivalence] : (Over.post (X := X) F).IsEquivalence where

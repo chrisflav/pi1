@@ -131,8 +131,6 @@ instance {ι : Type u} [Finite ι] (R : Type u) [CommRing R] :
   rw [IsFiniteEtale.SpecMap_iff]
   simp
   rw [RingHom.isFiniteEtale_algebraMap_iff]
-  have : Algebra.Etale R R :=
-    Algebra.instEtaleOfIsStandardSmoothOfRelativeDimensionOfNatNat.{u, u, u}
   constructor
 
 @[simps]
@@ -163,8 +161,6 @@ instance (S : FintypeCat.{u}) :
   have : IsEtale f := by
     rw [HasRingHomProperty.Spec_iff (P := @IsEtale)]
     simp only [CommRingCat.hom_ofHom, RingHom.etale_algebraMap_iff]
-    have : Algebra.Etale Ω Ω :=
-      Algebra.instEtaleOfIsStandardSmoothOfRelativeDimensionOfNatNat.{u, u, u}
     infer_instance
   have : Finite (Spec (CommRingCat.of (S.carrier → Ω))).toPresheafedSpace :=
     finite_of_isEtale_of_isAffineHom _ f

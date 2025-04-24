@@ -74,8 +74,8 @@ def _root_.KaehlerDifferential.tensorKaehlerCancelBase : B ⊗[A] Ω[A⁄R] ≃�
     intro b x
     dsimp
     induction b using h.1.inductionOn with
-    | h₁ => rw [zero_smul, LinearEquiv.map_zero, zero_smul]
-    | h₂ a =>
+    | zero => rw [zero_smul, LinearEquiv.map_zero, zero_smul]
+    | tmul a =>
       simp only [AlgHom.toLinearMap_apply, IsScalarTower.coe_toAlgHom', algebraMap_smul]
       induction x with
       | zero => rw [smul_zero, LinearEquiv.map_zero, smul_zero]
@@ -83,8 +83,8 @@ def _root_.KaehlerDifferential.tensorKaehlerCancelBase : B ⊗[A] Ω[A⁄R] ≃�
       | tmul s x =>
       show f.symm (s ⊗ₜ[R] (a • x)) = a • f.symm (s ⊗ₜ[R] x)
       simp only [f, IsPushout.cancelBaseChange_symm_tmul, tmul_smul]
-    | h₃ s b h => rw [smul_assoc, map_smul, h, smul_assoc]
-    | h₄ b₁ b₂ h1 h2 => rw [add_smul, add_smul, map_add, h1, h2]
+    | smul s b h => rw [smul_assoc, map_smul, h, smul_assoc]
+    | add b₁ b₂ h1 h2 => rw [add_smul, add_smul, map_add, h1, h2]
 
 @[simp]
 lemma _root_.KaehlerDifferential.tensorKaehlerCancelBase_tmul (x : Ω[A⁄R]) :

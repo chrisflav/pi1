@@ -231,72 +231,11 @@ lemma PrimeSpectrum.irreducibleSpace_of_isSeparable
   ⟨((Algebra.TensorProduct.isIntegral_includeRight k R Ω).specComap_surjective <|
     Algebra.TensorProduct.includeRight_injective (algebraMap k Ω).injective).nonempty⟩
 
-@[simp]
-lemma PrimeSpectrum.zeroLocus_nilradical {R : Type*} [CommRing R] :
-    PrimeSpectrum.zeroLocus (nilradical R : Set R) = Set.univ := by
-  rw [Set.eq_univ_iff_forall]
-  intro x
-  simpa using nilradical_le_prime x.asIdeal
-
-lemma PrimeSpectrum.zeroLocus_eq_univ_iff {R : Type*} [CommRing R] (s : Set R) :
-    PrimeSpectrum.zeroLocus s = Set.univ ↔ s ⊆ nilradical R := by
-  refine ⟨fun hs ↦ ?_, fun hs ↦ ?_⟩
-  · simp_rw [nilradical_eq_sInf, Submodule.sInf_coe, Set.mem_setOf_eq, Set.subset_iInter_iff]
-    intro I hI
-    exact (Set.eq_univ_iff_forall.mp hs) ⟨I, hI⟩
-  · rw [← Set.univ_subset_iff, ← PrimeSpectrum.zeroLocus_nilradical]
-    exact PrimeSpectrum.zeroLocus_anti_mono hs
-
 lemma PrimeSpectrum.comap_quotientMk_surjective_of_le_nilradical {R : Type*} [CommRing R]
     (I : Ideal R) (hle : I ≤ nilradical R) :
     Function.Surjective (PrimeSpectrum.comap <| Ideal.Quotient.mk I) := by
   simpa [← Set.range_eq_univ, range_comap_of_surjective _ _ Ideal.Quotient.mk_surjective,
     zeroLocus_eq_univ_iff]
-
-lemma PrimeSpectrum.isHomeomorph_comap {R S : Type*} [CommRing R] [CommRing S] (f : R →+* S)
-    (H : ∀ (x : S), ∃ n > 0, x ^ n ∈ f.range)
-    (hker : RingHom.ker f ≤ nilradical R) :
-    IsHomeomorph (PrimeSpectrum.comap f) := by
-  have h1 : Function.Injective (PrimeSpectrum.comap f) := by
-    intro q q' hqq'
-    ext x
-    by_contra! h
-    wlog ha : x ∈ q.asIdeal ∧ x ∉ q'.asIdeal generalizing q q'
-    · exact this hqq'.symm (Or.inl <| by tauto) (by tauto)
-    obtain ⟨hxq, hxq'⟩ := ha
-    obtain ⟨n, hn, y, hy⟩ := H x
-    simp only [PrimeSpectrum.ext_iff, SetLike.ext'_iff, PrimeSpectrum.comap_asIdeal,
-      Ideal.coe_comap] at hqq'
-    have : x ^ n ∈ q'.asIdeal := by
-      rw [← hy, ← SetLike.mem_coe, ← Set.mem_preimage, ← hqq', Set.mem_preimage, hy]
-      exact Ideal.pow_mem_of_mem q.asIdeal hxq n hn
-    exact hxq' (q'.2.mem_of_pow_mem n this)
-  have hint : f.kerLift.IsIntegral := by
-    intro x
-    obtain ⟨n, hn, y, hy⟩ := H x
-    use Polynomial.X ^ n - Polynomial.C (Ideal.Quotient.mk _ y)
-    simp only [Polynomial.eval₂_sub, Polynomial.eval₂_X_pow, ← hy, Polynomial.eval₂_C,
-      RingHom.kerLift_mk, sub_self, and_true]
-    apply Polynomial.monic_X_pow_add
-    simpa using lt_of_le_of_lt Polynomial.degree_C_le (by simpa using hn)
-  have : f = f.kerLift.comp (Ideal.Quotient.mk _) := rfl
-  have hbij : Function.Bijective (PrimeSpectrum.comap f) := by
-    refine ⟨h1, ?_⟩
-    rw [this, PrimeSpectrum.comap_comp]
-    dsimp
-    apply Function.Surjective.comp
-    · exact PrimeSpectrum.comap_quotientMk_surjective_of_le_nilradical _ hker
-    · exact hint.specComap_surjective f.kerLift_injective
-  refine ⟨(PrimeSpectrum.comap f).continuous, ?_, h1, hbij.2⟩
-  · rw [PrimeSpectrum.isTopologicalBasis_basic_opens.isOpenMap_iff]
-    rintro - ⟨s, rfl⟩
-    obtain ⟨n, hn, r, hr⟩ := H s
-    have : (PrimeSpectrum.comap f) '' (PrimeSpectrum.basicOpen s) = PrimeSpectrum.basicOpen r := by
-      refine Set.preimage_injective.mpr hbij.2 ?_
-      rw [Set.preimage_image_eq _ hbij.1, ← PrimeSpectrum.basicOpen_pow _ n hn, ← hr]
-      rfl
-    rw [this]
-    exact PrimeSpectrum.isOpen_basicOpen
 
 open Algebra
 
@@ -313,77 +252,6 @@ lemma nontrivial_of_expChar (R : Type*) [AddMonoidWithOne R] (q : ℕ) [hq : Exp
     rw [not_nontrivial_iff_subsingleton] at h
     exact hq.ne_one (CharP.eq R inferInstance inferInstance)
 
-lemma PrimeSpectrum.isHomeomorph_comap_of_bijective {R S : Type*} [CommRing R]
-    [CommRing S] {f : R →+* S} (hf : Function.Bijective f) :
-    IsHomeomorph (PrimeSpectrum.comap f) := by
-  refine PrimeSpectrum.isHomeomorph_comap _
-    (fun x ↦ ⟨1, Nat.one_pos, RingHom.range_eq_top_of_surjective f hf.2 ▸ trivial⟩) ?_
-  convert bot_le
-  exact (RingHom.injective_iff_ker_eq_bot _).mp hf.1
-
-lemma TensorProduct.flip_mk_surjective (R S T : Type*) [CommSemiring R]
-    [Semiring S] [Algebra R S] [Semiring T] [Algebra R T]
-    (h : Function.Surjective (algebraMap R T)) :
-    Function.Surjective ((TensorProduct.mk R S T).flip 1) := by
-  rw [← LinearMap.range_eq_top, ← top_le_iff, ← span_tmul_eq_top, Submodule.span_le]
-  rintro _ ⟨s, t, rfl⟩
-  obtain ⟨r, rfl⟩ := h t
-  rw [Algebra.algebraMap_eq_smul_one, ← smul_tmul]
-  exact ⟨r • s, rfl⟩
-
-lemma Algebra.TensorProduct.includeLeft_surjective {R S A B : Type*}
-    [CommSemiring R] [Semiring A] [Algebra R A] [Semiring B] [Algebra R B] [CommSemiring S]
-    [Algebra S A] [SMulCommClass R S A]
-    (h : Function.Surjective (algebraMap R B)) :
-    Function.Surjective (TensorProduct.includeLeft : A →ₐ[S] A ⊗[R] B) :=
-  TensorProduct.flip_mk_surjective R A B h
-
-/-- Purely inseparable field extensions are universal homeomorphisms. -/
-lemma PrimeSpectrum.isHomeomorph_comap_of_isPurelyInseparable (k K : Type*) [Field k] [Field K]
-    [Algebra k K] [IsPurelyInseparable k K] (R : Type*) [CommRing R] [Algebra k R] :
-    IsHomeomorph (PrimeSpectrum.comap <| algebraMap R (R ⊗[k] K)) := by
-  wlog hR : Nontrivial R
-  · rw [not_nontrivial_iff_subsingleton] at hR
-    exact PrimeSpectrum.isHomeomorph_comap_of_bijective
-      ⟨Function.injective_of_subsingleton _, Function.surjective_to_subsingleton _⟩
-  let q := ringExpChar k
-  refine PrimeSpectrum.isHomeomorph_comap _ (fun x ↦ ?_) ?_
-  · obtain (hq|hq) := expChar_is_prime_or_one k q
-    · obtain ⟨n, hn, hr⟩ : ∃ n > 0, x ^ q ^ n ∈ (algebraMap R (R ⊗[k] K)).range := by
-        induction x with
-        | zero => exact ⟨1, Nat.zero_lt_one, 0, by simp [zero_pow_eq, hq.ne_zero]⟩
-        | add x y hx hy =>
-          obtain ⟨n, hn, hx⟩ := hx
-          obtain ⟨m, hm, hy⟩ := hy
-          refine ⟨n + m, by simp [hn], ?_⟩
-          have : ExpChar (R ⊗[k] K) q := by
-            refine expChar_of_injective_ringHom
-              (f := TensorProduct.includeRight.toRingHom.comp (algebraMap k K)) ?_ q
-            exact (Algebra.TensorProduct.includeRight_injective (algebraMap k R).injective).comp
-              (algebraMap k K).injective
-          rw [add_pow_expChar_pow, pow_add]
-          nth_rw 2 [mul_comm]
-          rw [pow_mul, pow_mul]
-          exact Subring.add_mem _ (Subring.pow_mem _ hx _) (Subring.pow_mem _ hy _)
-        | tmul x y =>
-          obtain ⟨n, a, ha⟩ := IsPurelyInseparable.pow_mem k q y
-          refine ⟨n + 1, by simp, ?_⟩
-          have : (x ^ q ^ (n + 1)) ⊗ₜ[k] (y ^ q ^ (n + 1)) =
-              (x ^ q ^ (n + 1)) ⊗ₜ[k] (1 : K) * (1 : R) ⊗ₜ[k] (y ^ q ^ (n + 1)) := by
-            rw [TensorProduct.tmul_mul_tmul, mul_one, one_mul]
-          rw [TensorProduct.tmul_pow, this]
-          refine Subring.mul_mem _ ⟨x ^ q ^ (n + 1), rfl⟩ ⟨algebraMap k R (a ^ q), ?_⟩
-          rw [pow_add, pow_mul, ← IsScalarTower.algebraMap_apply, TensorProduct.algebraMap_apply,
-            TensorProduct.tmul_comm, map_pow, ha, pow_one]
-      exact ⟨q ^ n, Nat.pow_pos hq.pos, hr⟩
-    · have : ExpChar k 1 := ringExpChar.of_eq hq
-      have : CharZero k := charZero_of_expChar_one' k
-      exact ⟨1, Nat.one_pos, (Algebra.TensorProduct.includeLeft_surjective (S := R) <|
-        IsPurelyInseparable.surjective_algebraMap_of_isSeparable k K) _⟩
-  · convert bot_le
-    rw [← RingHom.injective_iff_ker_eq_bot]
-    exact Algebra.TensorProduct.includeLeft_injective (S := R) (algebraMap k K).injective
-
 lemma Function.Surjective.preirreducibleSpace {X Y : Type*} [TopologicalSpace X]
     [TopologicalSpace Y] (f : X → Y) (hfc : Continuous f) (hf : Function.Surjective f)
     [PreirreducibleSpace X] : PreirreducibleSpace Y where
@@ -396,26 +264,6 @@ lemma IsHomeomorph.irreducibleSpace {X Y : Type*} [TopologicalSpace X]
     [IrreducibleSpace X] : IrreducibleSpace Y := by
   have := hf.surjective.preirreducibleSpace _ hf.continuous
   exact ⟨(hf.homeomorph).symm.surjective.nonempty⟩
-
-lemma PrimeSpectrum.isHomeomorph_comap_tensorProductMap_of_isPurelyInseparable
-    (k R : Type*) [CommRing R] [Field k] [Algebra k R]
-    (K : Type*) [Field K] [Algebra k K] (L : Type*) [Field L] [Algebra k L] [Algebra K L]
-    [IsScalarTower k K L] [IsPurelyInseparable K L] :
-    IsHomeomorph (PrimeSpectrum.comap <|
-      (Algebra.TensorProduct.map (Algebra.ofId K L) (AlgHom.id k R)).toRingHom) := by
-  let e : (L ⊗[k] R) ≃ₐ[K] L ⊗[K] (K ⊗[k] R) :=
-    (Algebra.TensorProduct.cancelBaseChange k K K L R).symm
-  let e2 : L ⊗[K] (K ⊗[k] R) ≃ₐ[K] (K ⊗[k] R) ⊗[K] L := Algebra.TensorProduct.comm ..
-  have heq : Algebra.TensorProduct.map (Algebra.ofId K L) (AlgHom.id k R) =
-      (e.symm.toAlgHom.comp e2.symm.toAlgHom).comp
-        (IsScalarTower.toAlgHom K (K ⊗[k] R) ((K ⊗[k] R) ⊗[K] L)) := by
-    ext; simp [e, e2]
-  rw [heq]
-  simp only [AlgEquiv.toAlgHom_eq_coe, AlgHom.toRingHom_eq_coe, AlgHom.comp_toRingHom,
-    AlgEquiv.toAlgHom_toRingHom, IsScalarTower.coe_toAlgHom, comap_comp, ContinuousMap.coe_comp]
-  exact (PrimeSpectrum.isHomeomorph_comap_of_isPurelyInseparable K L (K ⊗[k] R)).comp <|
-    (PrimeSpectrum.isHomeomorph_comap_of_bijective e2.symm.bijective).comp <|
-    PrimeSpectrum.isHomeomorph_comap_of_bijective e.symm.bijective
 
 lemma IsPurelyInseparable.of_surjective {F E : Type*} [CommRing F] [CommRing E] [Algebra F E]
     (h : Function.Surjective (algebraMap F E)) :
@@ -442,7 +290,7 @@ lemma PrimeSpectrum.irreducibleSpace_of_isAlgClosure_of_irreducibleSpace_of_isSe
     IsPurelyInseparable.trans (SeparableClosure k) (AlgebraicClosure k) L
   have : IsPurelyInseparable K L :=
     IsPurelyInseparable.trans K (SeparableClosure k) L
-  have e := isHomeomorph_comap_tensorProductMap_of_isPurelyInseparable k R K L
+  have e := isHomeomorph_comap_tensorProductMap_of_isPurelyInseparable K k R L
   refine ⟨fun h ↦ (e.homeomorph).symm.isHomeomorph.irreducibleSpace, fun h ↦ e.irreducibleSpace⟩
 
 @[stacks 00I7 "For algebraically closed fields."]

@@ -320,4 +320,4 @@ instance (priority := 900) {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
   have : Module.Free R S' := MvPolynomial.free_quotient_of_monic _ (fun i ↦ hm i)
   have : Module.FinitePresentation R S' :=
     Module.finitePresentation_of_projective R S'
-  apply Module.FinitePresentation.trans S'
+  apply Module.FinitePresentation.trans R S S'

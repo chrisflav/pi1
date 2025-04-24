@@ -39,13 +39,11 @@ lemma AlgEquiv.default_apply {R S T : Type*} [CommSemiring R] [Semiring S] [Semi
   rfl
 
 instance (R : Type u) [CommRing R] : Algebra.Etale R R :=
-    Algebra.instEtaleOfIsStandardSmoothOfRelativeDimensionOfNatNat.{u, 0, 0}
+    Algebra.instEtaleOfIsStandardSmoothOfRelativeDimensionOfNatNat.{u}
 
 instance (R : Type u) [CommRing R] (n : Type) [Finite n] :
     Algebra.Etale R (n → R) where
   formallyEtale :=
-    have : Algebra.Etale R R :=
-      Algebra.instEtaleOfIsStandardSmoothOfRelativeDimensionOfNatNat.{u, 0, 0}
     have : Algebra.FormallyEtale R R := Algebra.Etale.formallyEtale
     Algebra.FormallyEtale.instForallOfFinite (fun _ : n ↦ R)
 

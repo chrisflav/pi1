@@ -1,10 +1,10 @@
 import Mathlib.Algebra.BigOperators.Finprod
 import Mathlib.Algebra.BigOperators.Ring.Finset
-import Mathlib.Data.Finite.Card
+import Mathlib.Data.ENat.Lattice
 import Mathlib.Data.Set.Card
-import Mathlib.Topology.Separation.Basic
-import Mathlib.Topology.Connected.LocallyConnected
+import Mathlib.Order.CompletePartialOrder
 import Mathlib.Topology.LocalAtTarget
+import Mathlib.Topology.Separation.Connected
 
 -- PR #23835
 
@@ -267,4 +267,3 @@ instance (X : Type*) [TopologicalSpace X] [LocallyConnectedSpace X] :
     DiscreteTopology (ConnectedComponents X) := by
   rw [ConnectedComponents.discreteTopology_iff]
   exact fun x ↦ isOpen_connectedComponent
-

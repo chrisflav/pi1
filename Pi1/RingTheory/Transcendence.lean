@@ -52,7 +52,7 @@ lemma foobar' [PerfectField k] (Hfg : (⊤ : IntermediateField k K).FG) :
     exact Nat.Prime.ne_zero hp
   · have : ExpChar k 1 := ringExpChar.of_eq h
     have : CharZero k := charZero_of_expChar_one' k
-    obtain ⟨s, hs⟩ := exists_isTranscendenceBasis k (algebraMap k K).injective
+    obtain ⟨s, hs⟩ := exists_isTranscendenceBasis k K
     -- will follow from a PR by Junyan
     have hfin : s.Finite := sorry
     refine ⟨hfin.toFinset, ?_, ?_⟩
