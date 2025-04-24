@@ -15,6 +15,7 @@ import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Finite
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.RingHomProperties
+import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Smooth
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
 import Pi1.Mathlib.CategoryTheory.Comma.Over.Basic
