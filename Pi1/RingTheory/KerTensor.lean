@@ -3,6 +3,8 @@ import Pi1.RingTheory.FiniteEtale.Equalizer
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Pi1.Mathlib.RingTheory.Flat.Equalizer
 
+set_option linter.unusedTactic false
+
 open TensorProduct
 
 universe u
@@ -65,12 +67,37 @@ lemma _root_.Pi.algebraMap_instAlgebraForall_apply {ι : Type*} (A : ι → Type
     algebraMap (∀ i, S i) (∀ i, A i) x = fun i ↦ algebraMap (S i) (A i) (x i) :=
   rfl
 
--- bump mathlib first to use better `Module.pi_induction'`
+instance (R M N : Type*) [CommRing R] [AddCommGroup M] [AddCommGroup N]
+    [Module R M] [Module R N] [Module.Flat R M] [Module.Flat R N] :
+    Module.Flat R (M × N) := by
+  refine ⟨fun P _ _ _ Q _ ↦ ?_⟩
+  have heq :
+      LinearMap.rTensor (M × N) Q.subtype =
+        (TensorProduct.prodRight _ _ _ _ _).symm.toLinearMap ∘ₗ
+          LinearMap.prodMap (Q.subtype.rTensor M) (Q.subtype.rTensor N) ∘ₗ
+          (TensorProduct.prodRight _ _ _ _ _).toLinearMap := by
+    ext <;>
+    · apply (TensorProduct.prodRight R R P M N).injective
+      simp
+  simp only [LinearMap.coe_comp, LinearEquiv.coe_coe, EmbeddingLike.comp_injective,
+    EquivLike.injective_comp, heq]
+  apply Function.Injective.prodMap <;>
+    exact Module.Flat.rTensor_preserves_injective_linearMap _ Subtype.val_injective
+
 instance {ι : Type*} (R : Type*) [CommRing R] [_root_.Finite ι]
     (M : ι → Type*) [∀ i, AddCommGroup (M i)] [∀ i, Module R (M i)]
     [∀ i, Module.Flat R (M i)] :
     Module.Flat R (∀ i, M i) := by
-  sorry
+  refine Module.pi_induction' (ι := ι) R (motive := fun N _ _ ↦ Module.Flat R N)
+    (motive' := fun N _ _ ↦ Module.Flat R N)
+      ?_ ?_ ?_ ?_ M inferInstance
+  · intro N N' _ _ _ _ e _
+    exact Module.Flat.of_linearEquiv e.symm
+  · intro N N' _ _ _ _ e _
+    exact Module.Flat.of_linearEquiv e.symm
+  · infer_instance
+  · intros
+    infer_instance
 
 lemma CodescendsAlong.of_forall_flat {R S : Type u} [CommRing R] [CommRing S] [Algebra R S]
     (hPi : RespectsIso P) (hPl : OfLocalizationSpan P) (hP : CodescendsAlong P FaithfullyFlat)
