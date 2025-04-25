@@ -1,6 +1,9 @@
 import Mathlib.RingTheory.RingHomProperties
 import Mathlib.CategoryTheory.MorphismProperty.Limits
 import Mathlib.Algebra.MvPolynomial.CommRing
+import Pi1.Mathlib.Algebra.Category.Ring.Colimits
+
+set_option linter.unusedTactic false
 
 open TensorProduct
 
@@ -47,7 +50,17 @@ lemma CodescendsAlong.includeRight (hPQ : CodescendsAlong P Q) (h : Q (algebraMa
   apply hPQ R S T (S ⊗[R] T) h H
 
 lemma isStableUnderCobaseChange_toMorphismProperty_iff :
-    (toMorphismProperty P).IsStableUnderCobaseChange ↔ IsStableUnderBaseChange P :=
-  sorry
+    (toMorphismProperty P).IsStableUnderCobaseChange ↔ IsStableUnderBaseChange P := by
+  refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
+  · intro R S R' S' _ _ _ _ _ _ _ _ _ _ _ hsq hRS
+    rw [← CommRingCat.isPushout_iff_isPushout] at hsq
+    exact h.1 (f := CommRingCat.ofHom (algebraMap R S)) hsq.flip hRS
+  · constructor
+    intro R S R' S' f g f' g' hsq hf
+    algebraize [f.hom, g.hom, f'.hom, g'.hom, f'.hom.comp g.hom]
+    have : IsScalarTower R S S' := .of_algebraMap_eq fun x ↦ congr($(hsq.1.1).hom x)
+    have : Algebra.IsPushout R S R' S' :=
+      (CommRingCat.isPushout_iff_isPushout.mp hsq).symm
+    apply h (R := R) (S := S) _ _ hf
 
 end RingHom

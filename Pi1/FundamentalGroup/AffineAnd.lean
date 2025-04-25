@@ -63,7 +63,7 @@ def Comma.mapRightEq [Q.RespectsIso] [W.RespectsIso] (r r' : R₁ ⟶ R₂) (h :
 def Comma.mapRightIso [P.RespectsIso] [Q.RespectsIso] [W.RespectsIso]
       (e : R₁ ≅ R₂) :
     P.Comma L R₁ Q W ≌ P.Comma L R₂ Q W where
-  functor := Comma.mapRight L e.hom (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop) 
+  functor := Comma.mapRight L e.hom (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop)
   inverse := Comma.mapRight L e.inv (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop)
   unitIso := (mapRightId _).symm ≪≫
     mapRightEq _ _ _ e.hom_inv_id.symm (fun X ↦ by simpa using X.prop) ≪≫
@@ -113,7 +113,7 @@ def Comma.mapLeftEq [Q.RespectsIso] [W.RespectsIso] (l l' : L₁ ⟶ L₂) (h : 
 def Comma.mapLeftIso [P.RespectsIso] [Q.RespectsIso] [W.RespectsIso]
       (e : L₁ ≅ L₂) :
     P.Comma L₁ R Q W ≌ P.Comma L₂ R Q W where
-  functor := Comma.mapLeft R e.inv (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop) 
+  functor := Comma.mapLeft R e.inv (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop)
   inverse := Comma.mapLeft R e.hom (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop)
   unitIso := (mapLeftId _).symm ≪≫
     mapLeftEq _ _ _ e.hom_inv_id.symm (fun X ↦ by simpa using X.prop) ≪≫
@@ -149,7 +149,8 @@ noncomputable def pushoutIsoOfIso [HasPushouts C] {X Y X' Y' Z : C} {f : X ⟶ Y
   inv := pushout.map _ _ _ _ (𝟙 Z) e.inv.right e.inv.left (by simp) (by simp)
 
 noncomputable
-def Under.congrPushoutIso [HasPushouts C] [P.IsStableUnderCobaseChange] [Q.RespectsIso]
+def Under.congrPushoutIso [HasPushouts C] [P.IsStableUnderCobaseChange]
+    [Q.IsStableUnderCobaseChange] [Q.RespectsIso]
     {X X' Y Y' : C} (f : X ⟶ Y) (f' : X' ⟶ Y') (eX : X ≅ X') (eY : Y ≅ Y')
     (h : f ≫ eY.hom = eX.hom ≫ f') :
     (Under.congr P Q eX).functor ⋙ Under.pushout P Q f' ≅

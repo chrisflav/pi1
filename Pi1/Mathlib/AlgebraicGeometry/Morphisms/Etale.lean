@@ -8,6 +8,8 @@ import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
 import Mathlib.CategoryTheory.Limits.MorphismProperty
 import Mathlib.CategoryTheory.MorphismProperty.Limits
 import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
+import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Smooth
+import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Pi1.Mathlib.RingTheory.RingHom.Etale
 
 universe u
@@ -69,12 +71,17 @@ instance : HasPullbacks (Etale X) := by
   unfold Etale
   infer_instance
 
-instance : HasRingHomProperty @IsEtale RingHom.Etale :=
-  sorry
+instance : HasRingHomProperty @IsEtale RingHom.Etale where
+  isLocal_ringHomProperty := RingHom.Etale.propertyIsLocal
+  eq_affineLocally' := by
+    rw [HasRingHomProperty.eq_affineLocally (P := @IsEtale)]
+    congr!
+    ext
+    exact (RingHom.Etale.iff_locally_isStandardSmoothOfRelativeDimension _).symm
 
 instance isOpenImmersion_of_mono {X Y : Scheme.{u}} (f : X ⟶ Y) [IsEtale f] [Mono f] :
     IsOpenImmersion f :=
-  sorry
+  inferInstance
 
 end IsEtale
 

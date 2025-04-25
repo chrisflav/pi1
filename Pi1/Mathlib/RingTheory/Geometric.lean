@@ -294,20 +294,18 @@ lemma PrimeSpectrum.irreducibleSpace_of_isAlgClosure_of_irreducibleSpace_of_isSe
   refine ⟨fun h ↦ (e.homeomorph).symm.isHomeomorph.irreducibleSpace, fun h ↦ e.irreducibleSpace⟩
 
 @[stacks 00I7 "For algebraically closed fields."]
-lemma PrimeSpectrum.irreducibleSpace_tensorProduct_of_isSepClosed {k R S : Type*} [Field k]
+proof_wanted PrimeSpectrum.irreducibleSpace_tensorProduct_of_isSepClosed {k R S : Type*} [Field k]
     [IsSepClosed k] [CommRing R] [CommRing S]
     [Algebra k R] [Algebra k S]
     (hR : IrreducibleSpace (PrimeSpectrum R)) (hS : IrreducibleSpace (PrimeSpectrum S)) :
-    IrreducibleSpace (PrimeSpectrum (R ⊗[k] S)) :=
-  sorry
+    IrreducibleSpace (PrimeSpectrum (R ⊗[k] S))
 
 /-- If `Ω` is an algebraic closure of `k` such that `Spec (Ω ⊗[k] R)` is irreducible
 and `K` an arbitrary field extension of `K`, then also `Spec (K ⊗[k] R)` is irreducible. -/
-lemma PrimeSpectrum.irreducibleSpace_of_isAlgClosure (k R : Type*) [CommRing R]
+proof_wanted PrimeSpectrum.irreducibleSpace_of_isAlgClosure (k R : Type*) [CommRing R]
     [Field k] [Algebra k R] (Ω : Type*) [Field Ω] [Algebra k Ω] [IsAlgClosure k Ω]
     (H : IrreducibleSpace (PrimeSpectrum (Ω ⊗[k] R)))
-    (K : Type*) [Field K] [Algebra k K] : IrreducibleSpace (PrimeSpectrum (K ⊗[k] R)) := by
-  sorry
+    (K : Type*) [Field K] [Algebra k K] : IrreducibleSpace (PrimeSpectrum (K ⊗[k] R))
 
 /-- A `k`-algebra `R` is geometrically irreducible if `Spec (AlgebraicClosure k ⊗[k] R)` is
 irreducible. In this case, `Spec (K ⊗[k] R)` is irreducible for every field extension `K` of `k`
@@ -317,14 +315,12 @@ class Algebra.GeometricallyIrreducible (k R : Type*) [Field k] [CommRing R] [Alg
 
 /-- If `Ω` is a separably closed extension of `k` such that `Spec (Ω ⊗[k] R)` is irreducible,
 `R` is geometrically irreducible over `k`. -/
-lemma Algebra.GeometricallyIrreducible.of_irreducibleSpace_of_isSepClosed (k R : Type*)
+proof_wanted Algebra.GeometricallyIrreducible.of_irreducibleSpace_of_isSepClosed (k R : Type*)
     [CommRing R] [Field k] [Algebra k R] (Ω : Type*) [Field Ω] [Algebra k Ω] [IsSepClosed Ω]
     (H : IrreducibleSpace (PrimeSpectrum (Ω ⊗[k] R))) :
-    Algebra.GeometricallyIrreducible k R := by
-  sorry
+    Algebra.GeometricallyIrreducible k R
 
-lemma Algebra.GeometricallyIrreducible.irreducibleSpace (k R : Type*)
+proof_wanted Algebra.GeometricallyIrreducible.irreducibleSpace (k R : Type*)
     [CommRing R] [Field k] [Algebra k R] (K : Type*) [Field K] [Algebra k K]
     [Algebra.GeometricallyIrreducible k R] :
-    IrreducibleSpace (PrimeSpectrum (K ⊗[k] R)) :=
-  sorry
+    IrreducibleSpace (PrimeSpectrum (K ⊗[k] R))

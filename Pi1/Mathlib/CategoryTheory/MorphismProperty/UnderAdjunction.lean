@@ -3,6 +3,7 @@ Copyright (c) 2025 Christian Merten. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christian Merten
 -/
+import Pi1.Mathlib.CategoryTheory.MorphismProperty.Limits
 import Mathlib.CategoryTheory.MorphismProperty.OverAdjunction
 
 /-!
@@ -33,8 +34,8 @@ end Map
 
 variable [HasPushouts T] [P.IsStableUnderCobaseChange] [Q.IsStableUnderCobaseChange]
 
-/-- If `P` and `Q` are stable under base change and pullbacks exist in `T`,
-this is the functor `P.Over Q Y ⥤ P.Over Q X` given by base change along `f`. -/
+/-- If `P` and `Q` are stable under cobase change and pushouts exist in `T`,
+this is the functor `P.Over Q X ⥤ P.Over Q Y` given by cobase change along `f`. -/
 @[simps! obj_left obj_hom map_left]
 noncomputable def Under.pushout : P.Under Q X ⥤ P.Under Q Y where
   obj A :=
@@ -43,7 +44,6 @@ noncomputable def Under.pushout : P.Under Q X ⥤ P.Under Q Y where
   map {A B} g :=
     { __ := (CategoryTheory.Under.pushout f).map g.toCommaMorphism
       prop_hom_left := trivial
-      -- the proof for `Over.pullback` is `Q.baseChange_map f g.toCommaMorphism g.prop_hom_left`
-      prop_hom_right := sorry }
+      prop_hom_right := Q.pushout_map f _ g.prop_hom_right }
 
 end CategoryTheory.MorphismProperty

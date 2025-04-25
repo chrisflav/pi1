@@ -7,6 +7,9 @@ defaultTargets = ["Pi1"]
 pp.unicode.fun = true # pretty-prints `fun a ↦ b`
 autoImplicit = false
 linter.style.longLine = true
+# regressions from v4.19
+linter.unusedTactic = false
+linter.unreachableTactic = false
 
 [[require]]
 name = "mathlib"

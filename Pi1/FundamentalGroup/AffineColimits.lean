@@ -370,10 +370,6 @@ instance {X U : Scheme.{u}} (f : U ⟶ X) [IsOpenImmersion f] [IsAffine U] :
     PreservesFiniteColimits (pullback f) :=
   sorry
 
-instance {X U : Scheme.{u}} (f : U ⟶ X) [IsOpenImmersion f] [IsAffine U] :
-    PreservesFiniteColimits (pullback f) :=
-  sorry
-
 end Affine
 
 end AlgebraicGeometry
