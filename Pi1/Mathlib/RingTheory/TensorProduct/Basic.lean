@@ -23,3 +23,19 @@ lemma Algebra.TensorProduct.map_mul_of_map_mul_tmul {R S A B C : Type*} [CommRin
       | zero => simp
       | add c d hc hd => simp [hc, hd, mul_add]
       | tmul => apply hf
+
+attribute [local instance] Algebra.TensorProduct.rightAlgebra in
+noncomputable def Algebra.TensorProduct.comm' {R S T : Type*} [CommRing R]
+    [CommRing S] [CommRing T] [Algebra R S] [Algebra R T] :
+    S ⊗[R] T ≃ₗ[S] T ⊗[R] S :=
+  (_root_.TensorProduct.comm ..).toAddEquiv.toLinearEquiv <| by
+    intro c x
+    induction x with
+    | zero => simp
+    | add x y hx hy =>
+      simp only [LinearEquiv.coe_toAddEquiv, LinearEquiv.coe_addEquiv_apply] at hx hy
+      simp [hx, hy]
+    | tmul s t =>
+      simp only [LinearEquiv.coe_toAddEquiv, LinearEquiv.coe_addEquiv_apply, comm_tmul]
+      show (_root_.TensorProduct.comm R S T) ((c • s) ⊗ₜ[R] t) = c • t ⊗ₜ[R] s
+      simp [comm_tmul, Algebra.smul_def, RingHom.algebraMap_toAlgebra]
