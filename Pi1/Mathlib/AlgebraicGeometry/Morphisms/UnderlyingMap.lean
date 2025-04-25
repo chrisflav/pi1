@@ -1,6 +1,10 @@
 import Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Constructors
 
+universe u
+
+open CategoryTheory
+
 namespace AlgebraicGeometry
 
 instance : (topologically IsOpenMap).RespectsIso :=
@@ -19,5 +23,12 @@ instance : IsLocalAtSource (topologically GeneralizingMap) :=
 instance : IsLocalAtTarget (topologically GeneralizingMap) :=
   topologically_isLocalAtTarget' (fun _ ↦ _) fun _ _ _ hU _ ↦
     hU.generalizingMap_iff_restrictPreimage
+
+section Surjective
+
+instance : MorphismProperty.IsStableUnderComposition @Surjective.{u} where
+  comp_mem _ _ hf hg := ⟨hg.1.comp hf.1⟩
+
+end Surjective
 
 end AlgebraicGeometry

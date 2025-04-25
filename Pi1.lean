@@ -4,6 +4,7 @@ import Pi1.FundamentalGroup.AffineColimits
 import Pi1.FundamentalGroup.FiniteEtale
 import Pi1.FundamentalGroup.Galois
 import Pi1.FundamentalGroup.Rank
+import Pi1.Mathlib.Algebra.Category.Ring.Colimits
 import Pi1.Mathlib.Algebra.Module.FinitePresentation
 import Pi1.Mathlib.Algebra.Module.LocalizedModule.Basic
 import Pi1.Mathlib.AlgebraicGeometry.Limits
@@ -17,6 +18,7 @@ import Pi1.Mathlib.AlgebraicGeometry.Morphisms.RingHomProperties
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Smooth
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
+import Pi1.Mathlib.AlgebraicGeometry.PullbackCarrier
 import Pi1.Mathlib.CategoryTheory.Comma.Over.Basic
 import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
 import Pi1.Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
@@ -29,7 +31,9 @@ import Pi1.Mathlib.RingTheory.Geometric
 import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
 import Pi1.Mathlib.RingTheory.IsTensorProduct
 import Pi1.Mathlib.RingTheory.RingHom.And
+import Pi1.Mathlib.RingTheory.RingHom.Bijective
 import Pi1.Mathlib.RingTheory.RingHom.Etale
+import Pi1.Mathlib.RingTheory.RingHom.FaithfullyFlat
 import Pi1.Mathlib.RingTheory.RingHom.Finite
 import Pi1.Mathlib.RingTheory.RingHom.Flat
 import Pi1.Mathlib.RingTheory.RingHom.Integral

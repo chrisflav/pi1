@@ -2,13 +2,16 @@ import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
 import Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Mathlib.AlgebraicGeometry.Morphisms.UniversallyClosed
 import Mathlib.AlgebraicGeometry.Morphisms.UniversallyInjective
+import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
 import Mathlib.RingTheory.Ideal.GoingDown
 import Mathlib.RingTheory.Spectrum.Prime.Chevalley
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.RingHomProperties
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.Limits
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
+import Pi1.Mathlib.AlgebraicGeometry.PullbackCarrier
 import Pi1.Mathlib.RingTheory.RingHom.Flat
+import Pi1.Mathlib.RingTheory.RingHom.FaithfullyFlat
 import Pi1.Mathlib.RingTheory.Spectrum.Prime.Topology
 import Pi1.Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
 
@@ -16,95 +19,22 @@ universe u v
 
 open TensorProduct
 
-section
-
-@[algebraize Module.FaithfullyFlat]
-def RingHom.FaithfullyFlat {R S : Type*} [CommRing R] [CommRing S] (f : R →+* S) : Prop :=
-  letI : Algebra R S := f.toAlgebra
-  Module.FaithfullyFlat R S
-
-variable {R S : Type*} [CommRing R] [CommRing S] (f : R →+* S)
-
-lemma RingHom.faithfullyFlat_algebraMap_iff [Algebra R S] :
-    (algebraMap R S).FaithfullyFlat ↔ Module.FaithfullyFlat R S := by
-  simp only [RingHom.FaithfullyFlat]
-  congr!
-  exact Algebra.algebra_ext _ _ fun _ ↦ rfl
-
-lemma RingHom.FaithfullyFlat.flat (hf : f.FaithfullyFlat) : f.Flat := by
-  algebraize [f]
-  exact inferInstanceAs <| Module.Flat R S
-
-lemma RingHom.FaithfullyFlat.iff_flat_and_comap_surjective :
-    f.FaithfullyFlat ↔ f.Flat ∧ Function.Surjective f.specComap := by
-  algebraize [f]
-  show (algebraMap R S).FaithfullyFlat ↔ (algebraMap R S).Flat ∧
-    Function.Surjective (algebraMap R S).specComap
-  rw [RingHom.faithfullyFlat_algebraMap_iff, RingHom.flat_algebraMap_iff]
-  exact ⟨fun h ↦ ⟨inferInstance, PrimeSpectrum.specComap_surjective_of_faithfullyFlat⟩,
-    fun ⟨h, hf⟩ ↦ .of_specComap_surjective hf⟩
-
-lemma Module.FaithfullyFlat.bijective_of_tensorProduct [Algebra R S]
-    {T : Type*} [CommRing T] [Algebra R T] [Module.FaithfullyFlat R S]
-    (H : Function.Bijective (algebraMap S (S ⊗[R] T))) :
-    Function.Bijective (algebraMap R T) := by
-  refine ⟨?_, ?_⟩
-  · apply (Module.FaithfullyFlat.lTensor_injective_iff_injective R S (Algebra.linearMap R T)).mp
-    have : LinearMap.lTensor S (Algebra.linearMap R T) =
-        Algebra.linearMap S (S ⊗[R] T) ∘ₗ (AlgebraTensorModule.rid R S S).toLinearMap := by
-      ext; simp
-    simpa [this] using H.1
-  · apply (Module.FaithfullyFlat.lTensor_surjective_iff_surjective R S (Algebra.linearMap R T)).mp
-    have : LinearMap.lTensor S (Algebra.linearMap R T) =
-        Algebra.linearMap S (S ⊗[R] T) ∘ₗ (AlgebraTensorModule.rid R S S).toLinearMap := by
-      ext; simp
-    simpa [this] using H.2
-
-lemma RingHom.Bijective.stableUnderComposition :
-    RingHom.StableUnderComposition (fun f ↦ Function.Bijective f) :=
-  fun _ _ _ _ _ _ _ _ hf hg ↦ hg.comp hf
-
-lemma RingHom.Bijective.respectsIso :
-    RingHom.RespectsIso (fun f ↦ Function.Bijective f) :=
-  RingHom.Bijective.stableUnderComposition.respectsIso fun e ↦ e.bijective
-
-lemma RingHom.FaithfullyFlat.bijective_codescendsAlong :
-    RingHom.CodescendsAlong (fun f ↦ Function.Bijective f) RingHom.FaithfullyFlat := by
-  apply RingHom.CodescendsAlong.mk
-  · exact RingHom.Bijective.respectsIso
-  · introv h H
-    rw [RingHom.faithfullyFlat_algebraMap_iff] at h
-    exact h.bijective_of_tensorProduct H
-
-end
-
 open CategoryTheory Limits MorphismProperty
+
+lemma RingHom.Flat.isOpenMap_comap_of_finitePresentation
+    {R S : Type*} [CommRing R] [CommRing S] {f : R →+* S} (hf : f.Flat)
+    (hfin : f.FinitePresentation) :
+    IsOpenMap (PrimeSpectrum.comap f) := by
+  algebraize [f]
+  exact PrimeSpectrum.isOpenMap_comap_of_hasGoingDown_of_finitePresentation
 
 namespace AlgebraicGeometry
 
-lemma exists_preimage_of_isPullback {P X Y Z : Scheme.{u}} {fst : P ⟶ X} {snd : P ⟶ Y}
-    {f : X ⟶ Z} {g : Y ⟶ Z} (h : IsPullback fst snd f g) (x : X) (y : Y)
-    (hxy : f.base x = g.base y) :
-    ∃ (p : P), fst.base p = x ∧ snd.base p = y := by
-  let e := h.isoPullback
-  obtain ⟨z, hzl, hzr⟩ := AlgebraicGeometry.Scheme.Pullback.exists_preimage_pullback x y hxy
-  use h.isoPullback.inv.base z
-  simp [← Scheme.comp_base_apply, hzl, hzr]
+instance {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z) [Flat g] : Flat (pullback.fst f g) :=
+  pullback_fst _ _ inferInstance
 
-lemma image_preimage_eq_of_isPullback {P X Y Z : Scheme.{u}} {fst : P ⟶ X} {snd : P ⟶ Y}
-    {f : X ⟶ Z} {g : Y ⟶ Z} (h : IsPullback fst snd f g) (s : Set X) :
-    snd.base '' (fst.base ⁻¹' s) = g.base ⁻¹' (f.base '' s) := by
-  refine subset_antisymm ?_ (fun x hx ↦ ?_)
-  · rw [Set.image_subset_iff, ← Set.preimage_comp, ← TopCat.coe_comp, ← Scheme.comp_base, ← h.1.1]
-    rw [Scheme.comp_base, TopCat.coe_comp, ← Set.image_subset_iff, Set.image_comp]
-    exact Set.image_mono (Set.image_preimage_subset _ _)
-  · obtain ⟨y, hy, heq⟩ := hx
-    obtain ⟨o, hl, hr⟩ := exists_preimage_of_isPullback h y x heq
-    use o
-    simpa [hl, hr]
-
-instance : IsStableUnderComposition @Surjective where
-  comp_mem _ _ hf hg := ⟨hg.1.comp hf.1⟩
+instance {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z) [Flat f] : Flat (pullback.snd f g) :=
+  pullback_snd _ _ inferInstance
 
 instance Flat.surjective_descendsAlong_surjective_inf_flat_inf_quasicompact :
     DescendsAlong @Surjective (@Surjective ⊓ @Flat ⊓ @QuasiCompact) := by
@@ -117,20 +47,6 @@ instance Flat.surjective_descendsAlong_surjective_inf_flat_inf_quasicompact :
     introv hf hcomp
     exact Surjective.of_comp f g
   infer_instance
-
-instance {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z) [Flat g] : Flat (pullback.fst f g) :=
-  pullback_fst _ _ inferInstance
-
-instance {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z) [Flat f] : Flat (pullback.snd f g) :=
-  pullback_snd _ _ inferInstance
-
-instance {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z) [Surjective g] :
-    Surjective (pullback.fst f g) :=
-  pullback_fst _ _ inferInstance
-
-instance {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z) [Surjective f] :
-    Surjective (pullback.snd f g) :=
-  pullback_snd _ _ inferInstance
 
 /-- Universally closed satisfies fpqc descent. -/
 @[stacks 02KS]
@@ -252,13 +168,6 @@ instance Flat.isomorphisms_descendsAlong_surjective_inf_flat_inf_quasicompact :
       rfl
     · exact h
     · exact hfst
-
-lemma _root_.RingHom.Flat.isOpenMap_comap_of_finitePresentation
-    {R S : Type*} [CommRing R] [CommRing S] {f : R →+* S} (hf : f.Flat)
-    (hfin : f.FinitePresentation) :
-    IsOpenMap (PrimeSpectrum.comap f) := by
-  algebraize [f]
-  exact PrimeSpectrum.isOpenMap_comap_of_hasGoingDown_of_finitePresentation
 
 lemma of_generalizingMap {X Y : Scheme.{u}} (f : X ⟶ Y) [LocallyOfFinitePresentation f]
     (hf : GeneralizingMap f.base) : IsOpenMap f.base := by
