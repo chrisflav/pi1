@@ -15,69 +15,12 @@ lemma Algebra.finite_of_intermediateFieldFG_of_isAlgebraic
     simpa [← IntermediateField.toSubalgebra_inj] using hs
   exact Algebra.IsIntegral.finite
 
-lemma Algebra.exists_isTranscendenceBasis_and_isSeparable (p : ℕ) [ExpChar k p]
-      (hp : Nat.Prime p) (H : ∀ (s : Finset K),
-      LinearIndepOn k _root_.id (s : Set K) → LinearIndepOn k (fun x ↦ x ^ p) (s : Set K))
-      (Hfg : (⊤ : IntermediateField k K).FG) :
-    ∃ s : Finset K,
-      IsTranscendenceBasis k (Subtype.val : s → K) ∧
-      Algebra.IsSeparable ((IntermediateField.adjoin k (s : Set K))) K :=
-  sorry
-
-lemma sum_pow_expChar {R : Type*} [CommSemiring R] (p : ℕ) [ExpChar R p]
-    {ι : Type*} (s : Finset ι) (f : ι → R) :
-    (∑ x ∈ s, f x) ^ p = ∑ x ∈ s, f x ^ p :=
-  map_sum (frobenius R p) ..
-
-lemma foobar' [PerfectField k] (Hfg : (⊤ : IntermediateField k K).FG) :
-    ∃ (s : Finset K),
-      IsTranscendenceBasis k (Subtype.val : s → K) ∧
-      Algebra.IsSeparable (IntermediateField.adjoin k (s : Set K)) K := by
-  let p := ringExpChar k
-  have : ExpChar K p := expChar_of_injective_ringHom (algebraMap k K).injective p
-  obtain (hp|h) := expChar_is_prime_or_one k p
-  · refine Algebra.exists_isTranscendenceBasis_and_isSeparable k K p hp (fun s hs ↦ ?_) Hfg
-    simp only [LinearIndepOn, Finset.coe_sort_coe, Fintype.linearIndependent_iff]
-    intro g hg
-    have (x : s) : ∃ (a : k), a ^ p = g x := surjective_frobenius k p (g x)
-    choose a ha using this
-    simp_rw [← ha, Algebra.smul_def, map_pow, ← mul_pow, ← sum_pow_expChar, ← frobenius_def,
-      ← Algebra.smul_def] at hg
-    have := frobenius_inj K p
-    rw [RingHom.injective_iff_ker_eq_bot, RingHom.ker_eq_bot_iff_eq_zero] at this
-    rw [LinearIndepOn, Fintype.linearIndependent_iff] at hs
-    simp_rw [← ha, hs _ (this _ hg)]
-    intro i
-    simp
-    exact Nat.Prime.ne_zero hp
-  · have : ExpChar k 1 := ringExpChar.of_eq h
-    have : CharZero k := charZero_of_expChar_one' k
-    obtain ⟨s, hs⟩ := exists_isTranscendenceBasis k K
-    -- will follow from a PR by Junyan
-    have hfin : s.Finite := sorry
-    refine ⟨hfin.toFinset, ?_, ?_⟩
-    · convert hs <;> ext <;> simp
-    · have : Algebra.IsAlgebraic (IntermediateField.adjoin k (hfin.toFinset : Set K)) K := by
-        convert hs.isAlgebraic_field <;> simp
-      infer_instance
-
 instance Algebra.formallySmooth_fractionRing_mvPolynomial {k ι : Type u} [Field k] :
     FormallySmooth k (FractionRing (MvPolynomial ι k)) :=
   have : FormallySmooth k (MvPolynomial ι k) := inferInstance
   have : FormallySmooth (MvPolynomial ι k) (FractionRing (MvPolynomial ι k)) :=
     .of_isLocalization (nonZeroDivisors _)
   .comp k (MvPolynomial ι k) (FractionRing (MvPolynomial ι k))
-
-lemma formallySmooth_of_perfectField_of_FG [PerfectField k] (Hfg : (⊤ : IntermediateField k K).FG) :
-    Algebra.FormallySmooth k K := by
-  obtain ⟨s, hb, hs⟩ := foobar' k K Hfg
-  have : Algebra.FormallySmooth k ↥(IntermediateField.adjoin k (s : Set K)) :=
-    let e : FractionRing (MvPolynomial s k) ≃ₐ[k] IntermediateField.adjoin k (s : Set K) :=
-      (hb.1.aevalEquivField).trans (IntermediateField.equivOfEq (by simp))
-    .of_equiv e
-  have : Algebra.FormallyEtale (IntermediateField.adjoin k (s : Set K)) K :=
-    Algebra.FormallyEtale.of_isSeparable _ _
-  apply Algebra.FormallySmooth.comp k (IntermediateField.adjoin k (s : Set K)) K
 
 open AlgebraicGeometry CategoryTheory
 
