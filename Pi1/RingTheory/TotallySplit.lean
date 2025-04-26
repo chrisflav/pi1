@@ -7,36 +7,13 @@ import Pi1.RingTheory.FinitePresentation
 import Pi1.RingTheory.RankAtStalk
 import Pi1.RingTheory.SmoothFlat
 import Pi1.Mathlib.RingTheory.TensorProduct.Basic
+import Pi1.Mathlib.Algebra.Algebra.Equiv
 
 open TensorProduct
 
 universe u v
 
 section
-
-instance {R S T : Type*} [CommSemiring R] [Semiring S] [Semiring T] [Algebra R S] [Algebra R T]
-    [Subsingleton T] :
-    Inhabited (S →ₐ[R] T) where
-  default := AlgHom.ofLinearMap default (Subsingleton.elim _ _) (fun _ _ ↦ (Subsingleton.elim _ _))
-
-@[simp]
-lemma AlgHom.default_apply {R S T : Type*} [CommSemiring R] [Semiring S] [Semiring T] [Algebra R S]
-    [Algebra R T] [Subsingleton T] (x : S) :
-    (default : S →ₐ[R] T) x = 0 :=
-  rfl
-
-instance {R S T : Type*} [CommSemiring R] [Semiring S] [Semiring T] [Algebra R S] [Algebra R T]
-    [Subsingleton S] [Subsingleton T] :
-    Inhabited (S ≃ₐ[R] T) where
-  default := AlgEquiv.ofAlgHom default default
-    (AlgHom.ext fun _ ↦ Subsingleton.elim _ _)
-    (AlgHom.ext fun _ ↦ Subsingleton.elim _ _)
-
-@[simp]
-lemma AlgEquiv.default_apply {R S T : Type*} [CommSemiring R] [Semiring S] [Semiring T]
-    [Algebra R S] [Algebra R T] [Subsingleton S] [Subsingleton T] (x : S) :
-    (default : S ≃ₐ[R] T) x = 0 :=
-  rfl
 
 instance (R : Type u) [CommRing R] : Algebra.Etale R R :=
     Algebra.instEtaleOfIsStandardSmoothOfRelativeDimensionOfNatNat.{u}

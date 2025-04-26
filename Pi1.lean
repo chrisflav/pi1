@@ -4,6 +4,8 @@ import Pi1.FundamentalGroup.AffineColimits
 import Pi1.FundamentalGroup.FiniteEtale
 import Pi1.FundamentalGroup.Galois
 import Pi1.FundamentalGroup.Rank
+import Pi1.Mathlib.Algebra.Algebra.Equiv
+import Pi1.Mathlib.Algebra.Algebra.Hom
 import Pi1.Mathlib.Algebra.Category.Ring.Colimits
 import Pi1.Mathlib.Algebra.Module.FinitePresentation
 import Pi1.Mathlib.Algebra.Module.LocalizedModule.Basic
