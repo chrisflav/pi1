@@ -78,11 +78,11 @@ def tensorQuotientEquiv (I : Ideal T) :
   let e : A ⊗[R] (T ⧸ I) ≃ₗ[S] (A ⊗[R] T) ⧸ I.map (includeRight (A := A) (R := R)) :=
     f ≪≫ₗ g
   AlgEquiv.ofLinearEquiv e rfl <| by
-    apply Algebra.TensorProduct.map_mul_of_map_mul_tmul
+    apply LinearMap.map_mul_of_map_mul_tmul
     intro a₁ a₂ b₁ b₂
     obtain ⟨b₁, rfl⟩ := Ideal.Quotient.mk_surjective b₁
     obtain ⟨b₂, rfl⟩ := Ideal.Quotient.mk_surjective b₂
-    rw [Algebra.TensorProduct.tmul_mul_tmul, ← map_mul]
+    rw [← map_mul]
     have : (Ideal.Quotient.mk I) (b₁ * b₂) = Submodule.Quotient.mk (b₁ * b₂) := rfl
     simp only [LinearEquiv.coe_coe, LinearEquiv.trans_apply, e, f, g]
     rw [this, AlgebraTensorModule.tensorQuotientEquiv_apply_tmul]

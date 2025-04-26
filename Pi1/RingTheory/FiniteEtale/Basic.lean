@@ -110,7 +110,7 @@ lemma RingHom.OfLocalizationSpan.of_exists_of_isPrime'
     apply IsLocalization.ringHom_ext (Submonoid.powers r)
     ext x
     simp [e, Localization.awayMap, IsLocalization.Away.map, ← IsScalarTower.algebraMap_apply,
-      Algebra.TensorProduct.tmul_comm]
+      Algebra.TensorProduct.tmul_one_eq_one_tmul]
   rw [this]
   exact hPi.left _ _ hf
 

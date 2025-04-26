@@ -16,30 +16,6 @@ local notation f " ≟ₐ " g => AlgHom.equalizer f g
 
 local notation S " ⊗ₘ " f => Algebra.TensorProduct.map (AlgHom.id S S) f
 
-noncomputable
-def TensorProduct.assoc' (R S A B C : Type*) [CommSemiring R] [Semiring A] [Semiring B]
-    [Semiring C] [Algebra R A] [CommSemiring S] [Algebra R S] [Algebra S A]
-    [IsScalarTower R S A] [Algebra R B] [Algebra R C] :
-    (A ⊗[R] B) ⊗[R] C ≃ₐ[S] A ⊗[R] B ⊗[R] C where
-  __ := Algebra.TensorProduct.assoc R A B C
-  commutes' r := by simp [one_def]
-
-@[simp]
-lemma TensorProduct.assoc'_tmul (R S A B C : Type*) [CommSemiring R] [Semiring A] [Semiring B]
-    [Semiring C] [Algebra R A] [CommSemiring S] [Algebra R S] [Algebra S A]
-    [IsScalarTower R S A] [Algebra R B] [Algebra R C]
-    (a : A) (b : B) (c : C) :
-    TensorProduct.assoc' R S A B C (a ⊗ₜ b ⊗ₜ c) = a ⊗ₜ (b ⊗ₜ c) :=
-  rfl
-
-@[simp]
-lemma TensorProduct.assoc'_symm_tmul (R S A B C : Type*) [CommSemiring R] [Semiring A] [Semiring B]
-    [Semiring C] [Algebra R A] [CommSemiring S] [Algebra R S] [Algebra S A]
-    [IsScalarTower R S A] [Algebra R B] [Algebra R C]
-    (a : A) (b : B) (c : C) :
-    (TensorProduct.assoc' R S A B C).symm (a ⊗ₜ (b ⊗ₜ c)) = a ⊗ₜ b ⊗ₜ c :=
-  rfl
-
 variable (R) in
 def _root_.AlgHom.equalizerRestrictScalars [Algebra S A] [Algebra S B]
     [IsScalarTower R S A] [IsScalarTower R S B]

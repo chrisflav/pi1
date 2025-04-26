@@ -91,7 +91,7 @@ nonrec def Algebra.TensorProduct.prodRight (R S T A B : Type*) [CommRing R] [Com
     T ⊗[R] (A × B) ≃ₐ[S] T ⊗[R] A × T ⊗[R] B :=
   AlgEquiv.ofLinearEquiv (TensorProduct.prodRight R S T A B)
     (by simp [Algebra.TensorProduct.one_def])
-    (map_mul_of_map_mul_tmul (fun _ _ _ _ ↦ by simp))
+    (LinearMap.map_mul_of_map_mul_tmul (fun _ _ _ _ ↦ by simp))
 
 def AlgEquiv.prodCongr {R S T A B : Type*} [CommRing R] [CommRing A] [CommRing B]
     [CommRing S] [CommRing T] [Algebra R S] [Algebra R T] [Algebra R A] [Algebra R B]
