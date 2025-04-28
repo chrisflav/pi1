@@ -11,6 +11,45 @@ import Pi1.Mathlib.Algebra.Algebra.Equiv
 
 open TensorProduct
 
+section
+
+--
+noncomputable
+nonrec def Algebra.TensorProduct.prodRight (R S T A B : Type*) [CommRing R] [CommRing A]
+    [CommRing B] [CommRing S] [CommRing T] [Algebra R S] [Algebra R T] [Algebra S T]
+    [IsScalarTower R S T] [Algebra R A] [Algebra R B] :
+    T ⊗[R] (A × B) ≃ₐ[S] T ⊗[R] A × T ⊗[R] B :=
+  .ofLinearEquiv (TensorProduct.prodRight R S T A B) (by simp [Algebra.TensorProduct.one_def])
+    (LinearMap.map_mul_of_map_mul_tmul (fun _ _ _ _ ↦ by simp))
+
+def AlgEquiv.prodCongr {R S T A B : Type*} [CommRing R] [CommRing A] [CommRing B]
+    [CommRing S] [CommRing T] [Algebra R S] [Algebra R T] [Algebra R A] [Algebra R B]
+    (l : S ≃ₐ[R] A) (r : T ≃ₐ[R] B) :
+    (S × T) ≃ₐ[R] A × B :=
+  .ofRingEquiv (f := RingEquiv.prodCongr l r) <| by simp
+
+def AlgEquiv.funUnique (R S : Type*) [CommRing R] [CommRing S] [Algebra R S]
+    (ι : Type*) [Unique ι] :
+    (ι → S) ≃ₐ[R] S :=
+  .ofAlgHom (Pi.evalAlgHom R (fun _ ↦ S) default) (Pi.constAlgHom R ι S)
+    (by ext; simp) (by ext f i; simp [Unique.default_eq i])
+
+def Algebra.prodPiEquiv (R A α β : Type*) [CommRing R] [CommRing A] [Algebra R A] :
+    (α ⊕ β → A) ≃ₐ[R] (α → A) × (β → A) :=
+  .ofLinearEquiv (.sumArrowLequivProdArrow α β R A) rfl <| fun x y ↦ by ext <;> simp
+
+def AlgEquiv.piCongrLeft' {ι ι' : Type*} (R : Type*) (S : ι → Type*) (e : ι ≃ ι')
+    [CommSemiring R] [∀ i, Semiring (S i)] [∀ i, Algebra R (S i)] :
+    (Π i, S i) ≃ₐ[R] Π i, S (e.symm i) :=
+  .ofLinearEquiv (.piCongrLeft' R S e) (by ext; simp) (by intro x y; ext; simp)
+
+def AlgEquiv.piCongrLeft {ι ι' : Type*} (R : Type*) (S : ι → Type*) (e : ι' ≃ ι)
+    [CommSemiring R] [∀ i, Semiring (S i)] [∀ i, Algebra R (S i)] :
+    (Π i, S (e i)) ≃ₐ[R] Π i, S i :=
+  (AlgEquiv.piCongrLeft' R S e.symm).symm
+
+end
+
 universe u v
 
 section
@@ -60,43 +99,6 @@ lemma RingHom.prod_bijective_of_isIdempotentElem {R : Type*} [CommRing R]
   · intro i j hij
     fin_cases i <;> fin_cases j <;> simp at hij ⊢ <;> simpa [mul_comm]
   · simpa
-
-noncomputable
-nonrec def Algebra.TensorProduct.prodRight (R S T A B : Type*) [CommRing R] [CommRing A]
-    [CommRing B] [CommRing S] [CommRing T] [Algebra R S] [Algebra R T] [Algebra S T]
-    [IsScalarTower R S T] [Algebra R A] [Algebra R B] :
-    T ⊗[R] (A × B) ≃ₐ[S] T ⊗[R] A × T ⊗[R] B :=
-  AlgEquiv.ofLinearEquiv (TensorProduct.prodRight R S T A B)
-    (by simp [Algebra.TensorProduct.one_def])
-    (LinearMap.map_mul_of_map_mul_tmul (fun _ _ _ _ ↦ by simp))
-
-def AlgEquiv.prodCongr {R S T A B : Type*} [CommRing R] [CommRing A] [CommRing B]
-    [CommRing S] [CommRing T] [Algebra R S] [Algebra R T] [Algebra R A] [Algebra R B]
-    (l : S ≃ₐ[R] A) (r : T ≃ₐ[R] B) :
-    (S × T) ≃ₐ[R] A × B :=
-  AlgEquiv.ofRingEquiv (f := RingEquiv.prodCongr l r) <| by simp
-
-def AlgEquiv.funUnique (R S : Type*) [CommRing R] [CommRing S] [Algebra R S]
-    (ι : Type*) [Unique ι] :
-    (ι → S) ≃ₐ[R] S :=
-  AlgEquiv.ofAlgHom (Pi.evalAlgHom R (fun _ ↦ S) default) (Pi.constAlgHom R ι S)
-    (by ext; simp) (by ext f i; simp [Unique.default_eq i])
-
-def Algebra.prodPiEquiv (R A α β : Type*) [CommRing R] [CommRing A] [Algebra R A] :
-    (α ⊕ β → A) ≃ₐ[R] (α → A) × (β → A) :=
-  AlgEquiv.ofLinearEquiv (LinearEquiv.sumArrowLequivProdArrow α β R A) rfl <| fun x y ↦ by
-    ext <;> simp
-
-def AlgEquiv.piCongrLeft' {ι ι' : Type*} (R : Type*) (S : ι → Type*) (e : ι ≃ ι')
-    [CommSemiring R] [∀ i, Semiring (S i)] [∀ i, Algebra R (S i)] :
-    (Π i, S i) ≃ₐ[R] Π i, S (e.symm i) :=
-  AlgEquiv.ofLinearEquiv (LinearEquiv.piCongrLeft' R S e)
-    (by ext; simp) (by intro x y; ext; simp)
-
-def AlgEquiv.piCongrLeft {ι ι' : Type*} (R : Type*) (S : ι → Type*) (e : ι' ≃ ι)
-    [CommSemiring R] [∀ i, Semiring (S i)] [∀ i, Algebra R (S i)] :
-    (Π i, S (e i)) ≃ₐ[R] Π i, S i :=
-  (AlgEquiv.piCongrLeft' R S e.symm).symm
 
 noncomputable
 def AlgEquiv.prodQuotientOfIsIdempotentElem {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
