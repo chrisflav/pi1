@@ -1062,15 +1062,6 @@ lemma gluedHomEquiv_eq (T : Scheme.{u}) (f : T ⟶ d.glued.X) :
 lemma gluedHomEquiv_f : (d.gluedHomEquiv _ (𝟙 _)).g = d.glued.f := rfl
 
 /-
-@[reassoc (attr := simp)]
-lemma gluedHomEquiv_symm_f (T : Scheme.{u}) (C : d.CompatibleFamily T) :
-    (d.gluedHomEquiv T).symm C ≫ d.glued.f = C.g := by
-  rw [← gluedHomEquiv_f]
-  simp [glued]
-  sorry
--/
-
-/-
 def glued.mkOverHom (T : Over S) (C : d.CompatibleFamily T.left) (hC : C.g = T.hom) :
     T ⟶ Over.mk (d.glued.f) :=
   Over.homMk ((d.gluedHomEquiv T.left).symm C) <| by simpa
@@ -1115,52 +1106,6 @@ lemma gluedHomEquiv_id_g :
 lemma gluedHomEquiv_id_h (i : d.ι) :
     ((d.gluedHomEquiv d.glued.X) (𝟙 d.glued.X)).h i = (d.glued.iso i).hom :=
   rfl
-
-/-
-lemma foo {T : Scheme.{u}} (C : d.CompatibleFamily T) (G : d.Glued) (i j : d.ι) :
-    T.homOfLE inf_le_right ≫ C.h i ≫ G.ι i = T.homOfLE inf_le_left ≫ C.h j ≫ G.ι j := sorry
--/
-
-/-
-lemma ι_gluedHomEquiv_symm {T : Scheme.{u}} (C : d.CompatibleFamily T) (i : d.ι) :
-    (C.g ⁻¹ᵁ d.U i).ι ≫ (d.gluedHomEquiv T).symm C =
-      C.h i ≫ d.glued.ι i := by
-    apply (d.gluedHomEquiv (C.g ⁻¹ᵁ d.U i)).injective
-    simp only [gluedHomEquiv]
-    erw [d.gluedRepresentable.homEquiv_comp]
-    erw [d.gluedRepresentable.homEquiv_comp]
-    simp only [presheaf_map, Quiver.Hom.unop_op]
-    erw [Equiv.apply_symm_apply]
-    rw [Functor.RepresentableBy.homEquiv_eq]
-    simp only [gluedRepresentable_homEquiv, presheaf_map, Quiver.Hom.unop_op]
-    rw [CompatibleFamily.eq_iff]
-    simp only [compatibleFamilyMap_g, compatibleFamilyMap_h, gluedHomEquiv_id_g]
-    have hg : (d.compatibleFamilyMap (C.g ⁻¹ᵁ d.U i).ι C).g =
-        (d.compatibleFamilyMap (C.h i)
-          (d.compatibleFamilyMap (d.glued.ι i)
-            (d.gluedRepresentable.homEquiv (𝟙 d.glued.X)))).g := by
-      simp only [compatibleFamilyMap_g, gluedRepresentable_homEquiv, gluedHomEquiv_id_g]
-      rw [← Glued.f_ι]
-      rw [CompatibleFamily.hcompf_assoc]
-      simp
-    use hg
-    intro j
-    simp only [gluedHomEquiv_id_h]
-    rw [← cancel_mono (d.glued.iso j).inv]
-    simp only [Category.assoc, Iso.hom_inv_id, Category.comp_id]
-    rw [← cancel_mono (d.glued.f ⁻¹ᵁ d.U j).ι]
-    simp only [Category.assoc, morphismRestrict_ι, morphismRestrict_ι_assoc,
-      Scheme.isoOfEq_hom_ι_assoc]
-    simp only [Scheme.comp_coeBase, Opens.map_comp_obj, Glued.iso_inv_ι, morphismRestrict_ι_assoc,
-      Scheme.isoOfEq_hom_ι_assoc]
-    set a : ((C.g ⁻¹ᵁ d.U i).ι ⁻¹ᵁ C.g ⁻¹ᵁ d.U j).toScheme ⟶ _ :=
-      (C.g ⁻¹ᵁ d.U i).ι ∣_ C.g ⁻¹ᵁ d.U j
-    set b : ((C.g ⁻¹ᵁ d.U i).ι ⁻¹ᵁ C.g ⁻¹ᵁ d.U j).toScheme ⟶ _ :=
-      Scheme.Opens.ι ((Opens.map (C.g ⁻¹ᵁ d.U i).ι.base).obj ((Opens.map C.g.base).obj (d.U j)))
-    sorry
-    --have hb : (Opens.map (C.g ⁻¹ᵁ d.U i).ι.base).obj ((Opens.map C.g.base).obj (d.U j)) =
-    --  C.g ⁻¹ᵁ d.U i ⊓ C.g ⁻¹ᵁ d.U j := sorry
--/
 
 variable {d} in
 @[simps! map]
