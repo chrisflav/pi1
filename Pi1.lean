@@ -21,6 +21,7 @@ import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Smooth
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
 import Pi1.Mathlib.AlgebraicGeometry.PullbackCarrier
+import Pi1.Mathlib.AlgebraicGeometry.RelativeGluing
 import Pi1.Mathlib.CategoryTheory.Comma.Over.Basic
 import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
 import Pi1.Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
