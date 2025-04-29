@@ -8,6 +8,7 @@ import Mathlib.AlgebraicGeometry.Morphisms.Affine
 import Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Mathlib.CategoryTheory.MorphismProperty.OverAdjunction
 import Pi1.Mathlib.CategoryTheory.Comma.Over.Basic
+import Pi1.FundamentalGroup.Colimits.Gluing
 
 /-!
 # Category of schemes affine over an affine base
@@ -19,6 +20,66 @@ universe t u
 noncomputable section
 
 open CategoryTheory Limits Opposite TensorProduct
+
+section
+
+namespace CategoryTheory
+
+variable {C : Type*} [Category C] (P Q : MorphismProperty C) [Q.IsMultiplicative]
+  [P.IsStableUnderBaseChange] [Q.IsStableUnderBaseChange]
+
+@[simp]
+lemma Over.pullbackId_hom_app_left [HasPullbacks C] {X : C} (A : Over X) :
+    (CategoryTheory.Over.pullbackId.hom.app A).left = pullback.fst _ _ := by
+  simp [Over.pullbackId, Adjunction.id]
+
+@[simp]
+lemma Over.pullbackId_inv_app_left [HasPullbacks C] {X : C} (A : Over X) :
+    (CategoryTheory.Over.pullbackId.inv.app A).left = pullback.lift (𝟙 _) A.hom (by simp) := by
+  apply pullback.hom_ext <;> simp [Over.pullbackId, Adjunction.id]
+
+@[simps!]
+def MorphismProperty.Over.pullbackId [HasPullbacks C] (X : C) :
+    MorphismProperty.Over.pullback P Q (𝟙 X) ≅ 𝟭 _ :=
+  NatIso.ofComponents
+    (fun A ↦ MorphismProperty.Over.isoMk
+      (Comma.leftIso (CategoryTheory.Over.pullbackId.app <| A.toComma))
+      (by simp [pullback.condition]))
+
+@[reassoc (attr := simp)]
+lemma MorphismProperty.Over.pullbackCongr_hom_app_left_snd [HasPullbacks C]
+    {X Y : C} {f g : X ⟶ Y} (h : f = g) (A : P.Over Q Y) :
+    ((pullbackCongr h).hom.app A).left ≫ pullback.snd _ _ = pullback.snd _ _ := by
+  subst h
+  simp [pullbackCongr]
+
+def MorphismProperty.Over.pullbackIso [HasPullbacks C] {X Y : C} (e : X ≅ Y) :
+    P.Over Q X ≌ P.Over Q Y where
+  functor := MorphismProperty.Over.pullback P Q e.inv
+  inverse := MorphismProperty.Over.pullback P Q e.hom
+  unitIso := (MorphismProperty.Over.pullbackId P Q _).symm ≪≫
+    MorphismProperty.Over.pullbackCongr e.hom_inv_id.symm ≪≫
+    MorphismProperty.Over.pullbackComp e.hom e.inv
+  counitIso :=
+    (MorphismProperty.Over.pullbackComp e.inv e.hom).symm ≪≫
+    MorphismProperty.Over.pullbackCongr e.inv_hom_id ≪≫
+    (MorphismProperty.Over.pullbackId P Q _)
+  functor_unitIso_comp A := by
+    ext
+    simp only [Functor.id_obj, pullback_obj_left, Functor.comp_obj, Iso.trans_hom, Iso.symm_hom,
+      NatTrans.comp_app, Functor.map_comp, Category.assoc, Comma.comp_hom,
+      CategoryTheory.Comma.comp_left, pullback_obj_hom, pullback_map_left, pullbackId_inv_app_left,
+      pullbackComp_hom_app_left, pullbackComp_inv_app_left, pullbackId_hom_app_left, Comma.id_hom,
+      CategoryTheory.Comma.id_left]
+    apply pullback.hom_ext
+    · simp_rw [← Over.pullback_obj_hom, MorphismProperty.Over.pullbackCongr_hom_app_left_fst]
+      simp
+    · simp_rw [← Over.pullback_obj_hom, MorphismProperty.Over.pullbackCongr_hom_app_left_fst]
+      simp [pullback.condition_assoc]
+
+end CategoryTheory
+
+end
 
 section
 
@@ -148,6 +209,40 @@ namespace AlgebraicGeometry
 
 section
 
+variable {P Q : MorphismProperty Scheme.{u}} [Q.IsMultiplicative] [P.IsStableUnderBaseChange]
+  [Q.IsStableUnderBaseChange] [P.IsStableUnderComposition]
+  [Q.IsStableUnderComposition]
+variable {S : Scheme.{u}} {J : Type t} [UnivLE.{t, u}] [Category J] (D : J ⥤ P.Over Q S)
+variable (d : ColimitGluingData D)
+variable [∀ {i j : d.ι} (hij : d.ℬ i ≤ d.ℬ j),
+  PreservesColimitsOfShape J (MorphismProperty.Over.map Q (d.hPhom hij))]
+variable [∀ (i j : d.ι) (hij : d.ℬ i ≤ d.ℬ j),
+  PreservesColimitsOfShape J (MorphismProperty.Over.pullback P Q (S.homOfLE hij))]
+variable [IsLocalAtTarget P]
+
+def ColimitGluingData.mapCoconePullback (i : d.ι) :
+    (MorphismProperty.Over.pullback P Q (d.ℬ i).ι).mapCocone d.gluedCocone ≅ d.c i := by
+  refine Cocones.ext ?_ ?_
+  · exact MorphismProperty.Comma.isoFromComma (d.gluingData.glued.isoPullback i)
+  · intro j
+    ext : 1
+    rw [← cancel_mono (d.gluingData.glued.ι i)]
+    simp only [Functor.comp_obj, MorphismProperty.Over.pullback_obj_left, Functor.mapCocone_pt,
+      Functor.const_obj_obj, Functor.mapCocone_ι_app, RelativeGluingData.Glued.isoPullback,
+      gluingData_f, Over.pullback_obj_left, Over.mk_left, Over.mk_hom,
+      MorphismProperty.Comma.isoFromComma_hom, MorphismProperty.Comma.comp_hom,
+      MorphismProperty.Comma.homFromCommaOfIsIso_hom, Comma.comp_left,
+      MorphismProperty.Over.pullback_map_left, Over.isoMk_hom_left, Iso.trans_hom, Category.assoc]
+    conv_lhs => rw [← RelativeGluingData.Glued.iso_inv_ι]
+    rw [Iso.hom_inv_id_assoc]
+    simp only [pullbackRestrictIsoRestrict_hom_ι]
+    erw [pullback.lift_fst]
+    apply componentOpenCover_map_gluedCoconeι
+
+end
+
+section
+
 @[reassoc]
 lemma Scheme.comp_app_top {X Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) :
     (f ≫ g).app ⊤ = g.app ⊤ ≫ f.app ⊤ :=
@@ -201,9 +296,11 @@ def app_snd_ΓpullbackIsoPushout_hom :
 
 end
 
-variable (S : Scheme.{u}) (A : CommRingCat.{u})
+variable (S : Scheme.{u})
 
 section General
+
+variable (A : CommRingCat.{u})
 
 def Over.Spec : Over (op A) ⥤ Over (Spec A) :=
   Over.post Scheme.Spec
@@ -363,12 +460,80 @@ instance [Flat f] : PreservesFiniteColimits (pullback f) where
 
 end AffineBase
 
-instance (X : Scheme.{u}) : HasFiniteColimits (Affine X) :=
-  sorry
+section
 
-instance {X U : Scheme.{u}} (f : U ⟶ X) [IsOpenImmersion f] [IsAffine U] :
-    PreservesFiniteColimits (pullback f) :=
-  sorry
+variable {J : Type t} [UnivLE.{t, u}] [SmallCategory J] [FinCategory J] (D : J ⥤ Affine S)
+
+variable {S} in
+def colimitGluingData : ColimitGluingData D where
+  ι := S.affineOpens
+  ℬ := fun U ↦ U.1
+  hℬ := by simpa using isBasis_affine_open S
+  hP := inferInstance
+  hQ := inferInstance
+  c := fun U ↦
+    let K : J ⥤ Affine U.1.toScheme :=
+      Scheme.Opens.diagram D U.1
+    colimit.cocone K
+  hc := fun U ↦
+    let K : J ⥤ Affine U.1.toScheme :=
+      Scheme.Opens.diagram D U.1
+    colimit.isColimit K
+  hPhom := fun _ ↦ inferInstance
+  hQhom := fun _ ↦ trivial
+  hQ_trivial := by simp
+
+instance : HasColimit D where
+  exists_colimit := by
+    haveI {U V : S.affineOpens} (hUV : U.1 ≤ V.1) :
+        PreservesColimitsOfShape J (map (S.homOfLE hUV)) :=
+      inferInstance
+    haveI {U V : S.affineOpens} (hUV : U.1 ≤ V.1) :
+        PreservesColimitsOfShape J (pullback (S.homOfLE hUV)) :=
+      inferInstance
+    use (colimitGluingData D).gluedCocone
+    exact (colimitGluingData D).gluedIsColimit
+
+end
+
+instance : HasFiniteColimits (Affine S) where
+  out J _ _ := { }
+
+instance {U : Scheme.{u}} (f : U ⟶ S) [IsOpenImmersion f] [IsAffine U] :
+    PreservesFiniteColimits (pullback f) := by
+  wlog h : ∃ (V : S.Opens) (h : U = V), IsAffineOpen V ∧ h ▸ f = V.ι
+  · let V : S.Opens := f.opensRange
+    have _ : IsAffineOpen V := isAffineOpen_opensRange f
+    let e : U ≅ V := f.isoOpensRange
+    have heq : f = e.hom ≫ V.ι := by simp [e, V]
+    rw [heq]
+    let iso := MorphismProperty.Over.pullbackComp (P := @IsAffineHom) (Q := ⊤) e.hom V.ι
+    constructor
+    intro J _ _
+    let eq : Affine U ≌ Affine V := MorphismProperty.Over.pullbackIso _ _ e
+    have heq : pullback e.hom = eq.inverse := rfl
+    have _ : PreservesColimitsOfShape J (pullback e.hom) := by
+      rw [heq]
+      infer_instance
+    have _ : IsAffine V := ‹_›
+    have _ : PreservesFiniteColimits (pullback V.ι) :=
+      this _ _ ⟨_, rfl, isAffineOpen_opensRange f, rfl⟩
+    exact preservesColimitsOfShape_of_natIso iso.symm
+  obtain ⟨V, rfl, hV, rfl⟩ := h
+  constructor
+  intro J _ _
+  constructor
+  intro D
+  haveI {U V : S.affineOpens} (hUV : U.1 ≤ V.1) :
+      PreservesColimitsOfShape J (map (S.homOfLE hUV)) :=
+    inferInstance
+  haveI {U V : S.affineOpens} (hUV : U.1 ≤ V.1) :
+      PreservesColimitsOfShape J (pullback (S.homOfLE hUV)) :=
+    inferInstance
+  have hc := (colimitGluingData D).gluedIsColimit
+  apply CategoryTheory.Limits.preservesColimit_of_preserves_colimit_cocone hc
+  let iso := (colimitGluingData D).mapCoconePullback D ⟨V, hV⟩
+  exact ((colimitGluingData D).hc ⟨V, hV⟩).ofIsoColimit iso.symm
 
 end Affine
 
