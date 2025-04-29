@@ -1,6 +1,7 @@
 import Pi1.EtaleCohomology.SmallSite
 import Pi1.FundamentalGroup.AffineAnd
 import Pi1.FundamentalGroup.AffineColimits
+import Pi1.FundamentalGroup.Colimits.Gluing
 import Pi1.FundamentalGroup.FiniteEtale
 import Pi1.FundamentalGroup.Galois
 import Pi1.FundamentalGroup.Rank
