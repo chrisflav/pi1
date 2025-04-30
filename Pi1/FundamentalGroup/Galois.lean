@@ -551,11 +551,15 @@ instance [IsSepClosed Ω] : PreservesFiniteColimits (fiber ξ) := by
 
 open PreGaloisCategory
 
+/-- If `X` is a connected scheme and `ξ : Spec Ω ⟶ X` is a geometric point,
+taking fibers over `ξ` is a fiber functor. -/
 instance [ConnectedSpace X] [IsSepClosed Ω] : FiberFunctor (fiber ξ) where
   preservesTerminalObjects := by dsimp [fiber]; infer_instance
   preservesPullbacks := by dsimp [fiber]; infer_instance
   preservesQuotientsByFiniteGroups _ _ := inferInstance
 
+/-- If `X` is a connected scheme, the category of finite étale schemes over `X`
+is a Galois category. -/
 instance [ConnectedSpace X] : GaloisCategory (FiniteEtale X) where
   hasFiberFunctor := by
     have : Nonempty X := inferInstance
@@ -565,5 +569,14 @@ instance [ConnectedSpace X] : GaloisCategory (FiniteEtale X) where
     let ξ : Spec (.of Ω) ⟶ X :=
       Spec.map (CommRingCat.ofHom <| algebraMap k Ω) ≫ X.fromSpecResidueField x
     exact ⟨fiber ξ, ⟨inferInstance⟩⟩
+
+/-- The étale fundamental group of a connected scheme `X` at the geometric point `ξ` is
+the automorphism group of the fiber functor at `ξ`. -/
+notation:arg "π₁ᵉᵗ" "(" x ")" => Aut (fiber x)
+
+example : IsTopologicalGroup π₁ᵉᵗ(ξ) := inferInstance
+example : T2Space π₁ᵉᵗ(ξ) := inferInstance
+example : TotallyDisconnectedSpace π₁ᵉᵗ(ξ) := inferInstance
+example : CompactSpace π₁ᵉᵗ(ξ) := inferInstance
 
 end AlgebraicGeometry.FiniteEtale
