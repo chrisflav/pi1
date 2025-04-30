@@ -57,6 +57,9 @@ import Pi1.RingTheory.FiveLemma
 import Pi1.RingTheory.KaehlerBaseChange
 import Pi1.RingTheory.KerTensor
 import Pi1.RingTheory.RankAtStalk
+import Pi1.RingTheory.Smooth.FreeKaehler
+import Pi1.RingTheory.Smooth.KaehlerLocalization
+import Pi1.RingTheory.Smooth.StandardSmoothSmooth
 import Pi1.RingTheory.SmoothDescent
 import Pi1.RingTheory.SmoothFlat
 import Pi1.RingTheory.StableProperties

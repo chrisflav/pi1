@@ -87,11 +87,6 @@ lemma Smooth.propertyIsLocal : PropertyIsLocal Smooth where
     (stableUnderComposition.stableUnderCompositionWithLocalizationAway
       holdsForLocalizationAway).right
 
--- done in a branch of mathlib
-lemma locally_isStandardSmooth_iff_smooth {R S : Type u} [CommRing R] [CommRing S]
-    (f : R →+* S) : Locally IsStandardSmooth f ↔ f.Smooth :=
-  sorry
-
 end RingHom
 
 lemma Algebra.FormallySmooth.of_bijective_algebraMap {R S : Type u} [CommRing R] [CommRing S]

@@ -4,6 +4,7 @@ import Mathlib.RingTheory.RingHom.StandardSmooth
 import Mathlib.RingTheory.RingHom.Unramified
 import Pi1.Mathlib.RingTheory.RingHom.Smooth
 import Pi1.Mathlib.RingTheory.RingHom.And
+import Pi1.RingTheory.Smooth.StandardSmoothSmooth
 
 universe u
 
@@ -106,7 +107,7 @@ lemma Etale.stableUnderComposition : StableUnderComposition Etale := by
 theorem Etale.iff_locally_isStandardSmoothOfRelativeDimension
     {R S : Type u} [CommRing R] [CommRing S] (f : R →+* S) :
     f.Etale ↔ Locally (IsStandardSmoothOfRelativeDimension 0) f := by
-  rw [etale_iff_formallyUnramified_and_smooth, ← locally_isStandardSmooth_iff_smooth]
+  rw [etale_iff_formallyUnramified_and_smooth, smooth_iff_locally_isStandardSmooth]
   refine ⟨fun ⟨hr, hs⟩ ↦ ?_, fun h ↦ ⟨?_, ?_⟩⟩
   · have : Locally (fun f ↦ f.FormallyUnramified ∧ f.IsStandardSmooth) f := by
       obtain ⟨s, hs, H⟩ := hs
