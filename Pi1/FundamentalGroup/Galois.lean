@@ -553,14 +553,14 @@ open PreGaloisCategory
 
 /-- If `X` is a connected scheme and `ξ : Spec Ω ⟶ X` is a geometric point,
 taking fibers over `ξ` is a fiber functor. -/
-instance [ConnectedSpace X] [IsSepClosed Ω] : FiberFunctor (fiber ξ) where
+instance fiberFunctor [ConnectedSpace X] [IsSepClosed Ω] : FiberFunctor (fiber ξ) where
   preservesTerminalObjects := by dsimp [fiber]; infer_instance
   preservesPullbacks := by dsimp [fiber]; infer_instance
   preservesQuotientsByFiniteGroups _ _ := inferInstance
 
 /-- If `X` is a connected scheme, the category of finite étale schemes over `X`
 is a Galois category. -/
-instance [ConnectedSpace X] : GaloisCategory (FiniteEtale X) where
+instance galoisCategory [ConnectedSpace X] : GaloisCategory (FiniteEtale X) where
   hasFiberFunctor := by
     have : Nonempty X := inferInstance
     let x : X := ‹Nonempty X›.some
