@@ -1,5 +1,7 @@
 import Mathlib.RingTheory.Idempotents
 
+-- #24518
+
 lemma RingHom.prod_bijective_of_isIdempotentElem {R : Type*} [CommRing R]
     {e f : R} (he : IsIdempotentElem e) (hf : IsIdempotentElem f) (hef₁ : e + f = 1)
     (hef₂ : e * f = 0) :
