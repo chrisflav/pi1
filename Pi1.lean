@@ -7,6 +7,7 @@ import Pi1.FundamentalGroup.Galois
 import Pi1.FundamentalGroup.Rank
 import Pi1.Mathlib.Algebra.Algebra.Equiv
 import Pi1.Mathlib.Algebra.Algebra.Hom
+import Pi1.Mathlib.Algebra.Algebra.Pi
 import Pi1.Mathlib.Algebra.Category.Ring.Colimits
 import Pi1.Mathlib.Algebra.Module.FinitePresentation
 import Pi1.Mathlib.Algebra.Module.LocalizedModule.Basic
@@ -30,9 +31,11 @@ import Pi1.Mathlib.CategoryTheory.MorphismProperty.Composition
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.Limits
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.Over
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.UnderAdjunction
+import Pi1.Mathlib.RingTheory.Etale.Basic
 import Pi1.Mathlib.RingTheory.Flat.Equalizer
 import Pi1.Mathlib.RingTheory.Geometric
 import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
+import Pi1.Mathlib.RingTheory.Idempotents
 import Pi1.Mathlib.RingTheory.IsTensorProduct
 import Pi1.Mathlib.RingTheory.RingHom.And
 import Pi1.Mathlib.RingTheory.RingHom.Bijective
@@ -45,6 +48,8 @@ import Pi1.Mathlib.RingTheory.RingHom.Smooth
 import Pi1.Mathlib.RingTheory.RingHomProperties
 import Pi1.Mathlib.RingTheory.Spectrum.Prime.Topology
 import Pi1.Mathlib.RingTheory.TensorProduct.Basic
+import Pi1.Mathlib.RingTheory.TensorProduct.Pi
+import Pi1.Mathlib.RingTheory.Unramified.Basic
 import Pi1.Mathlib.Topology.Connected.Clopen
 import Pi1.RingTheory.Cotangent.Basic
 import Pi1.RingTheory.Cotangent.SpaceBaseChange

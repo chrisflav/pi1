@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2025 Christian Merten. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Christian Merten
+-/
 import Mathlib.RingTheory.Etale.Pi
 import Mathlib.RingTheory.Ideal.IdempotentFG
 import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
@@ -7,134 +12,31 @@ import Pi1.RingTheory.FinitePresentation
 import Pi1.RingTheory.RankAtStalk
 import Pi1.RingTheory.SmoothFlat
 import Pi1.Mathlib.RingTheory.TensorProduct.Basic
+import Pi1.Mathlib.RingTheory.TensorProduct.Pi
 import Pi1.Mathlib.Algebra.Algebra.Equiv
+import Pi1.Mathlib.Algebra.Algebra.Pi
+import Pi1.Mathlib.RingTheory.Idempotents
+import Pi1.Mathlib.RingTheory.Etale.Basic
+import Pi1.Mathlib.RingTheory.Unramified.Basic
+
+/-!
+# Totally split algebras
+
+An `R`-algebra `S` is totally split of rank `n` if it is isomorphic to `Fin n → R`. Geometrically,
+this corresponds to a trivial covering.
+
+Every totally split algebra is finite étale and conversely, every finite étale covering is étale
+locally totally split.
+-/
 
 open TensorProduct
 
-section
-
---
-noncomputable
-nonrec def Algebra.TensorProduct.prodRight (R S T A B : Type*) [CommRing R] [CommRing A]
-    [CommRing B] [CommRing S] [CommRing T] [Algebra R S] [Algebra R T] [Algebra S T]
-    [IsScalarTower R S T] [Algebra R A] [Algebra R B] :
-    T ⊗[R] (A × B) ≃ₐ[S] T ⊗[R] A × T ⊗[R] B :=
-  .ofLinearEquiv (TensorProduct.prodRight R S T A B) (by simp [Algebra.TensorProduct.one_def])
-    (LinearMap.map_mul_of_map_mul_tmul (fun _ _ _ _ ↦ by simp))
-
-def AlgEquiv.prodCongr {R S T A B : Type*} [CommRing R] [CommRing A] [CommRing B]
-    [CommRing S] [CommRing T] [Algebra R S] [Algebra R T] [Algebra R A] [Algebra R B]
-    (l : S ≃ₐ[R] A) (r : T ≃ₐ[R] B) :
-    (S × T) ≃ₐ[R] A × B :=
-  .ofRingEquiv (f := RingEquiv.prodCongr l r) <| by simp
-
-def AlgEquiv.funUnique (R S : Type*) [CommRing R] [CommRing S] [Algebra R S]
-    (ι : Type*) [Unique ι] :
-    (ι → S) ≃ₐ[R] S :=
-  .ofAlgHom (Pi.evalAlgHom R (fun _ ↦ S) default) (Pi.constAlgHom R ι S)
-    (by ext; simp) (by ext f i; simp [Unique.default_eq i])
-
-def Algebra.prodPiEquiv (R A α β : Type*) [CommRing R] [CommRing A] [Algebra R A] :
-    (α ⊕ β → A) ≃ₐ[R] (α → A) × (β → A) :=
-  .ofLinearEquiv (.sumArrowLequivProdArrow α β R A) rfl <| fun x y ↦ by ext <;> simp
-
-def AlgEquiv.piCongrLeft' {ι ι' : Type*} (R : Type*) (S : ι → Type*) (e : ι ≃ ι')
-    [CommSemiring R] [∀ i, Semiring (S i)] [∀ i, Algebra R (S i)] :
-    (Π i, S i) ≃ₐ[R] Π i, S (e.symm i) :=
-  .ofLinearEquiv (.piCongrLeft' R S e) (by ext; simp) (by intro x y; ext; simp)
-
-def AlgEquiv.piCongrLeft {ι ι' : Type*} (R : Type*) (S : ι → Type*) (e : ι' ≃ ι)
-    [CommSemiring R] [∀ i, Semiring (S i)] [∀ i, Algebra R (S i)] :
-    (Π i, S (e i)) ≃ₐ[R] Π i, S i :=
-  (AlgEquiv.piCongrLeft' R S e.symm).symm
-
-end
-
 universe u v
-
-section
-
-instance (R : Type u) [CommRing R] : Algebra.Etale R R :=
-    Algebra.instEtaleOfIsStandardSmoothOfRelativeDimensionOfNatNat.{u}
-
-instance (R : Type u) [CommRing R] (n : Type) [Finite n] :
-    Algebra.Etale R (n → R) where
-  formallyEtale :=
-    have : Algebra.FormallyEtale R R := Algebra.Etale.formallyEtale
-    Algebra.FormallyEtale.instForallOfFinite (fun _ : n ↦ R)
-
-instance (R S : Type u) [CommRing R] [CommRing S] [Algebra R S] [Algebra.Etale R S] :
-    Algebra.Smooth R S where
-
-instance (R S : Type u) [CommRing R] [CommRing S] [Algebra R S] [Algebra.Etale R S] :
-    Algebra.Unramified R S where
-
-instance (R S : Type u) [CommRing R] [CommRing S] :
-    letI : Algebra (R × S) S := (RingHom.snd R S).toAlgebra
-    Algebra.Etale (R × S) S := by
-  algebraize [RingHom.snd R S]
-  exact Algebra.Etale.of_isLocalization_Away (0, 1)
-
-instance (R S : Type u) [CommRing R] [CommRing S] :
-    letI : Algebra (R × S) R := (RingHom.fst R S).toAlgebra
-    Algebra.Etale (R × S) R := by
-  algebraize [RingHom.fst R S]
-  exact Algebra.Etale.of_isLocalization_Away (1, 0)
-
-lemma RingHom.prod_bijective_of_isIdempotentElem {R : Type*} [CommRing R]
-    {e f : R} (he : IsIdempotentElem e) (hf : IsIdempotentElem f) (hef₁ : (1 - e) * (1 - f) = 0)
-    (hef₂ : e * f = 0) :
-    Function.Bijective ((Ideal.Quotient.mk <| Ideal.span {e}).prod
-      (Ideal.Quotient.mk <| Ideal.span {f})) := by
-  let o (i : Fin 2) : R := match i with
-    | 0 => e
-    | 1 => f
-  show Function.Bijective
-    (piFinTwoEquiv _ ∘ Pi.ringHom (fun i : Fin 2 ↦ Ideal.Quotient.mk (Ideal.span {o i})))
-  rw [(Equiv.bijective _).of_comp_iff']
-  simp only [o]
-  apply bijective_pi_of_isIdempotentElem
-  · intro i
-    fin_cases i <;> simpa [o]
-  · intro i j hij
-    fin_cases i <;> fin_cases j <;> simp at hij ⊢ <;> simpa [mul_comm]
-  · simpa
-
-noncomputable
-def AlgEquiv.prodQuotientOfIsIdempotentElem {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
-    {e f : S} (he : IsIdempotentElem e) (hf : IsIdempotentElem f) (hef₁ : (1 - e) * (1 - f) = 0)
-    (hef₂ : e * f = 0) :
-    S ≃ₐ[R] (S ⧸ Ideal.span {e}) × (S ⧸ Ideal.span {f}) :=
-  AlgEquiv.ofBijective ((Ideal.Quotient.mkₐ _ _).prod (Ideal.Quotient.mkₐ _ _)) <|
-    RingHom.prod_bijective_of_isIdempotentElem he hf hef₁ hef₂
-
-lemma exists_split_of_formallyUnramified (R S : Type u) [CommRing R] [CommRing S] [Algebra R S]
-    [Algebra.EssFiniteType R S] [Algebra.FormallyUnramified R S] :
-    ∃ (T : Type u) (_ : CommRing T) (_ : Algebra S T), Nonempty (S ⊗[R] S ≃ₐ[S] S × T) := by
-  have : Subsingleton (Ω[S⁄R]) := inferInstance
-  apply (Ideal.cotangent_subsingleton_iff _).mp at this
-  apply (Ideal.isIdempotentElem_iff_of_fg _ (KaehlerDifferential.ideal_fg R S)).mp at this
-  obtain ⟨e, he, hsp⟩ := this
-  let eq := AlgEquiv.prodQuotientOfIsIdempotentElem (R := S) he he.one_sub
-    (by simp [he]) (by simp [he])
-  let eq2 : (S ⊗[R] S ⧸ Ideal.span {e}) ≃ₐ[S] S :=
-    ((Ideal.span {e}).quotientEquivAlgOfEq S hsp.symm).trans
-      (Ideal.quotientKerAlgEquivOfSurjective <|
-      fun x ↦ by use x ⊗ₜ 1; simp [Algebra.TensorProduct.lmul''])
-  refine ⟨(S ⊗[R] S) ⧸ Ideal.span {1 - e}, inferInstance, inferInstance, ⟨?_⟩⟩
-  exact eq.trans (AlgEquiv.prodCongr eq2 AlgEquiv.refl)
-
-end
 
 open IsLocalRing
 
-lemma Algebra.Etale.faithfullyFlat_of_rankAtStalk_pos (R S : Type u) [CommRing R] [CommRing S]
-    [Algebra R S] [Algebra.Etale R S] [Module.Finite R S]
-    (h : ∀ p, 0 < Module.rankAtStalk (R := R) S p) :
-    Module.FaithfullyFlat R S := by
-  apply Module.FaithfullyFlat.of_specComap_surjective
-  rwa [← Algebra.rankAtStalk_pos_iff_specComap_surjective]
-
+/-- `S` is an `R`-algebra split of rank `n` if `S` is isomorphic to `Fin n → R`.
+Geometrically, this is a trivial cover of degree `n`. -/
 class Algebra.IsSplitOfRank (n : outParam ℕ) (R S : Type*) [CommRing R]
     [CommRing S] [Algebra R S] : Prop where
   nonempty_algEquiv_fun' : Nonempty (S ≃ₐ[R] Fin n → R)
@@ -205,6 +107,9 @@ instance [IsSplitOfRank n R S] : Etale R S := by
   obtain ⟨e⟩ := Algebra.IsSplitOfRank.nonempty_algEquiv_fun n R S
   exact Algebra.Etale.of_equiv e.symm
 
+/-- If `S` is finite étale over `R` of (constant) rank `n`, there exists
+a faithfully flat, étale `R`-algebra `T` such that `T ⊗[R] S` is split of rank `n`
+over `T`. -/
 lemma exists_isSplitOfRank_tensorProduct [Etale R S] [Module.Finite R S] {n : ℕ}
     (hn : Module.rankAtStalk (R := R) S = n) :
     ∃ (T : Type u) (_ : CommRing T) (_ : Algebra R T) (_ : Module.FaithfullyFlat R T)
@@ -228,7 +133,7 @@ lemma exists_isSplitOfRank_tensorProduct [Etale R S] [Module.Finite R S] {n : �
       have : Nontrivial S := by
         apply Module.nontrivial_of_rankAtStalk_pos (R := R) (p := Nonempty.some inferInstance)
         simp [hn]
-      obtain ⟨U, _, _, ⟨e⟩⟩ := exists_split_of_formallyUnramified R S
+      obtain ⟨U, _, _, ⟨e⟩⟩ := Algebra.FormallyUnramified.exists_algEquiv_prod R S
       algebraize [RingHom.snd S U]
       have : IsScalarTower S (S × U) U := IsScalarTower.of_algebraMap_eq' rfl
       have : Etale S U := by
@@ -261,11 +166,12 @@ lemma exists_isSplitOfRank_tensorProduct [Etale R S] [Module.Finite R S] {n : �
         AlgEquiv.prodCongr (TensorProduct.rid S V V) f
       let e₅ : (V × (Fin n → V)) ≃ₐ[V] (Unit ⊕ Fin n) → V :=
         AlgEquiv.trans (AlgEquiv.prodCongr (AlgEquiv.funUnique _ _ _).symm AlgEquiv.refl)
-          (Algebra.prodPiEquiv V V Unit (Fin n)).symm
+          (AlgEquiv.sumArrowEquivProdArrow V V Unit (Fin n)).symm
       let e := e₁.trans <| e₂.trans <| e₃.trans <| e₄.trans e₅
       refine ⟨V, inferInstance, inferInstance, ?_, ?_, ?_⟩
       · have : Module.FaithfullyFlat R S := by
-          apply Algebra.Etale.faithfullyFlat_of_rankAtStalk_pos
+          apply Module.FaithfullyFlat.of_specComap_surjective
+          rw [← Algebra.rankAtStalk_pos_iff_specComap_surjective]
           intro p
           simp [hn]
         exact Module.FaithfullyFlat.trans R S V
