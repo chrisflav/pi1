@@ -5,7 +5,7 @@ import Pi1.Mathlib.RingTheory.RingHom.And
 
 open TensorProduct
 
-variable {R S : Type*} [CommRing R] [CommRing S] (f : R →+* S)
+variable {R S : Type*} [CommRing R] [CommRing S] {f : R →+* S}
 
 namespace RingHom
 
@@ -21,11 +21,13 @@ lemma faithfullyFlat_algebraMap_iff [Algebra R S] :
   congr!
   exact Algebra.algebra_ext _ _ fun _ ↦ rfl
 
-lemma FaithfullyFlat.flat (hf : f.FaithfullyFlat) : f.Flat := by
+namespace FaithfullyFlat
+
+lemma flat (hf : f.FaithfullyFlat) : f.Flat := by
   algebraize [f]
   exact inferInstanceAs <| Module.Flat R S
 
-lemma FaithfullyFlat.iff_flat_and_comap_surjective :
+lemma iff_flat_and_comap_surjective :
     f.FaithfullyFlat ↔ f.Flat ∧ Function.Surjective f.specComap := by
   algebraize [f]
   show (algebraMap R S).FaithfullyFlat ↔ (algebraMap R S).Flat ∧
@@ -34,13 +36,36 @@ lemma FaithfullyFlat.iff_flat_and_comap_surjective :
   exact ⟨fun h ↦ ⟨inferInstance, PrimeSpectrum.specComap_surjective_of_faithfullyFlat⟩,
     fun ⟨h, hf⟩ ↦ .of_specComap_surjective hf⟩
 
-lemma FaithfullyFlat.eq_and :
-    @FaithfullyFlat =
+lemma eq_and : @FaithfullyFlat =
       fun R S (_ : CommRing R) (_ : CommRing S) f ↦ f.Flat ∧ Function.Surjective f.specComap := by
   ext
   rw [iff_flat_and_comap_surjective]
 
-end RingHom
+lemma stableUnderComposition : StableUnderComposition FaithfullyFlat := by
+  rw [eq_and]
+  refine Flat.stableUnderComposition.and ?_
+  introv R hf hg
+  rw [PrimeSpectrum.specComap_comp]
+  exact hf.comp hg
+
+lemma of_bijective (hf : Function.Bijective f) : f.FaithfullyFlat := by
+  rw [iff_flat_and_comap_surjective]
+  refine ⟨.of_bijective hf, fun p ↦ ?_⟩
+  use (RingEquiv.ofBijective f hf).symm.toRingHom.specComap p
+  have : (RingEquiv.ofBijective f hf).symm.toRingHom.comp f = RingHom.id R := by
+    ext
+    exact (RingEquiv.ofBijective f hf).injective (by simp)
+  rw [← PrimeSpectrum.specComap_comp_apply, this, PrimeSpectrum.specComap_id]
+
+lemma respectsIso : RespectsIso FaithfullyFlat :=
+  stableUnderComposition.respectsIso (fun e ↦ .of_bijective e.bijective)
+
+lemma isStableUnderBaseChange : IsStableUnderBaseChange FaithfullyFlat := by
+  refine .mk _ respectsIso (fun R S T _ _ _ _ _ _ ↦ show (algebraMap _ _).FaithfullyFlat from ?_)
+  rw [faithfullyFlat_algebraMap_iff] at *
+  infer_instance
+
+end RingHom.FaithfullyFlat
 
 lemma Module.FaithfullyFlat.bijective_of_tensorProduct [Algebra R S]
     {T : Type*} [CommRing T] [Algebra R T] [Module.FaithfullyFlat R S]
