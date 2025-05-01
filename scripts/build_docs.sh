@@ -31,9 +31,9 @@ template > docbuild/lakefile.toml
 sed -i s/TOOLCHAIN/`grep -oP 'v4\..*' lean-toolchain`/ docbuild/lakefile.toml
 
 # Fetch the docs cache if it exists
-mkdir -p website/docs
+mkdir -p docs/build
 mkdir -p docbuild/.lake/build/doc
-mv website/docs/* docbuild/.lake/build/doc
+mv docs/build/* docbuild/.lake/build/doc
 
 # Initialise docbuild as a Lean project
 cd docbuild
