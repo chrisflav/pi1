@@ -11,6 +11,7 @@ import Pi1.Mathlib.Algebra.Algebra.Pi
 import Pi1.Mathlib.Algebra.Category.Ring.Colimits
 import Pi1.Mathlib.Algebra.Module.FinitePresentation
 import Pi1.Mathlib.Algebra.Module.LocalizedModule.Basic
+import Pi1.Mathlib.AlgebraicGeometry.Cover.Directed
 import Pi1.Mathlib.AlgebraicGeometry.Limits
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.AffineAnd
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Constructors
