@@ -64,6 +64,12 @@ lemma MvPolynomial.coeffs_mul_X {R σ : Type*} [CommSemiring R] (p : MvPolynomia
   classical
   aesop (add simp mem_coeffs_iff)
 
+@[simp]
+lemma MvPolynomial.coeffs_X_mul {R σ : Type*} [CommSemiring R] (p : MvPolynomial σ R) (n : σ) :
+    (X n * p).coeffs = p.coeffs := by
+  classical
+  aesop (add simp mem_coeffs_iff)
+
 lemma MvPolynomial.coeffs_add {R σ : Type*} [CommSemiring R] [DecidableEq R]
     {p q : MvPolynomial σ R} (h : Disjoint p.support q.support) :
     (p + q).coeffs = p.coeffs ∪ q.coeffs := by
