@@ -608,13 +608,14 @@ instance : IsLocalization.Away D.gbar S := by
 open Classical in
 def Q₁ : Presentation R D.T :=
   Presentation.naive (Subtype.val ∘ D.f ∘ b)
-    (fun x ↦ if x = -1 then -1 else if x = 0 then 0 else Quotient.out x)
+    (fun x ↦ if x = -1 then -1 else if x = 0 then 0 else
+      Function.surjInv Ideal.Quotient.mk_surjective x)
     (fun x ↦ by
       simp only
       split_ifs
       · next h => subst h; rfl
       · next h => subst h; rfl
-      · simp)
+      · simp [Function.surjInv_eq])
 
 lemma vmem (i : σ) : (D.f (b i)).val ∈ D.Q₁.toExtension.ker := by
   dsimp only [Q₁]
@@ -727,7 +728,12 @@ lemma P'_val_comp_inr : D.P'.val ∘ Sum.inr = P.val := by
   dsimp
   erw [Generators.naive_val]
   show aeval P.val _ = _
-  simp
+  simp only [aeval_X]
+  intro x
+  split_ifs
+  · next h => subst h; rfl
+  · next h => subst h; rfl
+  · simp [Function.surjInv_eq]
 
 set_option maxHeartbeats 400000 in
 lemma b_eq [Nontrivial S] (r : D.P'.rels) :

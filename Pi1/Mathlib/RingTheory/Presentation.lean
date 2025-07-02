@@ -16,8 +16,9 @@ lemma aeval_mk_X_eq_mk {σ : Type*} (I : Ideal (MvPolynomial σ R)) :
   rfl
 
 def Generators.naive {σ : Type t₁} {ι : Type t₂} (v : ι → MvPolynomial σ R)
-    (s : MvPolynomial σ R ⧸ (Ideal.span <| Set.range v) → MvPolynomial σ R := Quotient.out)
-    (hs : ∀ x, Quotient.mk'' (s x) = x := by simp) :
+    (s : MvPolynomial σ R ⧸ (Ideal.span <| Set.range v) → MvPolynomial σ R :=
+      Function.surjInv Ideal.Quotient.mk_surjective)
+    (hs : ∀ x, Ideal.Quotient.mk _ (s x) = x := by apply Function.surjInv_eq) :
     Generators.{t₁} R (MvPolynomial σ R ⧸ (Ideal.span <| Set.range v)) where
   vars := σ
   val i := Ideal.Quotient.mk _ (X i)
@@ -33,27 +34,28 @@ def Generators.naive {σ : Type t₁} {ι : Type t₂} (v : ι → MvPolynomial 
     · simp
 
 lemma Generators.naive_val {σ ι : Type*} (v : ι → MvPolynomial σ R)
-    (s : MvPolynomial σ R ⧸ (Ideal.span <| Set.range v) → MvPolynomial σ R := Quotient.out)
-    (hs : ∀ x, Quotient.mk'' (s x) = x := by simp) (i : σ) :
+    (s : MvPolynomial σ R ⧸ (Ideal.span <| Set.range v) → MvPolynomial σ R)
+    (hs : ∀ x, Ideal.Quotient.mk _ (s x) = x) (i : σ) :
     (Generators.naive v s hs).val i = Ideal.Quotient.mk _ (X i) :=
   rfl
 
 lemma Generators.naive_ker {σ ι : Type*} (v : ι → MvPolynomial σ R)
     (s : MvPolynomial σ R ⧸ (Ideal.span <| Set.range v) → MvPolynomial σ R)
-    (hs : ∀ x, Quotient.mk'' (s x) = x) :
+    (hs : ∀ x, Ideal.Quotient.mk _ (s x) = x) :
     (Generators.naive v s hs).ker = Ideal.span (Set.range v) :=
   (Ideal.span (Set.range v)).mk_ker
 
 lemma Generators.naive_σ {σ ι : Type*} (v : ι → MvPolynomial σ R)
     (s : MvPolynomial σ R ⧸ (Ideal.span <| Set.range v) → MvPolynomial σ R)
-    (hs : ∀ x, Quotient.mk'' (s x) = x)
+    (hs : ∀ x, Ideal.Quotient.mk _ (s x) = x)
     (x : MvPolynomial σ R ⧸ (Ideal.span <| Set.range v)) :
     (Generators.naive v s hs).σ x = s x :=
   rfl
 
 def Presentation.naive {σ : Type t₁} {ι : Type t₂} (v : ι → MvPolynomial σ R)
-    (s : MvPolynomial σ R ⧸ (Ideal.span <| Set.range v) → MvPolynomial σ R := Quotient.out)
-    (hs : ∀ x, Quotient.mk'' (s x) = x := by simp) :
+    (s : MvPolynomial σ R ⧸ (Ideal.span <| Set.range v) → MvPolynomial σ R :=
+      Function.surjInv Ideal.Quotient.mk_surjective)
+    (hs : ∀ x, Ideal.Quotient.mk _ (s x) = x := by apply Function.surjInv_eq) :
     Presentation.{t₂, t₁} R (MvPolynomial σ R ⧸ (Ideal.span <| Set.range v)) where
   __ := Generators.naive v s hs
   rels := ι
