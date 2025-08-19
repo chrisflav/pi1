@@ -2,7 +2,6 @@ import Mathlib
 import Pi1.RingTheory.RankAtStalk
 import Pi1.RingTheory.FinitePresentation
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
-import Pi1.Mathlib.Algebra.Category.Ring.Colimits
 import Pi1.Mathlib.RingTheory.RingHom.Finite
 import Pi1.Mathlib.RingTheory.IsTensorProduct
 import Pi1.Mathlib.RingTheory.TensorProduct.Basic
@@ -32,7 +31,7 @@ lemma Algebra.rankAtStalk_eq_of_isPushout (R S : Type*) [CommRing R] [CommRing S
   have : IsPushout R R' S S' := Algebra.IsPushout.symm inferInstance
   have := Module.rankAtStalk_eq_of_equiv (Algebra.IsPushout.equiv R R' S S').symm.toLinearEquiv
   rw [Module.rankAtStalk_eq_of_equiv (Algebra.IsPushout.equiv R R' S S').symm.toLinearEquiv,
-    Module.rankAtStalk_tensorProduct]
+    Module.rankAtStalk_baseChange]
   rfl
 
 lemma Algebra.IsPushout.of_bijective_left (R S T : Type*) [CommRing R] [CommRing S] [Algebra R S]
@@ -372,7 +371,7 @@ lemma finrank_eq_one_of_isIso [IsIso f] : finrank f = 1 := by
   have : Nontrivial R := y.nontrivial
   rw [← finrank_pullback_snd, ← Category.comp_id (pullback.snd f g), finrank_comp_left_of_isIso,
     ← Spec.map_id, finrank_SpecMap_eq_finrank, CommRingCat.hom_id, Pi.one_apply,
-    ← Algebra.id.map_eq_id, finrank_algebraMap]
+    ← Algebra.algebraMap_self, finrank_algebraMap]
   simp
 
 nonrec lemma isIso_iff_rank_eq [Flat f] [IsFinite f] [LocallyOfFinitePresentation f] :

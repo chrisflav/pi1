@@ -79,7 +79,7 @@ lemma Algebra.FiniteType.of_finiteType_tensorProduct_of_faithfullyFlat
   have (x : s) := TensorProduct.exists_sum_tmul_eq x.1
   choose k t m h using this
   let f : MvPolynomial (Σ x : s, Fin (k x)) R →ₐ[R] S := MvPolynomial.aeval (fun ⟨x, i⟩ ↦ m x i)
-  apply Algebra.FiniteType.of_surjective inferInstance f
+  apply Algebra.FiniteType.of_surjective f
   have hf : Function.Surjective (Algebra.TensorProduct.map (.id T T) f) := by
     intro x
     have hx : x ∈ adjoin T s := by rw [hs]; trivial
@@ -142,6 +142,10 @@ lemma Algebra.FinitePresentation.of_finitePresentation_tensorProduct_of_faithful
   have : Algebra.FiniteType R S := .of_finiteType_tensorProduct_of_faithfullyFlat T
   rw [Algebra.FiniteType.iff_quotient_mvPolynomial''] at this
   obtain ⟨n, f, hf⟩ := this
+  letI : Module (MvPolynomial (Fin n) R) (T ⊗[R] MvPolynomial (Fin n) R) :=
+    Algebra.toModule
+  letI : Module (MvPolynomial (Fin n) R) (MvPolynomial (Fin n) R ⊗[R] T) :=
+    Algebra.toModule
   have : Module.FaithfullyFlat (MvPolynomial (Fin n) R) (T ⊗[R] MvPolynomial (Fin n) R) :=
     .of_linearEquiv _ _ Algebra.TensorProduct.comm'.symm
   let fT := Algebra.TensorProduct.map (.id T T) f

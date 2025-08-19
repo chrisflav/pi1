@@ -415,16 +415,15 @@ def pullbackΓIso : (pullback f).op ⋙ Γ T ≅ Γ S ⋙ Under.pushout (f.app �
     ext : 1
     dsimp
     rw [← cancel_epi (ΓpullbackIsoPushout (unop X).hom f).inv]
-    simp only [Functor.const_obj_obj, Functor.id_obj, TopologicalSpace.Opens.map_top,
+    simp only [Functor.const_obj_obj, Functor.id_obj,
       Iso.inv_hom_id_assoc]
     apply pushout.hom_ext
     · rw [pushout.inl_desc]
-      simp only [inl_ΓpullbackIsoPushout_inv_assoc, TopologicalSpace.Opens.map_top]
+      simp only [inl_ΓpullbackIsoPushout_inv_assoc]
       rw [← Scheme.comp_app_top_assoc]
       rw [pullback.lift_fst]
       simp
-    · simp only [inr_ΓpullbackIsoPushout_inv_assoc, TopologicalSpace.Opens.map_top, colimit.ι_desc,
-        Functor.id_obj, Functor.const_obj_obj, Γ_obj_hom, Under.mk_right, Γ_map_right, id_eq,
+    · simp only [inr_ΓpullbackIsoPushout_inv_assoc, colimit.ι_desc,
         PushoutCocone.mk_pt, PushoutCocone.mk_ι_app]
       rw [← Scheme.comp_app_top_assoc]
       rw [pullback.lift_snd]

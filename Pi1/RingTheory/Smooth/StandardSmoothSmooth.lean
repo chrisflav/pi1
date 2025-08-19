@@ -182,7 +182,7 @@ lemma FinitePresentation.exists_basis_of_isLocalizedModule_powers :
   rw [IsLocalizedModule.linearEquiv_symm_apply]
   simp only [Finsupp.coe_basisSingleOne, Finsupp.mapRange.linearMap_apply, Finsupp.mapRange_single,
     Algebra.linearMap_apply, map_one, Finsupp.linearCombination_single, one_smul,
-    eM, eb'', eb]
+    eM]
   rw [IsLocalizedModule.lift_iso, hb']
 
 end
@@ -321,7 +321,7 @@ theorem exists_isStandardSmooth [Smooth R S] (p : Ideal S) [p.IsPrime] :
     intro i
     have : Finsupp.basisSingleOne i = l₁ (Finsupp.basisSingleOne i) := by simp [l₁]
     simp only [this, IsLocalizedModule.mapExtendScalars_apply_apply, IsLocalizedModule.map_apply,
-      Basis.constr_basis, map_D, Basis.coe_repr_symm, eₚ, l₂, e]
+      Module.Basis.constr_basis, map_D, Module.Basis.coe_repr_symm, eₚ, l₂, e]
     simp [l₁, hb, v]
   have heₚ : Function.Bijective eₚ := by
     rw [this]
@@ -341,9 +341,10 @@ theorem exists_isStandardSmooth [Smooth R S] (p : Ideal S) [p.IsPrime] :
       (Algebra.H1Cotangent.map R R S (Localization.Away g))
   have : FinitePresentation R (Localization.Away g) :=
     FinitePresentation.trans R S (Localization.Away g)
-  refine isStandardSmooth_of (I := κ) (Basis.ofRepr (LinearEquiv.ofBijective eₜ' h).symm) ?_
+  refine isStandardSmooth_of (I := κ)
+    (Module.Basis.ofRepr (LinearEquiv.ofBijective eₜ' h).symm) ?_
   rintro - ⟨i, rfl⟩
-  simp only [Basis.coe_ofRepr, LinearEquiv.symm_symm, LinearEquiv.ofBijective_apply,
+  simp only [Module.Basis.coe_ofRepr, LinearEquiv.symm_symm, LinearEquiv.ofBijective_apply,
     IsLocalizedModule.mapExtendScalars_apply_apply, Set.mem_range, eₜ']
   use algebraMap S (Localization.Away g) (a i)
   have : Finsupp.single i 1 = (l₁ₜ g) (Finsupp.basisSingleOne i) := by simp [l₁ₜ]

@@ -24,7 +24,7 @@ end
 
 lemma LinearMap.isUnit_iff_isUnit_toMatrix {R M : Type*} [CommRing R] [AddCommGroup M]
     [Module R M] (f : M →ₗ[R] M)
-    {m : Type*} [Fintype m] [DecidableEq m] (b : Basis m R M) :
+    {m : Type*} [Fintype m] [DecidableEq m] (b : Module.Basis m R M) :
     IsUnit f ↔ IsUnit (f.toMatrix b b) := by
   simp_rw [isUnit_iff_exists]
   constructor
@@ -33,9 +33,9 @@ lemma LinearMap.isUnit_iff_isUnit_toMatrix {R M : Type*} [CommRing R] [AddCommGr
     simp [← LinearMap.toMatrix_mul, hl, hr]
   · intro ⟨A, hl, hr⟩
     use Matrix.toLin b b A
-    rw [← Matrix.toLin_toMatrix b b f, LinearMap.mul_eq_comp, LinearMap.mul_eq_comp,
+    rw [← Matrix.toLin_toMatrix b b f, Module.End.mul_eq_comp, Module.End.mul_eq_comp,
       ← Matrix.toLin_mul, ← Matrix.toLin_mul]
-    simp [hl, hr, LinearMap.one_eq_id]
+    simp [hl, hr, Module.End.one_eq_id]
 
 lemma LinearMap.isUnit_iff_isUnit_det {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M]
     [Module.Finite R M] [Module.Free R M]
@@ -47,14 +47,14 @@ lemma LinearMap.isUnit_iff_isUnit_det {R M : Type*} [CommRing R] [AddCommGroup M
 
 lemma LinearMap.bijective_of_linearIndependent_and_span_eq_top {R M N : Type*} [CommRing R]
     [AddCommGroup M] [AddCommGroup N] [Module R M] [Module R N] (f : M →ₗ[R] N) {ι : Type*}
-    (b : Basis ι R M) (hli : LinearIndependent R (f ∘ b))
+    (b : Module.Basis ι R M) (hli : LinearIndependent R (f ∘ b))
     (hsp : Submodule.span R (Set.range <| f ∘ b) = ⊤) :
     Function.Bijective f := by
-  let b' : Basis ι R N := Basis.mk hli (by rw [hsp])
+  let b' : Module.Basis ι R N := Module.Basis.mk hli (by rw [hsp])
   let e : M ≃ₗ[R] N := LinearEquiv.ofLinear f (b'.constr R (fun i ↦ b i))
     (by
       refine b'.ext fun i ↦ ?_
-      simp only [coe_comp, Function.comp_apply, Basis.constr_basis, id_coe, id_eq]
+      simp only [coe_comp, Function.comp_apply, Module.Basis.constr_basis, id_coe, id_eq]
       simp [b'])
     (by
       refine b.ext fun i ↦ ?_
@@ -88,7 +88,7 @@ variable (f : K →ₗ[R] M) (g : M →ₗ[R] P)
 
 section
 
-variable {κ σ : Type*} (b : Basis (κ ⊕ σ) R M)
+variable {κ σ : Type*} (b : Module.Basis (κ ⊕ σ) R M)
 
 lemma injective_restrict_aux (hf : Function.Injective f) (hfg : Function.Exact f g)
     (H : LinearIndependent R (fun i ↦ g (b (Sum.inr i)))) :
@@ -110,7 +110,7 @@ lemma injective_restrict_aux (hf : Function.Injective f) (hfg : Function.Exact f
   simp only [Finsupp.sum] at hgfx
   simp at hgfx
   rw [← Finset.toLeft_disjSum_toRight (u := (b.repr q).support)] at hgfx
-  rw [Finset.sum_disj_sum] at hgfx
+  rw [Finset.sum_disjSum] at hgfx
   simp [hx] at hgfx
   rw [linearIndependent_iff'] at H
   have := H _ _ hgfx
@@ -148,13 +148,13 @@ lemma surjective_restrict_aux (hfg : Function.Exact f g)
   obtain ⟨a, ha⟩ := this
   use a
   simp only [LinearMap.coe_comp, LinearEquiv.coe_coe, Function.comp_apply, ha, map_sub,
-    Basis.repr_self, map_sum, map_smul, Finsupp.smul_single, smul_eq_mul, mul_one]
+    Module.Basis.repr_self, map_sum, map_smul, Finsupp.smul_single, smul_eq_mul, mul_one]
   ext j
   simp [Finsupp.lcomapDomain]
 
 end
 
-variable {ι κ σ : Type*} (b : Basis ι R M)
+variable {ι κ σ : Type*} (b : Module.Basis ι R M)
   (u : κ → ι) (hu : Function.Injective u)
   (v : σ → ι) (hv : Function.Injective v)
 
@@ -190,15 +190,15 @@ lemma injective_restrict (hf : Function.Injective f) (hfg : Function.Exact f g)
     (huv : IsCompl (Set.range u) (Set.range v)) :
     Function.Injective
       (Finsupp.lcomapDomain v hv ∘ₗ b.repr.toLinearMap ∘ₗ f) := by
-  let b' : Basis (σ ⊕ κ) R M := b.reindex (sumEquiv u hu v hv huv).symm
+  let b' : Module.Basis (σ ⊕ κ) R M := b.reindex (sumEquiv u hu v hv huv).symm
   have : Finsupp.lcomapDomain v hv ∘ₗ b.repr.toLinearMap ∘ₗ f =
       Finsupp.lcomapDomain Sum.inl Sum.inl_injective ∘ₗ b'.repr.toLinearMap ∘ₗ f := by
     ext x i
     simp [b', Finsupp.lcomapDomain]
   rw [this]
   apply injective_restrict_aux f g _ hf hfg
-  have (i) : g (b' (Sum.inr i)) = g (b (u i)) := by simp [b']
-  simp_rw [this]
+  have heq (i) : g (b' (Sum.inr i)) = g (b (u i)) := by simp [b']
+  simp_rw [heq]
   exact H
 
 include hu in
@@ -207,7 +207,7 @@ lemma surjective_restrict (hfg : Function.Exact f g)
     (huv : IsCompl (Set.range u) (Set.range v)) :
     Function.Surjective
       (Finsupp.lcomapDomain v hv ∘ₗ b.repr.toLinearMap ∘ₗ f) := by
-  let b' : Basis (σ ⊕ κ) R M := b.reindex (sumEquiv u hu v hv huv).symm
+  let b' : Module.Basis (σ ⊕ κ) R M := b.reindex (sumEquiv u hu v hv huv).symm
   have : Finsupp.lcomapDomain v hv ∘ₗ b.repr.toLinearMap ∘ₗ f =
       Finsupp.lcomapDomain Sum.inl Sum.inl_injective ∘ₗ b'.repr.toLinearMap ∘ₗ f := by
     ext x i
@@ -222,7 +222,7 @@ end
 
 noncomputable section
 
-variable {R : Type u} {S : Type v} [CommRing R] [CommRing S] [Algebra R S]
+variable {R : Type u} {S : Type v} [CommRing R] [CommRing S] [Algebra R S] {σ : Type*}
 
 namespace Algebra
 
@@ -232,14 +232,14 @@ open MvPolynomial
 
 /-- Given generators `R[xᵢ] → S` and an injective map `ι → P.vars`, this is the
 composition `I/I² → ⊕ S dxᵢ → ⊕ S dxᵢ` where the second `i` only runs over `ι`. -/
-def cotangentRestrict (P : Generators R S) {ι : Type*} (a : ι → P.vars)
+def cotangentRestrict (P : Generators R S σ) {ι : Type*} (a : ι → σ)
     (ha : Function.Injective a) :
     P.toExtension.Cotangent →ₗ[S] (ι →₀ S) :=
   Finsupp.lcomapDomain a ha ∘ₗ P.cotangentSpaceBasis.repr.toLinearMap ∘ₗ
     P.toExtension.cotangentComplex
 
 @[simp]
-lemma cotangentRestrict_mk (P : Generators R S) {ι : Type*} (a : ι → P.vars)
+lemma cotangentRestrict_mk (P : Generators R S σ) {ι : Type*} (a : ι → σ)
     (ha : Function.Injective a) (x : P.ker) :
     cotangentRestrict P a ha (Extension.Cotangent.mk x) =
       (fun j ↦ (aeval P.val) <| pderiv (a j) x.val) := by
@@ -250,38 +250,40 @@ lemma cotangentRestrict_mk (P : Generators R S) {ι : Type*} (a : ι → P.vars)
   dsimp
   rw [P.cotangentSpaceBasis_repr_tmul, one_mul]
 
-lemma PreSubmersivePresentation.jacobian_eq_det_aevalDifferential
-    (P : PreSubmersivePresentation R S) :
+variable {α β : Type*}
+
+lemma PreSubmersivePresentation.jacobian_eq_det_aevalDifferential [Finite β]
+    (P : PreSubmersivePresentation R S α β) :
     P.jacobian = LinearMap.det P.aevalDifferential := by
   classical
-  have : Fintype P.rels := Fintype.ofFinite P.rels
+  have : Fintype β := Fintype.ofFinite β
   rw [← LinearMap.det_toMatrix', P.aevalDifferential_toMatrix'_eq_mapMatrix_jacobiMatrix]
   simp [jacobian_eq_jacobiMatrix_det, RingHom.map_det, P.algebraMap_eq]
 
-lemma PreSubmersivePresentation.isUnit_jacobian_iff_bijective_aevalDifferential
-    (P : PreSubmersivePresentation R S) :
+lemma PreSubmersivePresentation.isUnit_jacobian_iff_bijective_aevalDifferential [Finite β]
+    (P : PreSubmersivePresentation R S α β) :
     IsUnit P.jacobian ↔ Function.Bijective P.aevalDifferential := by
   rw [P.jacobian_eq_det_aevalDifferential]
   rw [← LinearMap.isUnit_iff_isUnit_det]
-  exact Module.End_isUnit_iff P.aevalDifferential
+  exact Module.End.isUnit_iff P.aevalDifferential
 
-lemma PreSubmersivePresentation.isUnit_jacobian_of_linearIndependent_and_span_eq_top
-    (P : PreSubmersivePresentation R S)
-    (hli : LinearIndependent S (fun j i : P.rels ↦ aeval P.val <| pderiv (P.map i) (P.relation j)))
+lemma PreSubmersivePresentation.isUnit_jacobian_of_linearIndependent_and_span_eq_top [Finite β]
+    (P : PreSubmersivePresentation R S α β)
+    (hli : LinearIndependent S (fun j i : β ↦ aeval P.val <| pderiv (P.map i) (P.relation j)))
     (hsp : Submodule.span S
-      (Set.range <| (fun j i : P.rels ↦ aeval P.val <| pderiv (P.map i) (P.relation j))) = ⊤) :
+      (Set.range <| (fun j i : β ↦ aeval P.val <| pderiv (P.map i) (P.relation j))) = ⊤) :
     IsUnit P.jacobian := by
   classical
   rw [PreSubmersivePresentation.isUnit_jacobian_iff_bijective_aevalDifferential]
-  apply LinearMap.bijective_of_linearIndependent_and_span_eq_top _ (Pi.basisFun S P.rels)
+  apply LinearMap.bijective_of_linearIndependent_and_span_eq_top _ (Pi.basisFun S β)
   · convert hli
     simp
   · convert hsp
     simp
 
-lemma PreSubmersivePresentation.jacobian_isUnit_of
-    (P : PreSubmersivePresentation R S)
-    (b : Basis P.rels S P.toExtension.Cotangent)
+lemma PreSubmersivePresentation.jacobian_isUnit_of [Finite β]
+    (P : PreSubmersivePresentation R S α β)
+    (b : Module.Basis β S P.toExtension.Cotangent)
     (hb : ∀ r, b r = Extension.Cotangent.mk ⟨P.relation r, P.relation_mem_ker r⟩)
     (h : Function.Bijective (cotangentRestrict P.toGenerators P.map P.map_inj)) :
     IsUnit P.jacobian := by
@@ -294,7 +296,7 @@ lemma PreSubmersivePresentation.jacobian_isUnit_of
   apply P.isUnit_jacobian_of_linearIndependent_and_span_eq_top
   · rw [this]
     exact (b.linearIndependent.map' _ (LinearMap.ker_eq_bot_of_injective h.injective)).map' _
-      (Finsupp.linearEquivFunOnFinite S S P.rels).ker
+      (Finsupp.linearEquivFunOnFinite S S β).ker
   · rw [this]
     rw [Set.range_comp, Set.range_comp, ← Submodule.map_span, ← Submodule.map_span]
     rw [b.span_eq, Submodule.map_top]
@@ -307,32 +309,28 @@ open KaehlerDifferential MvPolynomial
 
 /-- If `Ω[S⁄R]` has a basis of the form `{d sᵢ}` where `sᵢ : S`, there exist
 generators `P` such that `Ω[S⁄R]` is free on `{d xᵢ}` for some of the generators `xᵢ`. -/
-lemma exists_generators_of_basis_kaehlerDifferential [Algebra.FiniteType R S]
-    {I : Type v} (b : Basis I S (Ω[S⁄R]))
+nonrec lemma exists_generators_of_basis_kaehlerDifferential [Algebra.FiniteType R S]
+    {I : Type v} (b : Module.Basis I S (Ω[S⁄R]))
     (hb : Set.range b ⊆ Set.range (D R S)) :
-    ∃ (P : Generators.{v} R S) (_ : Finite P.vars) (κ : Type v) (a : κ → P.vars)
-      (b : Basis κ S (Ω[S⁄R])),
+    ∃ (α : Type v) (P : Generators R S α) (_ : Finite α) (κ : Type v) (a : κ → α)
+      (b : Module.Basis κ S (Ω[S⁄R])),
       Function.Injective a ∧ ∀ k, b k = P.toExtension.toKaehler (1 ⊗ₜ D _ _ (X (a k))) := by
   obtain ⟨ι, _, f, hf⟩ :=
     (Algebra.FiniteType.iff_quotient_mvPolynomial' (R := R) (S := S)).mp inferInstance
-  let P : Generators R S :=
+  let P : Generators R S ι :=
     Generators.ofSurjective (fun i ↦ f (X i)) <| by rwa [aeval_unique f] at hf
-  have hfin : Finite P.vars := by
-    simp only [P, Generators.ofSurjective_vars]
-    infer_instance
-  wlog h : Nontrivial S
-  · rw [not_nontrivial_iff_subsingleton] at h
-    have : Subsingleton (Ω[S⁄R]) := Module.subsingleton S _
-    exact ⟨P, hfin, PEmpty, PEmpty.elim,
-      Basis.empty _, Function.injective_of_subsingleton PEmpty.elim, by tauto⟩
-  letI : Fintype P.vars := Fintype.ofFinite P.vars
+  obtain h | h := subsingleton_or_nontrivial S
+  · have : Subsingleton (Ω[S⁄R]) := Module.subsingleton S _
+    exact ⟨ι, P, inferInstance, PEmpty, PEmpty.elim,
+      Module.Basis.empty _, Function.injective_of_subsingleton PEmpty.elim, by tauto⟩
+  letI : Fintype ι := Fintype.ofFinite ι
   choose f' hf' using hb
   let f (i : I) : S := f' ⟨i, rfl⟩
   have hf (i : I) : D R S (f i) = b i := by simp [f, hf']
   let g (i : I) : P.Ring := P.σ (f i)
-  let t : P.vars ⊕ I → P.Ring := Sum.elim X g
-  let P' : Generators R S := Generators.ofSurjective
-      (vars := P.vars ⊕ I) (aeval P.val ∘ t) <| by
+  let t : ι ⊕ I → P.Ring := Sum.elim X g
+  let P' : Generators R S (ι ⊕ I) := Generators.ofSurjective
+      (aeval P.val ∘ t) <| by
     intro s
     use rename Sum.inl (P.σ s)
     rw [aeval_rename]
@@ -345,7 +343,7 @@ lemma exists_generators_of_basis_kaehlerDifferential [Algebra.FiniteType R S]
       aeval_val := by intro i; rfl }
   haveI : Module.Finite S (Ω[S⁄R]) := inferInstance
   have : Finite I := Module.Finite.finite_basis b
-  use P', inferInstanceAs (Finite <| P.vars ⊕ I), I, Sum.inr, b, Sum.inr_injective
+  use ι ⊕ I, P', inferInstance, I, Sum.inr, b, Sum.inr_injective
   let r := Extension.CotangentSpace.map hom.toExtensionHom
   intro k
   let foo := r (1 ⊗ₜ[P'.toExtension.Ring] (D R P'.toExtension.Ring) (X (Sum.inr k)))
@@ -355,8 +353,7 @@ lemma exists_generators_of_basis_kaehlerDifferential [Algebra.FiniteType R S]
     simp [foo, r, Extension.toKaehler]
     conv_rhs => erw [mapBaseChange_tmul]
     conv_lhs => erw [mapBaseChange_tmul]
-    simp only [Generators.toExtension_Ring, Generators.toExtension_commRing, map_D,
-      Generators.algebraMap_apply, one_smul, aeval_X]
+    simp only [map_D, Generators.algebraMap_apply, one_smul, aeval_X]
     congr
     erw [Algebra.Extension.Hom.toAlgHom_apply]
     simp [hom]
@@ -366,22 +363,24 @@ lemma exists_generators_of_basis_kaehlerDifferential [Algebra.FiniteType R S]
   simp
   erw [Algebra.Extension.Hom.toAlgHom_apply]
   simp only [Extension.toKaehler, Generators.toExtension_Ring, Generators.toExtension_commRing,
-    Generators.toExtension_algebra₂, Generators.Hom.toExtensionHom_toRingHom,
-    AlgHom.toRingHom_eq_coe, RingHom.coe_coe, Generators.Hom.toAlgHom_X, Sum.elim_inr, t, g]
+    Generators.Hom.toExtensionHom_toRingHom,
+    AlgHom.toRingHom_eq_coe, RingHom.coe_coe, Generators.Hom.toAlgHom_X]
   erw [KaehlerDifferential.mapBaseChange_tmul]
-  simp only [map_D, Generators.algebraMap_apply, Generators.aeval_val_σ, one_smul]
+  simp only [map_D, Generators.algebraMap_apply, one_smul]
   simp [g, hom, t, hf]
 
 /-- If `H¹(L_{S/R}) = 0` and `R[xᵢ] → S` are generators indexed by `ι ⊕ κ` such that the images
 of `dxₖ` for `k : κ` form a basis of `Ω[S⁄R]`, then the restriction of
 `I/I² → ⊕ S dxᵢ` to the direct sum indexed by `i : ι` is an isomorphism. -/
 lemma cotangentRestrict_bijective_of_basis_kaehlerDifferential [Subsingleton (H1Cotangent R S)]
-    (P : Generators R S) {ι κ : Type*} (u : ι → P.vars) (hu : Function.Injective u)
-    (v : κ → P.vars) (hv : Function.Injective v) (huv : IsCompl (Set.range v) (Set.range u))
-    (b : Basis κ S (Ω[S⁄R])) (hb : ∀ k, b k = P.toExtension.toKaehler (1 ⊗ₜ D _ _ (X (v k)))) :
+    {α : Type*}
+    (P : Generators R S α) {ι κ : Type*} (u : ι → α) (hu : Function.Injective u)
+    (v : κ → α) (hv : Function.Injective v) (huv : IsCompl (Set.range v) (Set.range u))
+    (b : Module.Basis κ S (Ω[S⁄R]))
+    (hb : ∀ k, b k = P.toExtension.toKaehler (1 ⊗ₜ D _ _ (X (v k)))) :
     Function.Bijective (cotangentRestrict P u hu) := by
   have hsub : Subsingleton P.toExtension.H1Cotangent := P.equivH1Cotangent.subsingleton
-  let bC : Basis P.vars S P.toExtension.CotangentSpace := P.cotangentSpaceBasis
+  let bC : Module.Basis α S P.toExtension.CotangentSpace := P.cotangentSpaceBasis
   have heq : P.toExtension.toKaehler ∘ P.cotangentSpaceBasis ∘ v = b := by
     ext i
     simp [hb, P.cotangentSpaceBasis_apply]
@@ -510,17 +509,15 @@ lemma RingHom.ker_eq_top_of_subsingleton {R S : Type*} [Ring R] [Ring S] (f : R 
   apply Subsingleton.elim
 
 lemma exists_presentation_of_free_of_subsingleton [Subsingleton S] [Algebra.FinitePresentation R S]
-    (P : Generators.{t₁} R S) [Finite P.vars] (σ : Type t₂) :
-    ∃ (P' : Presentation.{t₂, t₁} R S)
-      (e₁ : Unit ⊕ P.vars ≃ P'.vars)
-      (_ : Unit ⊕ σ ≃ P'.rels)
-      (b : Basis P'.rels S P'.toExtension.Cotangent),
-      P'.val ∘ e₁ ∘ Sum.inr = P.val ∧
+    {α : Type t₁}
+    (P : Generators R S α) [Finite α] (σ : Type t₂) :
+    ∃ (P' : Presentation.{t₂, t₁} R S (Unit ⊕ α) (Unit ⊕ σ))
+      (b : Module.Basis (Unit ⊕ σ) S P'.toExtension.Cotangent),
+      P'.val ∘ Sum.inr = P.val ∧
       ∀ r, b r = Extension.Cotangent.mk ⟨P'.relation r, P'.relation_mem_ker r⟩ := by
-  let P' : Presentation.{t₂, t₁} R S :=
+  let P' : Presentation.{t₂, t₁} R S (Unit ⊕ α) (Unit ⊕ σ) :=
     { __ := Generators.ofSurjective
-        (fun i : Unit ⊕ P.vars ↦ 0) (Function.surjective_to_subsingleton _)
-      rels := Unit ⊕ σ
+        (fun i : Unit ⊕ α ↦ 0) (Function.surjective_to_subsingleton _)
       relation _ := 1
       span_range_relation_eq_ker := by
         simp only [Generators.ker_eq_ker_aeval_val]
@@ -530,8 +527,7 @@ lemma exists_presentation_of_free_of_subsingleton [Subsingleton S] [Algebra.Fini
         use Sum.inl ()
       }
   have : Subsingleton P'.toExtension.Cotangent := Module.subsingleton S _
-  refine ⟨P', Equiv.sumCongr (Equiv.refl _) (Equiv.refl _),
-      Equiv.sumCongr (Equiv.refl _) (Equiv.refl _), default, ?_, ?_⟩
+  refine ⟨P', default, ?_, ?_⟩
   · ext x
     apply Subsingleton.elim
   · intro r
@@ -539,8 +535,8 @@ lemma exists_presentation_of_free_of_subsingleton [Subsingleton S] [Algebra.Fini
 
 section
 
-variable (P : Generators.{t₁} R S) {σ : Type t₂}
-  (b : Basis σ S P.toExtension.Cotangent)
+variable {ι : Type t₁} (P : Generators R S ι) {σ : Type t₂}
+  (b : Module.Basis σ S P.toExtension.Cotangent)
 
 open Pointwise
 
@@ -559,7 +555,7 @@ variable {P} {b}
 variable (D : Aux P b)
 
 abbrev T :=
-  MvPolynomial P.vars R ⧸ (Ideal.span <| Set.range <| Subtype.val ∘ D.f ∘ b)
+  MvPolynomial ι R ⧸ (Ideal.span <| Set.range <| Subtype.val ∘ D.f ∘ b)
 
 def hom : D.T →ₐ[R] S := Ideal.Quotient.liftₐ _ (aeval P.val) <| by
   intro a ha
@@ -573,7 +569,7 @@ def hom : D.T →ₐ[R] S := Ideal.Quotient.liftₐ _ (aeval P.val) <| by
 
 instance : Algebra D.T S := D.hom.toAlgebra
 instance [Nontrivial S] : Nontrivial D.T := RingHom.domain_nontrivial (algebraMap D.T S)
-instance : IsScalarTower (MvPolynomial P.vars R) D.T S := by
+instance : IsScalarTower P.Ring D.T S := by
   constructor
   intro x y z
   rw [Algebra.smul_def]
@@ -583,20 +579,18 @@ instance : IsScalarTower (MvPolynomial P.vars R) D.T S := by
   obtain ⟨y, rfl⟩ := Ideal.Quotient.mk_surjective y
   obtain ⟨z, rfl⟩ := P.algebraMap_surjective z
   simp only [map_mul, Generators.algebraMap_apply]
-  simp only [RingHom.algebraMap_toAlgebra, AlgHom.toRingHom_eq_coe, id.map_eq_id,
-    RingHomCompTriple.comp_eq, RingHom.coe_coe, hom]
+  simp only [RingHom.algebraMap_toAlgebra, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, hom]
   rw [Ideal.Quotient.liftₐ_apply]
   rw [Ideal.Quotient.liftₐ_apply]
-  simp only [RingHom.coe_comp, RingHom.coe_mk, MonoidHom.coe_mk, OneHom.coe_mk,
-    Function.comp_apply, Ideal.Quotient.lift_mk, RingHom.coe_coe, ← mul_assoc]
+  simp only [Ideal.Quotient.lift_mk, RingHom.coe_coe, ← mul_assoc]
   congr 1
 
 abbrev gbar : D.T := D.g
 
 instance : IsLocalization.Away D.gbar S := by
-  fapply IsLocalization.Away.of_sub_one_mem_ker (R := MvPolynomial P.vars R) (n := 1)
-  · apply Function.Surjective.of_comp (g := algebraMap (MvPolynomial P.vars R) D.T)
-    have : ⇑(algebraMap D.T S) ∘ ⇑(algebraMap (MvPolynomial P.vars R) D.T) = algebraMap _ S := by
+  fapply IsLocalization.Away.of_sub_one_mem_ker (R := P.Ring) (n := 1)
+  · apply Function.Surjective.of_comp (g := algebraMap P.Ring D.T)
+    have : ⇑(algebraMap D.T S) ∘ ⇑(algebraMap P.Ring D.T) = algebraMap _ S := by
       ext x
       exact (DFunLike.congr_fun (IsScalarTower.algebraMap_eq _ D.T S) x).symm
     rw [this]
@@ -606,8 +600,8 @@ instance : IsLocalization.Away D.gbar S := by
   · simpa using D.hg
 
 open Classical in
-def Q₁ : Presentation R D.T :=
-  Presentation.naive (Subtype.val ∘ D.f ∘ b)
+def Q₁ : Presentation R D.T ι σ :=
+  Presentation.naive (v := Subtype.val ∘ D.f ∘ ⇑b)
     (fun x ↦ if x = -1 then -1 else if x = 0 then 0 else
       Function.surjInv Ideal.Quotient.mk_surjective x)
     (fun x ↦ by
@@ -619,8 +613,8 @@ def Q₁ : Presentation R D.T :=
 
 lemma vmem (i : σ) : (D.f (b i)).val ∈ D.Q₁.toExtension.ker := by
   dsimp only [Q₁]
-  show _ ∈ (Generators.naive (Subtype.val ∘ D.f ∘ b)).ker
-  rw [Generators.naive_ker]
+  show _ ∈ (Generators.naive (I := Ideal.span <| Set.range <| Subtype.val ∘ D.f ∘ b)).ker
+  rw [Generators.ker_naive]
   apply Ideal.subset_span
   use i
   simp
@@ -645,8 +639,8 @@ lemma hspan : Submodule.span (M := D.Q₁.toExtension.Cotangent) D.T
       (Set.range <| fun i : σ ↦ Extension.Cotangent.mk ⟨(D.f (b i)).val, D.vmem i⟩) = ⊤ := by
   apply Extension.Cotangent.span_eq_top_of_span_eq_ker
   dsimp only [Q₁, Presentation.naive]
-  show _ = Generators.ker (Generators.naive _ _ _)
-  simp only [Generators.naive_ker]
+  show _ = Generators.ker (Generators.naive _ _)
+  simp only [Generators.ker_naive]
   rfl
 
 def equiv1 : S ⊗[D.T] D.Q₁.toExtension.Cotangent ≃ₗ[S] P.toExtension.Cotangent := by
@@ -654,7 +648,7 @@ def equiv1 : S ⊗[D.T] D.Q₁.toExtension.Cotangent ≃ₗ[S] P.toExtension.Cot
   · dsimp [hom1, hom2, fhom]
     apply b.ext
     intro i
-    simp only [LinearMap.coe_comp, Function.comp_apply, Basis.constr_basis,
+    simp only [LinearMap.coe_comp, Function.comp_apply, Module.Basis.constr_basis,
       LinearMap.liftBaseChange_tmul, one_smul, LinearMap.id_coe, id_eq]
     erw [Extension.Cotangent.map_mk]
     simp only [Generators.toExtension_Ring, Generators.toExtension_commRing,
@@ -687,10 +681,10 @@ def equiv1 : S ⊗[D.T] D.Q₁.toExtension.Cotangent ≃ₗ[S] P.toExtension.Cot
     | add x y _ _ hx hy => simp [hx, hy, tmul_add]
     | smul a x _ hx => simp [hx]
 
-def Q₂ : SubmersivePresentation.{0} D.T S :=
+def Q₂ : SubmersivePresentation.{0} D.T S Unit Unit :=
   SubmersivePresentation.localizationAway S D.gbar
 
-def P' : Presentation R S := D.Q₂.toPresentation.comp D.Q₁
+def P' : Presentation R S (Unit ⊕ ι) (Unit ⊕ σ) := D.Q₂.toPresentation.comp D.Q₁
 
 lemma heq [Nontrivial S] :
     ((Generators.localizationAway D.gbar).ofComp D.Q₁.toGenerators).toAlgHom
@@ -713,11 +707,11 @@ def equiv2 [Nontrivial S] : D.P'.toExtension.Cotangent ≃ₗ[S]
   (D.Q₁.cotangentCompLocalizationAwayEquiv (T := S) D.gbar
     (D.P'.relation (Sum.inl ())) D.heq) ≪≫ₗ LinearEquiv.prodComm _ _ _
 
-def bQ₁ : Basis σ S (S ⊗[D.T] D.Q₁.toExtension.Cotangent) := b.map D.equiv1.symm
-def bQ₂ : Basis Unit S D.Q₂.toExtension.Cotangent := D.Q₂.basisCotangent
+def bQ₁ : Module.Basis σ S (S ⊗[D.T] D.Q₁.toExtension.Cotangent) := b.map D.equiv1.symm
+def bQ₂ : Module.Basis Unit S D.Q₂.toExtension.Cotangent := D.Q₂.basisCotangent
 
-def b' [Nontrivial S] : Basis D.P'.rels S D.P'.toExtension.Cotangent :=
-  (Basis.prod D.bQ₂ D.bQ₁).map D.equiv2.symm
+def b' [Nontrivial S] : Module.Basis (Unit ⊕ σ) S D.P'.toExtension.Cotangent :=
+  (Module.Basis.prod D.bQ₂ D.bQ₁).map D.equiv2.symm
 
 lemma P'_val_comp_inr : D.P'.val ∘ Sum.inr = P.val := by
   ext i
@@ -726,22 +720,16 @@ lemma P'_val_comp_inr : D.P'.val ∘ Sum.inr = P.val := by
   simp only [Sum.elim_inr, Function.comp_apply, Q₁]
   erw [Equiv.refl_apply]
   dsimp
-  erw [Generators.naive_val]
   show aeval P.val _ = _
   simp only [aeval_X]
-  intro x
-  split_ifs
-  · next h => subst h; rfl
-  · next h => subst h; rfl
-  · simp [Function.surjInv_eq]
 
 set_option maxHeartbeats 400000 in
-lemma b_eq [Nontrivial S] (r : D.P'.rels) :
+lemma b_eq [Nontrivial S] (r : Unit ⊕ σ) :
     D.b' r = Extension.Cotangent.mk ⟨D.P'.relation r, D.P'.relation_mem_ker r⟩ := by
   obtain (r|r) := r
   · have : (D.bQ₂.prod D.bQ₁) (Sum.inl r) = (D.bQ₂ r, 0) := by simp
     dsimp only [b']
-    simp only [Basis.map_apply]
+    simp only [Module.Basis.map_apply]
     erw [this]
     simp only [equiv2, LinearEquiv.trans_symm, LinearEquiv.trans_apply]
     erw [LinearEquiv.prodComm_symm_apply]
@@ -761,7 +749,7 @@ lemma b_eq [Nontrivial S] (r : D.P'.rels) :
     rfl
   · have : (D.bQ₂.prod D.bQ₁) (Sum.inr r) = (0, D.bQ₁ r) := by simp
     dsimp only [b']
-    simp only [Basis.map_apply]
+    simp only [Module.Basis.map_apply]
     erw [this]
     simp only [equiv2, LinearEquiv.trans_symm, LinearEquiv.trans_apply]
     erw [LinearEquiv.prodComm_symm_apply]
@@ -775,13 +763,12 @@ end Aux
 end
 
 lemma exists_presentation_of_free [Algebra.FinitePresentation R S]
-    (P : Generators.{t₁} R S) [Finite P.vars] {σ : Type t₂}
-    (b : Basis σ S P.toExtension.Cotangent) :
-    ∃ (P' : Presentation.{t₂, t₁} R S)
-      (e₁ : Unit ⊕ P.vars ≃ P'.vars)
-      (_ : Unit ⊕ σ ≃ P'.rels)
-      (b : Basis P'.rels S P'.toExtension.Cotangent),
-      P'.val ∘ e₁ ∘ Sum.inr = P.val ∧
+    {α : Type t₁}
+    (P : Generators.{t₁} R S α) [Finite α] {σ : Type t₂}
+    (b : Module.Basis σ S P.toExtension.Cotangent) :
+    ∃ (P' : Presentation.{t₂, t₁} R S (Unit ⊕ α) (Unit ⊕ σ))
+      (b : Module.Basis (Unit ⊕ σ) S P'.toExtension.Cotangent),
+      P'.val ∘ Sum.inr = P.val ∧
       ∀ r, b r = Extension.Cotangent.mk ⟨P'.relation r, P'.relation_mem_ker r⟩ := by
   cases subsingleton_or_nontrivial S
   · apply exists_presentation_of_free_of_subsingleton P σ
@@ -793,7 +780,7 @@ lemma exists_presentation_of_free [Algebra.FinitePresentation R S]
     simp only [Function.comp_apply, hf (b i)]
   let v (i : σ) : P.ker := f (b i)
   have hv (i : σ) : Extension.Cotangent.mk (v i) = b i := hf (b i)
-  let J : Ideal (MvPolynomial P.vars R) := Ideal.span (Set.range <| Subtype.val ∘ v)
+  let J : Ideal P.Ring := Ideal.span (Set.range <| Subtype.val ∘ v)
   have hJle : P.ker ≤ P.ker := le_rfl
   have hJ_fg : P.ker.FG := by
     rw [P.ker_eq_ker_aeval_val]
@@ -815,7 +802,7 @@ lemma exists_presentation_of_free [Algebra.FinitePresentation R S]
     simp_rw [this] at hc
     rw [← map_finsuppSum, Eq.comm] at hc
     rw [Algebra.Extension.Cotangent.mk_eq_mk_iff_sub_mem] at hc
-    simp only [Finsupp.sum, AddSubmonoidClass.coe_finset_sum, SetLike.val_smul, smul_eq_mul] at hc
+    simp only [Finsupp.sum, AddSubmonoidClass.coe_finset_sum] at hc
     have : x = ∑ x ∈ c.support, P.σ (c x) * v x + (x - ∑ x ∈ c.support, P.σ (c x) * ↑(v x)) := by
       simp
     rw [this]
@@ -837,15 +824,15 @@ lemma exists_presentation_of_free [Algebra.FinitePresentation R S]
     hgmem := hgmem
     hg := hg
   }
-  exact ⟨D.P', Equiv.refl _, Equiv.refl _, D.b', D.P'_val_comp_inr, D.b_eq⟩
+  exact ⟨D.P', D.b', D.P'_val_comp_inr, D.b_eq⟩
 
 theorem isStandardSmooth_of [Algebra.FinitePresentation R S]
     [Subsingleton (H1Cotangent R S)]
-    {I : Type v} (b : Basis I S (Ω[S⁄R])) (hb : Set.range b ⊆ Set.range (D R S)) :
+    {I : Type v} (b : Module.Basis I S (Ω[S⁄R])) (hb : Set.range b ⊆ Set.range (D R S)) :
     IsStandardSmooth R S := by
-  obtain ⟨P, hfin, κ, v, b, hv, hb⟩ := exists_generators_of_basis_kaehlerDifferential b hb
-  let σ : Type v := ((Set.range v)ᶜ : Set P.vars)
-  let u : σ → P.vars := Subtype.val
+  obtain ⟨α, P, hfin, κ, v, b, hv, hb⟩ := exists_generators_of_basis_kaehlerDifferential b hb
+  let σ : Type v := ((Set.range v)ᶜ : Set α)
+  let u : σ → α := Subtype.val
   have huv : IsCompl (Set.range v) (Set.range u) := by
     simp only [u]
     rw [Subtype.range_coe]
@@ -853,45 +840,38 @@ theorem isStandardSmooth_of [Algebra.FinitePresentation R S]
   have := cotangentRestrict_bijective_of_basis_kaehlerDifferential P u Subtype.val_injective v hv
     huv b hb
   let e := LinearEquiv.ofBijective (cotangentRestrict P u Subtype.val_injective) this
-  let bcot' : Basis σ S P.toExtension.Cotangent := Basis.ofRepr e
-  obtain ⟨Q, e₁, e₂, bcot, hcomp, hbcot⟩ :=
+  let bcot' : Module.Basis σ S P.toExtension.Cotangent := Module.Basis.ofRepr e
+  obtain ⟨Q, bcot, hcomp, hbcot⟩ :=
     exists_presentation_of_free P bcot'
-  have : Finite Q.rels := Finite.of_equiv _ e₂
-  let P' : PreSubmersivePresentation R S :=
+  let P' : PreSubmersivePresentation R S (Unit ⊕ α) (Unit ⊕ σ) :=
     { toPresentation := Q
-      map := e₁ ∘ Sum.map _root_.id u ∘ e₂.symm
-      map_inj := e₁.injective.comp <|
-        (Sum.map_injective.mpr ⟨fun _ _ h ↦ h, Subtype.val_injective⟩).comp e₂.symm.injective
-      relations_finite := inferInstance }
+      map := Sum.map _root_.id u
+      map_inj := Sum.map_injective.mpr ⟨fun _ _ h ↦ h, Subtype.val_injective⟩ }
   let hom : P.Hom P'.toGenerators :=
-    { val := X ∘ e₁ ∘ Sum.inr
+    { val := X ∘ Sum.inr
       aeval_val := fun k ↦ by simp [← hcomp, P'] }
   have heq (k : κ) :
-        (1 ⊗ₜ[P'.toExtension.Ring] (D R P'.toExtension.Ring) (X ((e₁ ∘ Sum.inr ∘ v) k))) =
+        (1 ⊗ₜ[P'.toExtension.Ring] (D R P'.toExtension.Ring) (X ((Sum.inr ∘ v) k))) =
         Extension.CotangentSpace.map hom.toExtensionHom
           (1 ⊗ₜ[P.toExtension.Ring] (D R P.toExtension.Ring) (X (v k))) := by
     rw [Extension.CotangentSpace.map_tmul, Extension.Hom.toAlgHom_apply]
     rw [Generators.Hom.toExtensionHom_toRingHom]
     simp [hom]
-  have : Finite P'.vars := Finite.of_equiv _ e₁
-  have : P'.IsFinite := ⟨inferInstance, inferInstance⟩
-  have hcompl : IsCompl (Set.range (e₁ ∘ Sum.inr ∘ v)) (Set.range P'.map) := by
+  have hcompl : IsCompl (Set.range (Sum.inr ∘ v)) (Set.range P'.map) := by
     simp only [u, Set.range_comp, P']
-    rw [e₁.image_eq_preimage, e₁.image_eq_preimage]
-    apply IsCompl.preimage
     simp only [Set.isCompl_iff]
-    simp only [Set.mem_image, Set.mem_range, exists_exists_eq_and, Equiv.range_eq_univ,
-      Set.image_univ, Sum.exists, Sum.map_inl, id_eq, Sum.map_inr, not_or, not_exists, Sum.forall,
+    simp only [Set.mem_image, Set.mem_range, exists_exists_eq_and,
+      Sum.exists, Sum.map_inl, id_eq, Sum.map_inr, not_or, not_exists, Sum.forall,
       reduceCtorEq, exists_false, not_true_eq_false, forall_const, not_false_eq_true, implies_true,
       and_true, Sum.inr.injEq, true_and]
     simp_rw [← Set.mem_range, ← not_exists, ← Set.mem_range]
     rwa [← Set.isCompl_iff]
   have hbij : Function.Bijective (cotangentRestrict P'.toGenerators P'.map P'.map_inj) := by
     apply cotangentRestrict_bijective_of_basis_kaehlerDifferential P'.toGenerators P'.map
-      P'.map_inj (e₁ ∘ Sum.inr ∘ v) (e₁.injective.comp <| Sum.inr_injective.comp hv) hcompl b
+      P'.map_inj (Sum.inr ∘ v) (Sum.inr_injective.comp hv) hcompl b
     intro k
     rw [heq, Extension.toKaehler_map, hb]
-  let P'' : SubmersivePresentation R S := ⟨P', P'.jacobian_isUnit_of bcot hbcot hbij, inferInstance⟩
+  let P'' : SubmersivePresentation R S _ _ := ⟨P', P'.jacobian_isUnit_of bcot hbcot hbij⟩
   exact P''.isStandardSmooth
 
 end Algebra

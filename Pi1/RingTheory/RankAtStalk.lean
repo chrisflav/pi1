@@ -35,10 +35,6 @@ variable {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M]
 
 attribute [local instance] Module.free_of_flat_of_isLocalRing
 
-lemma PrimeSpectrum.nontrivial (p : PrimeSpectrum R) : Nontrivial R := by
-  refine ⟨0, 1, fun h ↦ p.2.ne_top ?_⟩
-  simp [Ideal.eq_top_iff_one p.asIdeal, ← h]
-
 /-- A prime `p` is in the range of `Spec S → Spec R` if the fiber over `p` is nontrivial. -/
 lemma PrimeSpectrum.mem_rangeComap_iff_nontrivial {S : Type*} [CommRing S]
     [Algebra R S] (p : PrimeSpectrum R) :
@@ -59,39 +55,10 @@ lemma PrimeSpectrum.mem_rangeComap_iff_nontrivial {S : Type*} [CommRing S]
 
 namespace Module
 
-@[simp]
-lemma rankAtStalk_eq_zero_of_subsingleton [Subsingleton M] :
-    rankAtStalk (R := R) M = 0 := by
-  ext p
-  exact Module.finrank_zero_of_subsingleton
 
-lemma nontrivial_of_rankAtStalk_pos (p : PrimeSpectrum R) (h : 0 < rankAtStalk (R := R) M) :
-    Nontrivial M := by
-  by_contra! hn
-  have : Subsingleton M := not_nontrivial_iff_subsingleton.mp hn
-  have := finrank_zero_of_subsingleton (R := Localization.AtPrime p.asIdeal)
-    (M := LocalizedModule p.asIdeal.primeCompl M)
-  simp [rankAtStalk, this] at h
 
-lemma rankAtStalk_eq_of_equiv {N : Type*} [AddCommGroup N] [Module R N] (e : M ≃ₗ[R] N) :
-    rankAtStalk (R := R) M = rankAtStalk N := by
-  ext p
-  exact IsLocalizedModule.mapEquiv p.asIdeal.primeCompl
-    (LocalizedModule.mkLinearMap p.asIdeal.primeCompl M)
-    (LocalizedModule.mkLinearMap p.asIdeal.primeCompl N)
-    (Localization.AtPrime p.asIdeal) e |>.finrank_eq
 
-/-- If `M` is `R`-free, its rank at stalks is constant and agrees with the `R`-rank of `M`. -/
-@[simp]
-lemma rankAtStalk_eq_finrank_of_free [Module.Free R M] :
-    rankAtStalk (R := R) M = Module.finrank R M := by
-  ext p
-  simp [rankAtStalk, finrank_of_isLocalizedModule_of_free _ p.asIdeal.primeCompl
-    (LocalizedModule.mkLinearMap p.asIdeal.primeCompl M)]
 
-@[simp]
-lemma rankAtStalk_self [Nontrivial R] : rankAtStalk (R := R) R = 1 := by
-  simp [rankAtStalk_eq_finrank_of_free]
 
 open LocalizedModule Localization
 
@@ -100,92 +67,7 @@ instance {R : Type*} [CommSemiring R] (S : Submonoid R)
     Module.Finite (Localization S) (LocalizedModule S M) :=
   Module.Finite.of_isLocalizedModule S (LocalizedModule.mkLinearMap S M)
 
-/-- The rank of `Π i, M i` at a prime `p` is the sum of the ranks of `M i` at `p`. -/
-lemma rankAtStalk_pi {ι : Type*} [Finite ι] (M : ι → Type*)
-    [∀ i, AddCommGroup (M i)] [∀ i, Module R (M i)] [∀ i, Module.Flat R (M i)]
-    [∀ i, Module.Finite R (M i)] (p : PrimeSpectrum R) :
-    rankAtStalk (Π i, M i) p = ∑ᶠ i, rankAtStalk (M i) p := by
-  cases nonempty_fintype ι
-  let f : (Π i, M i) →ₗ[R] Π i, LocalizedModule p.asIdeal.primeCompl (M i) :=
-    .pi (fun i ↦ mkLinearMap p.asIdeal.primeCompl (M i) ∘ₗ LinearMap.proj i)
-  let e : LocalizedModule p.asIdeal.primeCompl (Π i, M i) ≃ₗ[Localization.AtPrime p.asIdeal]
-      Π i, LocalizedModule p.asIdeal.primeCompl (M i) :=
-    IsLocalizedModule.linearEquiv p.asIdeal.primeCompl
-      (mkLinearMap _ _) f |>.extendScalarsOfIsLocalization p.asIdeal.primeCompl _
-  simp_rw [rankAtStalk, e.finrank_eq, Module.finrank_pi_fintype, finsum_eq_sum_of_fintype]
-
-lemma rankAtStalk_eq_finrank_tensorProduct (p : PrimeSpectrum R):
-    rankAtStalk M p =
-      finrank (Localization.AtPrime p.asIdeal) (Localization.AtPrime p.asIdeal ⊗[R] M) := by
-  let e : LocalizedModule p.asIdeal.primeCompl M ≃ₗ[Localization.AtPrime p.asIdeal]
-      Localization.AtPrime p.asIdeal ⊗[R] M :=
-    LocalizedModule.equivTensorProduct p.asIdeal.primeCompl M
-  rw [rankAtStalk, e.finrank_eq]
-
 variable [Flat R M] [Module.Finite R M]
-
-lemma rankAtStalk_eq_zero_iff_subsingleton :
-    rankAtStalk (R := R) M = 0 ↔ Subsingleton M := by
-  refine ⟨fun h ↦ ?_, fun _ ↦ rankAtStalk_eq_zero_of_subsingleton⟩
-  simp_rw [← support_eq_empty_iff (R := R), Set.eq_empty_iff_forall_not_mem, not_mem_support_iff]
-  intro p
-  apply subsingleton_of_rank_zero (R := Localization.AtPrime p.asIdeal)
-  have hr : finrank (Localization.AtPrime p.asIdeal) (LocalizedModule p.asIdeal.primeCompl M) = 0 :=
-    funext_iff.mp h p
-  simp [← finrank_eq_rank, hr]
-
-variable (M) in
-/-- The rank of `M × N` at `p` is equal to the sum of the ranks. -/
-lemma rankAtStalk_prod (N : Type*) [AddCommGroup N] [Module R N]
-    [Module.Flat R N] [Module.Finite R N] (p : PrimeSpectrum R) :
-    rankAtStalk (M × N) p = rankAtStalk M p + rankAtStalk N p := by
-  let e : LocalizedModule p.asIdeal.primeCompl (M × N) ≃ₗ[Localization.AtPrime p.asIdeal]
-      LocalizedModule p.asIdeal.primeCompl M × LocalizedModule p.asIdeal.primeCompl N :=
-    IsLocalizedModule.linearEquiv p.asIdeal.primeCompl (mkLinearMap _ _)
-      (.prodMap (mkLinearMap _ M) (mkLinearMap _ N)) |>.extendScalarsOfIsLocalization
-      p.asIdeal.primeCompl _
-  simp [rankAtStalk, e.finrank_eq]
-
-lemma rankAtStalk_tensorProduct {S : Type*} [CommRing S] [Algebra R S] (p : PrimeSpectrum S) :
-    rankAtStalk (S ⊗[R] M) p = rankAtStalk M ((algebraMap R S).specComap p) := by
-  let q : PrimeSpectrum R := (algebraMap R S).specComap p
-  letI : Algebra (Localization.AtPrime q.asIdeal) (Localization.AtPrime p.asIdeal) :=
-    localRingHom q.asIdeal p.asIdeal (algebraMap R S) rfl |>.toAlgebra
-  have : IsScalarTower R (Localization.AtPrime q.asIdeal) (Localization.AtPrime p.asIdeal) := by
-    refine IsScalarTower.of_algebraMap_eq (fun x ↦ ?_)
-    simp [RingHom.algebraMap_toAlgebra, localRingHom_to_map,
-      IsScalarTower.algebraMap_apply R S (Localization.AtPrime p.asIdeal)]
-  let e : LocalizedModule p.asIdeal.primeCompl (S ⊗[R] M) ≃ₗ[Localization.AtPrime p.asIdeal]
-      Localization.AtPrime p.asIdeal ⊗[Localization.AtPrime q.asIdeal]
-        LocalizedModule q.asIdeal.primeCompl M :=
-    LocalizedModule.equivTensorProduct _ _ ≪≫ₗ
-      (AlgebraTensorModule.cancelBaseChange R S _ _ M) ≪≫ₗ
-      (AlgebraTensorModule.cancelBaseChange R _ _ _ M).symm ≪≫ₗ
-      (AlgebraTensorModule.congr (LinearEquiv.refl _ _)
-        (LocalizedModule.equivTensorProduct _ M).symm)
-  rw [rankAtStalk, e.finrank_eq]
-  apply Module.finrank_baseChange
-
-lemma rankAtStalk_tensorProduct' (N : Type*) [AddCommGroup N] [Module R N] [Module.Finite R N]
-    [Module.Flat R N] : rankAtStalk (M ⊗[R] N) = rankAtStalk M * rankAtStalk (R := R) N := by
-  ext p
-  let e : Localization.AtPrime p.asIdeal ⊗[R] M ⊗[R] N ≃ₗ[Localization.AtPrime p.asIdeal]
-      (Localization.AtPrime p.asIdeal ⊗[R] M) ⊗[Localization.AtPrime p.asIdeal]
-        (Localization.AtPrime p.asIdeal ⊗[R] N) :=
-    (AlgebraTensorModule.assoc _ _ _ _ _ _).symm ≪≫ₗ
-      (AlgebraTensorModule.cancelBaseChange _ _ _ _ _).symm
-  rw [rankAtStalk_eq_finrank_tensorProduct, e.finrank_eq, finrank_tensorProduct,
-    ← rankAtStalk_eq_finrank_tensorProduct, ← rankAtStalk_eq_finrank_tensorProduct, Pi.mul_apply]
-
-/-- The rank of a module `M` at a prime `p` is equal to the dimension
-of `κ(p) ⊗[R] M` as a `κ(p)`-module. -/
-lemma rankAtStalk_eq (p : PrimeSpectrum R) :
-    rankAtStalk M p = finrank p.asIdeal.ResidueField (p.asIdeal.ResidueField ⊗[R] M) := by
-  let k := p.asIdeal.ResidueField
-  let e : k ⊗[Localization.AtPrime p.asIdeal] (Localization.AtPrime p.asIdeal ⊗[R] M) ≃ₗ[k]
-      k ⊗[R] M :=
-    AlgebraTensorModule.cancelBaseChange _ _ _ _ _
-  rw [← e.finrank_eq, finrank_baseChange, rankAtStalk_eq_finrank_tensorProduct]
 
 /-- `M` has positive rank at `p` if the "fiber" over `p` is non-trivial. -/
 lemma rankAtStalk_pos_iff_nontrivial (p : PrimeSpectrum R) :
@@ -227,10 +109,10 @@ lemma Algebra.comap_surjective_iff_injective_of_finite :
     (Algebra.TensorProduct.includeRight.toLinearMap)
   ext
   simp only [LinearMap.coe_comp, Function.comp_apply, linearMap_apply, map_one,
-    LinearMap.coe_restrictScalars, TensorProduct.algebraMap_apply, id.map_eq_id, RingHom.id_apply]
+    LinearMap.coe_restrictScalars]
   have : Algebra.linearMap R (Localization.AtPrime P) 1 = 1 := by simp
   rw [← this, IsLocalizedModule.map_apply]
-  simp only [linearMap_apply, map_one, AlgHom.toLinearMap_apply, TensorProduct.includeRight_apply]
+  simp only [linearMap_apply, map_one, AlgHom.toLinearMap_apply]
   apply (faithfulSMul_iff_algebraMap_injective _ _).mp
   obtain ⟨⟨Q, _⟩, hQ⟩ := h ⟨P, inferInstance⟩
   have : Q.LiesOver P := ⟨(congr($(hQ).asIdeal)).symm⟩
@@ -263,15 +145,15 @@ lemma Algebra.bijective_algebraMap_of_free [Nontrivial R] [Module.Free R S]
     ext
     simp [f, this, h]
   let e := dualTensorHomEquiv R S S
-  let b : Basis (Unit × Unit) R (Module.End R S) :=
-    Basis.map (Basis.tensorProduct
-      (Basis.dualBasis <| Module.basisUnique Unit h) <| Module.basisUnique Unit h) e
+  let b : Module.Basis (Unit × Unit) R (Module.End R S) :=
+    Module.Basis.map (Module.Basis.tensorProduct
+      (Module.Basis.dualBasis <| Module.basisUnique Unit h) <| Module.basisUnique Unit h) e
   have h2 : (f ∘ₗ Algebra.linearMap R S) ∘ₗ LinearMap.trace R S = LinearMap.id := by
     apply b.ext
     intro i
     apply (Module.basisUnique Unit h).ext
     intro j
-    simp [f, b, e, Basis.tensorProduct]
+    simp [f, b, e, Module.Basis.tensorProduct]
   let eq : R ≃ₗ[R] Module.End R S := .ofLinear (f ∘ₗ Algebra.linearMap R S) (.trace R S) h2 h1
   have : Function.Bijective (f ∘ₗ Algebra.linearMap R S) := eq.bijective
   have hf : Function.Bijective f := ⟨hinj, .of_comp this.2⟩
@@ -295,10 +177,10 @@ lemma Algebra.surjective_algebraMap_of_rankAtStalk_le_one
     (Algebra.TensorProduct.includeRight.toLinearMap)
   ext
   simp only [LinearMap.coe_comp, Function.comp_apply, linearMap_apply, map_one,
-    LinearMap.coe_restrictScalars, TensorProduct.algebraMap_apply, id.map_eq_id, RingHom.id_apply]
+    LinearMap.coe_restrictScalars]
   have : Algebra.linearMap R (Localization.AtPrime P) 1 = 1 := by simp
   rw [← this, IsLocalizedModule.map_apply]
-  simp only [linearMap_apply, map_one, AlgHom.toLinearMap_apply, TensorProduct.includeRight_apply]
+  simp only [linearMap_apply, map_one, AlgHom.toLinearMap_apply]
   have := h ⟨P, inferInstance⟩
   by_cases h : Module.rankAtStalk S ⟨P, inferInstance⟩ = 0
   · have : Subsingleton (Localization.AtPrime P ⊗[R] S) := by
@@ -321,7 +203,7 @@ lemma Module.Flat.tfae_algebraMap_surjective :
   tfae_have 2 → 3 := fun H ↦ by
     intro p
     have h : Module.rankAtStalk (S ⊗[R] S) p = Module.rankAtStalk S p ^ 2 := by
-      simp [Module.rankAtStalk_tensorProduct', sq]
+      simp [Module.rankAtStalk_tensorProduct, sq]
     by_contra! hc
     apply Nat.succ_succ_ne_one 0
     rw [← Nat.pow_eq_self_iff hc, ← h, Module.rankAtStalk_eq_of_equiv

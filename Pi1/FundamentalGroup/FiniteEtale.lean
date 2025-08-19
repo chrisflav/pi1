@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christian Merten
 -/
 import Pi1.Mathlib.RingTheory.RingHom.Etale
-import Pi1.Mathlib.RingTheory.RingHomProperties
 import Pi1.FundamentalGroup.AffineAnd
 import Pi1.RingTheory.StableProperties
 import Pi1.RingTheory.FiniteEtale.Equalizer

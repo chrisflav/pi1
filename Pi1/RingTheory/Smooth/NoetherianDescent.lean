@@ -55,10 +55,8 @@ end
 theorem finiteType_of_adjoin_finite {A : Type v} [CommRing A] [Algebra R A] (T : Set A)
     (h : Set.Finite T) : FiniteType R (Algebra.adjoin R T) := by
   rw [Algebra.adjoin_eq_range]
-  apply Algebra.FiniteType.of_surjective _ (AlgHom.rangeRestrict (MvPolynomial.aeval Subtype.val))
-  · exact AlgHom.rangeRestrict_surjective _
-  · haveI : Finite T := Set.Finite.to_subtype h
-    apply FiniteType.mvPolynomial
+  haveI : Finite T := Set.Finite.to_subtype h
+  exact Algebra.FiniteType.of_surjective _ (AlgHom.rangeRestrict_surjective _)
 
 variable (A : Type u) [CommRing A] [Algebra R A]
 variable [FormallySmooth R A] (hfp : FinitePresentation R A)

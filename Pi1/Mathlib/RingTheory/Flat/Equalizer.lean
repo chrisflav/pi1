@@ -75,7 +75,7 @@ lemma _root_.AlgHom.equalizerCongr_apply {R A A' B B' : Type*} [CommSemiring R]
 lemma _root_.AlgHom.equalizerCancelBaseChange_tmul (f g : A →ₐ[R] B) (T : Type u) [CommRing T]
     [Algebra R T] (x : A) (hx : x ∈ AlgHom.equalizer f g) :
     ((AlgHom.equalizerCancelBaseChange S f g T)
-      ⟨1 ⊗ₜ[T] 1 ⊗ₜ[R] x, by simp [show f x = g x from hx]⟩) =
+      ⟨1 ⊗ₜ[T] (1 ⊗ₜ[R] x), by simp [show f x = g x from hx]⟩) =
         ⟨1 ⊗ₜ x, by simp [show f x = g x from hx]⟩ := by
   ext : 1
   simp [AlgHom.equalizerCancelBaseChange, AlgHom.equalizerCongr_apply]
@@ -139,12 +139,12 @@ def auxEquivLHS (f g : A →ₐ[R] B) (T : Type u) [CommRing T] [Algebra R T] [M
 @[simp]
 lemma auxEquivLHS_one_tmul_one (f g : A →ₐ[R] B) (T : Type u) [CommRing T] [Algebra R T]
     [Module.Flat R T] (x : S) :
-    auxEquivLHS f g T (1 ⊗ₜ[R] x ⊗ₜ[R] 1) = (1 ⊗ₜ x) ⊗ₜ 1 :=
+    auxEquivLHS f g T (1 ⊗ₜ[R] (x ⊗ₜ[R] 1)) = (1 ⊗ₜ x) ⊗ₜ 1 :=
   rfl
 
 lemma auxEquivLHS_one_one_tmul (f g : A →ₐ[R] B) (T : Type u) [CommRing T] [Algebra R T]
     [Module.Flat R T] (x : AlgHom.equalizer f g) :
-    (auxEquivLHS (S := S) f g T) (1 ⊗ₜ[R] 1 ⊗ₜ[R] x) =
+    (auxEquivLHS (S := S) f g T) (1 ⊗ₜ[R] (1 ⊗ₜ[R] x)) =
       1 ⊗ₜ ⟨1 ⊗ₜ x, by simp [show f x.1 = g x.1 from x.2]⟩ :=
   rfl
 
@@ -210,7 +210,7 @@ lemma TensorProduct.map_tensorEqualizer_bijective_iff_tensorEqualizer_map_biject
         AlgEquiv.toAlgHom_eq_coe, eLHS]
       erw [AlgHom.comp_apply]
       erw [AlgHom.comp_apply]
-      simp only [AlgHom.coe_coe, eLHS]
+      simp only [AlgHom.coe_coe]
       rw [auxEquivLHS_one_one_tmul]
       rw [AlgHom.tensorEqualizer_one_tmul, AlgHom.tensorEqualizer_one_tmul,
         auxEquivRHS_symm_tmul']

@@ -84,7 +84,7 @@ def myAssocE : T ⊗[R] (S ⊗[P.Ring] Ω[P.Ring⁄R]) ≃ₗ[T] (T ⊗[R] S) �
     rw [tmul_add, smul_add, LinearEquiv.map_add, hx, hy, LinearEquiv.map_add, smul_add]
     | tmul s x =>
     dsimp only [LinearEquiv.coe_toAddEquiv, LinearEquiv.coe_addEquiv_apply]
-    have : c • t ⊗ₜ[R] s ⊗ₜ[P.Ring] x = (c • t) ⊗ₜ[R] s ⊗ₜ[P.Ring] x := rfl
+    have : c • t ⊗ₜ[R] (s ⊗ₜ[P.Ring] x) = (c • t) ⊗ₜ[R] (s ⊗ₜ[P.Ring] x) := rfl
     rw [this, myAssoc_tmul, myAssoc_tmul]
     rfl
 
@@ -130,10 +130,10 @@ def tensorCotangentSpace' :
   let e₂ : T ⊗[R] (S ⊗[P.Ring] Ω[P.Ring⁄R]) ≃ₗ[T] (T ⊗[R] S) ⊗[P.Ring] Ω[P.Ring⁄R] :=
     myAssocE ..
   let e₃ : (T ⊗[R] S) ⊗[P.Ring] Ω[P.Ring⁄R] ≃ₗ[T]
-      (T ⊗[R] S) ⊗[PT.Ring] PT.Ring ⊗[P.Ring] Ω[P.Ring⁄R] :=
+      (T ⊗[R] S) ⊗[PT.Ring] (PT.Ring ⊗[P.Ring] Ω[P.Ring⁄R]) :=
     (AlgebraTensorModule.cancelBaseChange _ PT.Ring PT.Ring _ _).symm.restrictScalars T
-  let e'' : T ⊗[R] S ⊗[P.Ring] Ω[P.Ring⁄R] ≃ₗ[T]
-      (T ⊗[R] S) ⊗[PT.Ring] PT.Ring ⊗[P.Ring] Ω[P.Ring⁄R] :=
+  let e'' : T ⊗[R] (S ⊗[P.Ring] Ω[P.Ring⁄R]) ≃ₗ[T]
+      (T ⊗[R] S) ⊗[PT.Ring] (PT.Ring ⊗[P.Ring] Ω[P.Ring⁄R]) :=
     e₂ ≪≫ₗ e₃
   exact e'' ≪≫ₗ e'.restrictScalars T
 

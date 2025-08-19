@@ -12,10 +12,6 @@ import Pi1.RingTheory.FinitePresentation
 import Pi1.RingTheory.RankAtStalk
 import Pi1.RingTheory.SmoothFlat
 import Pi1.Mathlib.RingTheory.TensorProduct.Basic
-import Pi1.Mathlib.RingTheory.TensorProduct.Pi
-import Pi1.Mathlib.Algebra.Algebra.Equiv
-import Pi1.Mathlib.Algebra.Algebra.Pi
-import Pi1.Mathlib.RingTheory.Idempotents
 import Pi1.Mathlib.RingTheory.Etale.Basic
 import Pi1.Mathlib.RingTheory.Unramified.Basic
 
@@ -131,7 +127,7 @@ lemma exists_isSplitOfRank_tensorProduct [Etale R S] [Module.Finite R S] {n : �
         have : IsSplitOfRank (n + 1) R S := .of_subsingleton
         apply IsSplitOfRank.of_equiv (TensorProduct.lid R S).symm
       have : Nontrivial S := by
-        apply Module.nontrivial_of_rankAtStalk_pos (R := R) (p := Nonempty.some inferInstance)
+        apply Module.nontrivial_of_rankAtStalk_pos (R := R)
         simp [hn]
       obtain ⟨U, _, _, ⟨e⟩⟩ := Algebra.FormallyUnramified.exists_algEquiv_prod R S
       algebraize [RingHom.snd S U]
@@ -146,8 +142,9 @@ lemma exists_isSplitOfRank_tensorProduct [Etale R S] [Module.Finite R S] {n : �
         apply Module.Finite.trans (S × U)
       have (p : PrimeSpectrum S) : Module.rankAtStalk (R := S) (S × U) p = n + 1 := by
         rw [Module.rankAtStalk_eq_of_equiv e.symm.toLinearEquiv]
-        simp [Module.rankAtStalk_tensorProduct, hn]
-      simp_rw [Module.rankAtStalk_prod , Module.rankAtStalk_self, Pi.one_apply] at this
+        simp [Module.rankAtStalk_baseChange, hn]
+      simp_rw [Module.rankAtStalk_prod , Module.rankAtStalk_self, Pi.add_apply,
+        Pi.one_apply] at this
       have : Module.rankAtStalk (R := S) U = n := by
         ext p
         simp only [Pi.natCast_def, Nat.cast_id]
@@ -166,7 +163,7 @@ lemma exists_isSplitOfRank_tensorProduct [Etale R S] [Module.Finite R S] {n : �
         AlgEquiv.prodCongr (TensorProduct.rid S V V) f
       let e₅ : (V × (Fin n → V)) ≃ₐ[V] (Unit ⊕ Fin n) → V :=
         AlgEquiv.trans (AlgEquiv.prodCongr (AlgEquiv.funUnique _ _ _).symm AlgEquiv.refl)
-          (AlgEquiv.sumArrowEquivProdArrow V V Unit (Fin n)).symm
+          (AlgEquiv.sumArrowEquivProdArrow Unit (Fin n) V V).symm
       let e := e₁.trans <| e₂.trans <| e₃.trans <| e₄.trans e₅
       refine ⟨V, inferInstance, inferInstance, ?_, ?_, ?_⟩
       · have : Module.FaithfullyFlat R S := by

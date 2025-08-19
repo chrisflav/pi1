@@ -45,8 +45,7 @@ lemma RingHom.OfLocalizationSpan.of_exists_of_isPrime
       Set.mem_compl_iff, PrimeSpectrum.mem_zeroLocus, Set.singleton_subset_iff, SetLike.mem_coe]
     use p
     apply hu₁
-  · simp only [Set.mem_range, forall_exists_index, forall_apply_eq_imp_iff]
-    rintro ⟨p, ⟨p, rfl⟩⟩
+  · rintro ⟨p, ⟨p, rfl⟩⟩
     apply hu₂
 
 lemma IsUnit.tmul {R S T : Type*} [CommRing R] [CommRing S]
@@ -57,31 +56,6 @@ lemma IsUnit.tmul {R S T : Type*} [CommRing R] [CommRing S]
   rw [isUnit_iff_exists_inv]
   use s⁻¹.val ⊗ₜ t⁻¹.val
   simp [Algebra.TensorProduct.one_def]
-
-lemma Algebra.isLocalization_iff_isPushout {R : Type*} [CommSemiring R]
-    {S : Type*} (A : Type*) {B : Type*} [CommSemiring S] [Algebra R S]
-    [CommSemiring A] [CommSemiring B] [Algebra R A] [Algebra R B]
-    [Algebra S B] [Algebra A B] [IsScalarTower R A B] [IsScalarTower R S B]
-    (M : Submonoid R) [IsLocalization M A] :
-    IsLocalization (Algebra.algebraMapSubmonoid S M) B ↔ IsPushout R S A B := by
-  rw [Algebra.IsPushout.comm, Algebra.isPushout_iff, ← isLocalizedModule_iff_isLocalization]
-  rw [← isLocalizedModule_iff_isBaseChange (S := M)]
-
-attribute [local instance] Algebra.TensorProduct.rightAlgebra in
-instance IsLocalization.Away.tensor {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
-    (r : R) (A : Type*) [CommRing A] [Algebra R A] [IsLocalization.Away r A] :
-    IsLocalization.Away (algebraMap R S r) (S ⊗[R] A) := by
-  simp only [IsLocalization.Away]
-  have : Submonoid.powers (algebraMap R S r) = Algebra.algebraMapSubmonoid S (.powers r) := by
-    simp [Algebra.algebraMapSubmonoid]
-  rw [this, Algebra.isLocalization_iff_isPushout A]
-  infer_instance
-
-noncomputable
-def IsLocalization.Away.tensorEquiv {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
-    (r : R) (A : Type*) [CommRing A] [Algebra R A] [IsLocalization.Away r A] :
-    S ⊗[R] A ≃ₐ[S] Localization.Away (algebraMap R S r) :=
-  IsLocalization.algEquiv (Submonoid.powers <| algebraMap R S r) _ _
 
 lemma RingHom.OfLocalizationSpan.of_exists_of_isPrime'
     {P : ∀ {R S : Type u} [CommRing R] [CommRing S], (R →+* S) → Prop}
@@ -102,7 +76,7 @@ lemma RingHom.OfLocalizationSpan.of_exists_of_isPrime'
   let v : S →ₐ[R] Localization.Away ((algebraMap R S) r) :=
     IsScalarTower.toAlgHom R S (Localization.Away ((algebraMap R S) r))
   let e₀ : S ⊗[R] Localization.Away r ≃ₐ[R] Localization.Away (algebraMap R S r) :=
-    (IsLocalization.Away.tensorEquiv r (Localization.Away r)).restrictScalars R
+    (IsLocalization.Away.tensorEquiv _ r (Localization.Away r)).restrictScalars R
   let e : Localization.Away r ⊗[R] S ≃+* Localization.Away (algebraMap R S r) :=
     (Algebra.TensorProduct.comm R _ _).trans e₀
   have : Localization.awayMap (algebraMap R S) r =
@@ -117,7 +91,7 @@ lemma RingHom.OfLocalizationSpan.of_exists_of_isPrime'
 lemma Algebra.Etale.of_exists_of_isPrime {R S : Type u} [CommRing R] [CommRing S]
     [Algebra R S] (H : ∀ (p : Ideal R) [p.IsPrime], ∃ r ∉ p,
       Algebra.Etale (Localization.Away r) (Localization.Away r ⊗[R] S)) : Algebra.Etale R S := by
-  simp_rw [← RingHom.etale_algebraMap_iff] at H ⊢
+  simp_rw [← RingHom.etale_algebraMap] at H ⊢
   apply RingHom.Etale.ofLocalizationSpan.of_exists_of_isPrime'
   · exact RingHom.Etale.respectsIso
   · intro p hp

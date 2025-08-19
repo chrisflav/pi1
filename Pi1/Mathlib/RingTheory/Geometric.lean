@@ -1,6 +1,5 @@
 import Mathlib
 import Pi1.Mathlib.RingTheory.TensorProduct.Basic
-import Pi1.Mathlib.RingTheory.RingHom.Flat
 import Pi1.Mathlib.RingTheory.RingHom.Integral
 
 universe u v w
@@ -184,20 +183,6 @@ lemma Ideal.IsPrime.nontrivial {R : Type*} [Semiring R]
     {I : Ideal R} (hI : I.IsPrime) : Nontrivial R :=
   nontrivial_of_ne 1 0 (fun h ↦ hI.1 <| (eq_top_iff_one I).mpr (h ▸ I.zero_mem))
 
-lemma PrimeSpectrum.nonempty_iff_nontrivial {R : Type*} [CommSemiring R] :
-    Nonempty (PrimeSpectrum R) ↔ Nontrivial R :=
-  ⟨fun ⟨_, hp⟩ ↦ hp.nontrivial, fun _ ↦ inferInstance⟩
-
-instance Algebra.IsIntegral.tensorProduct (R S T : Type*) [CommRing R] [CommRing S]
-    [Algebra R S] [CommRing T] [Algebra R T] [Algebra.IsIntegral R S] :
-    Algebra.IsIntegral T (T ⊗[R] S) := by
-  constructor
-  intro x
-  induction x with
-  | zero => exact isIntegral_zero
-  | add x y hx hy => exact hx.add hy
-  | tmul x y => exact IsIntegral.tmul x (Algebra.IsIntegral.isIntegral y)
-
 lemma RingHom.isIntegral_algebraMap_iff {R S : Type*} [CommRing R] [CommRing S] [Algebra R S] :
     (algebraMap R S).IsIntegral ↔ Algebra.IsIntegral R S := by
   simp_rw [Algebra.isIntegral_def, RingHom.IsIntegral, _root_.IsIntegral]
@@ -208,7 +193,7 @@ lemma Algebra.TensorProduct.isIntegral_includeRight (R S T : Type*) [CommRing R]
   have : (Algebra.TensorProduct.includeRight : S →ₐ[R] T ⊗[R] S) =
       (Algebra.TensorProduct.comm ..).toAlgHom.comp (IsScalarTower.toAlgHom R S _) := rfl
   this ▸ RingHom.IsIntegral.trans _ _
-    (RingHom.isIntegral_algebraMap_iff.mpr <| Algebra.IsIntegral.tensorProduct R T S)
+    (RingHom.isIntegral_algebraMap_iff.mpr <| Algebra.IsIntegral.tensorProduct R S T)
     (RingHom.isIntegral_of_surjective _ (AlgEquiv.surjective _))
 
 /-- If `Spec (K ⊗[k] R)` is irreducible for every finite, separable extension `K` of `k`,
@@ -250,7 +235,7 @@ lemma nontrivial_of_expChar (R : Type*) [AddMonoidWithOne R] (q : ℕ) [hq : Exp
   | prime hq =>
     by_contra h
     rw [not_nontrivial_iff_subsingleton] at h
-    exact hq.ne_one (CharP.eq R inferInstance inferInstance)
+    exact hq.ne_one (CharP.eq R ‹_› h.charP)
 
 lemma Function.Surjective.preirreducibleSpace {X Y : Type*} [TopologicalSpace X]
     [TopologicalSpace Y] (f : X → Y) (hfc : Continuous f) (hf : Function.Surjective f)

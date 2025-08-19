@@ -34,19 +34,6 @@ lemma CategoryTheory.Iso.ofHom_commRingCatIsoToRingEquiv_symm {R S : CommRingCat
 
 end
 
--- from mathlib, remove after bumping
-lemma IntermediateField.finite_of_fg_of_isAlgebraic {F E : Type*}
-    [Field F] [Field E] [Algebra F E]
-    (h : IntermediateField.FG (⊤ : IntermediateField F E)) [Algebra.IsAlgebraic F E] :
-    Module.Finite F E := by
-  obtain ⟨s, hs⟩ := h
-  have : Algebra.FiniteType F E := by
-    use s
-    rw [← IntermediateField.adjoin_algebraic_toSubalgebra
-      (fun x hx ↦ Algebra.IsAlgebraic.isAlgebraic x)]
-    simpa [← IntermediateField.toSubalgebra_inj] using hs
-  exact Algebra.IsIntegral.finite
-
 @[simp]
 lemma IntermediateField.map_top {F E E' : Type*} [Field F] [Field E] [Field E'] [Algebra F E]
     [Algebra F E'] (f : E →ₐ[F] E') :
@@ -321,7 +308,7 @@ lemma eq_one_of_smul_eq [Algebra.IsSeparable k K] (g : K ≃ₐ[k] K)
   let X : FiniteEtale (Spec (.of k)) := FiniteEtale.mk (ξ k L)
   let y : Over.mk (ξ k K) ⟶ X.toComma := by
     refine Over.homMk (Spec.map <| CommRingCat.ofHom L.subtype) ?_
-    simp [X, ← Spec.map_comp, Spec.map_injective.eq_iff, ConcreteCategory.ext_iff, RingHom.ext_iff]
+    simp [X, ← Spec.map_comp, Spec.map_injective.eq_iff, ConcreteCategory.ext_iff]
   specialize H X y
   rw [CommaMorphism.ext_iff] at H
   simp only [Over.mk_left, Subalgebra.toSubsemiring_subtype,

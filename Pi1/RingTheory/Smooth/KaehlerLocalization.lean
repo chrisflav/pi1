@@ -3,9 +3,9 @@ Copyright (c) 2025 Christian Merten. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christian Merten
 -/
-import Mathlib.RingTheory.Presentation
+import Mathlib.RingTheory.Extension.Presentation.Basic
 import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
-import Mathlib.RingTheory.CotangentLocalizationAway
+import Mathlib.RingTheory.Extension.Cotangent.LocalizationAway
 import Mathlib.RingTheory.Kaehler.JacobiZariski
 
 /-!
@@ -31,7 +31,8 @@ namespace Algebra.Generators
 
 variable {R S T : Type*} [CommRing R] [CommRing S] [Algebra R S]
   [CommRing T] [Algebra R T] [Algebra S T] [IsScalarTower R S T]
-variable (g : S) [IsLocalization.Away g T] (P : Generators R S)
+variable {ι σ : Type*}
+variable (g : S) [IsLocalization.Away g T] (P : Generators R S ι)
 
 instance : Module.Free T (localizationAway g (S := T)).toExtension.Cotangent :=
   inferInstanceAs <| Module.Free T
@@ -39,7 +40,7 @@ instance : Module.Free T (localizationAway g (S := T)).toExtension.Cotangent :=
 
 lemma Hom.algebraMap_toAlgHom' {R R' S : Type*} [CommRing R] [CommRing S] [CommRing R']
     [Algebra R S] [Algebra R' S] [Algebra R R'] [IsScalarTower R R' S]
-    {P : Generators R S} {P' : Generators R' S} (f : Hom P P') (x) :
+    {P : Generators R S ι} {P' : Generators R' S σ} (f : Hom P P') (x) :
     MvPolynomial.aeval P'.val (f.toAlgHom x) = MvPolynomial.aeval P.val x :=
   f.algebraMap_toAlgHom _
 
@@ -47,7 +48,7 @@ noncomputable def cotangentCompAwaySec (x : ((localizationAway g (S := T)).comp 
     (hx : ((localizationAway g (S := T)).ofComp P).toAlgHom x = C g * X () - 1) :
     (localizationAway g (S := T)).toExtension.Cotangent →ₗ[T]
       ((localizationAway g (S := T)).comp P).toExtension.Cotangent :=
-  have hxmem : (aeval ((localizationAway g).comp P).val) x = 0 := by
+  have hxmem : (aeval ((localizationAway (S := T) g).comp P).val) x = 0 := by
     rw [← ((localizationAway g (S := T)).ofComp P).algebraMap_toAlgHom', hx]
     simp [localizationAway]
   (SubmersivePresentation.localizationAway g (S := T)).basisCotangent.constr T
@@ -69,7 +70,7 @@ lemma cotangentCompAwaySec_apply (x : ((localizationAway g (S := T)).comp P).Rin
         (SubmersivePresentation.localizationAway g (S := T)).relation_mem_ker ()⟩) = _
   dsimp only [cotangentCompAwaySec]
   erw [← (SubmersivePresentation.localizationAway g (S := T)).basisCotangent_apply]
-  erw [Basis.constr_basis]
+  erw [Module.Basis.constr_basis]
 
 lemma map_comp_cotangentCompAwaySec
     (x : ((localizationAway g (S := T)).comp P).Ring)
@@ -78,13 +79,14 @@ lemma map_comp_cotangentCompAwaySec
       cotangentCompAwaySec g P x hx = .id := by
   apply (SubmersivePresentation.localizationAway g (S := T)).basisCotangent.ext
   intro r
-  simp only [toExtension_Ring, toExtension_commRing, toExtension_algebra₂, LinearMap.coe_comp,
-    Function.comp_apply, Basis.constr_basis, cotangentCompAwaySec]
+  simp only [cotangentCompAwaySec, toExtension_Ring, toExtension_commRing, toExtension_algebra₂,
+    LinearMap.coe_comp, Function.comp_apply, Module.Basis.constr_apply_fintype, Finset.univ_unique,
+    PUnit.default_eq_unit, Module.Basis.equivFun_self, ↓reduceIte, one_smul, Finset.sum_const,
+    Finset.card_singleton]
   erw [Extension.Cotangent.map_mk]
   simp only [toExtension_Ring, toExtension_commRing, toExtension_algebra₂, Extension.Hom.toAlgHom,
     Hom.toExtensionHom, AlgHom.toRingHom_eq_coe, AlgHom.coe_mk, RingHom.coe_coe, hx]
-  simp only [SubmersivePresentation.basisCotangent, toExtension_Ring, toExtension_commRing,
-    toExtension_algebra₂, Basis.coe_mk]
+  simp only [SubmersivePresentation.basisCotangent]
   simp
   show Extension.Cotangent.mk _ = (SubmersivePresentation.localizationAway T g).cotangentEquiv.symm
       ((SubmersivePresentation.localizationAway T g).basisDeriv r)
@@ -186,7 +188,7 @@ lemma foo (σ A B) [AddMonoid A] [AddCommMonoid B] (f₁ f₂ : σ) (g₁ g₂ :
     split_ifs <;> aesop
   simp [Finsupp.sum, this, H, H.symm]
 
-lemma relation_comp_localizationAway_inl (P : Presentation R S)
+lemma relation_comp_localizationAway_inl (P : Presentation R S ι σ)
     (h1 : P.σ (-1) = -1) (h0 : P.σ 0 = 0) (r) :
     ((Presentation.localizationAway T g).comp P).relation (Sum.inl r) =
       rename Sum.inr (P.σ g) * X (Sum.inl ()) - 1 := by
@@ -199,7 +201,7 @@ lemma relation_comp_localizationAway_inl (P : Presentation R S)
   · simp
   · simp [h0]
   · simp only [Finsupp.mapDomain_single, h1, map_neg, map_one, Finsupp.mapDomain_zero,
-      monomial_zero', C_1, mul_one, sub_eq_add_neg, add_left_inj]
+      monomial_zero', mul_one, sub_eq_add_neg, add_left_inj]
     rfl
 
 lemma toAlgHom_ofComp_localizationAway :
@@ -208,6 +210,5 @@ lemma toAlgHom_ofComp_localizationAway :
   simp only [Hom.toAlgHom, ofComp, map_sub, map_mul, aeval_X, Sum.elim_inl, map_one, sub_left_inj]
   erw [aeval_rename, Sum.elim_comp_inr]
   simp only [aeval_C_comp_left, aeval_val_σ]
-  rfl
 
 end Algebra.Generators

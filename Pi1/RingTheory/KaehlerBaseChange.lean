@@ -92,7 +92,7 @@ lemma _root_.KaehlerDifferential.tensorKaehlerCancelBase_tmul (x : Ω[A⁄R]) :
       1 ⊗ₜ x := by
   have : SMulCommClass A S B := SMulCommClass.of_commMonoid A S B
   show ((IsPushout.cancelBaseChange R S A B (Ω[A⁄R])).symm).symm (1 ⊗ₜ[A] x) = _
-  simp [KaehlerDifferential.tensorKaehlerCancelBase]
+  simp
 
 @[simp]
 lemma _root_.KaehlerDifferential.tensorKaehlerCancelBase_symm_tmul (s : S) (x : Ω[A⁄R]) :

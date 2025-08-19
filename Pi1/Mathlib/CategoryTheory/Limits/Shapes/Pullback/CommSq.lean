@@ -19,7 +19,7 @@ lemma Limits.isPullback_map_snd_snd {C : Type*} [Category C] [HasPullbacks C]
   · intro c
     apply pullback.hom_ext <;> simp [c.condition]
   · intro c
-    apply pullback.hom_ext <;> simp [c.condition]
+    apply pullback.hom_ext <;> simp
   · intro c m hfst hsnd
     apply pullback.hom_ext
     · simpa

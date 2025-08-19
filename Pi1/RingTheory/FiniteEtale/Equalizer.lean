@@ -36,7 +36,7 @@ lemma AlgHom.exists_cover_eq_of_eq {R A B : Type*} [CommRing R] (S : Submonoid R
   use s
   ext a
   simp only [Algebra.TensorProduct.map_restrictScalars_comp_includeRight, coe_comp,
-    Function.comp_apply, Algebra.TensorProduct.includeRight_apply, u]
+    Function.comp_apply, Algebra.TensorProduct.includeRight_apply]
   have hun : IsUnit ((algebraMap R (Away s.val ⊗[R] B) s)) := by
     rw [IsScalarTower.algebraMap_apply R (Away s.val) _]
     apply (IsLocalization.Away.algebraMap_isUnit s.val).map
@@ -103,7 +103,7 @@ lemma Algebra.exists_cover_rankAtStalk_eq {R : Type*} (S : Type*) [CommRing R] [
     PrimeSpectrum.isTopologicalBasis_basic_opens.exists_subset_of_mem_open hp hU
   refine ⟨r, hr, ?_⟩
   ext q
-  rw [Module.rankAtStalk_tensorProduct]
+  rw [Module.rankAtStalk_baseChange]
   apply heq
   apply hrU
   simp only [PrimeSpectrum.basicOpen_eq_zeroLocus_compl, Set.mem_compl_iff,
@@ -396,7 +396,7 @@ lemma Algebra.FiniteEtale.equalizer_of_isSplitOfRank {R S T : Type u} {n m : ℕ
   have : Algebra.FiniteEtale R (AlgHom.equalizer f' g') :=
     Algebra.FiniteEtale.equalizer_fun f' g'
   let cong : AlgHom.equalizer f g ≃ₐ[R] AlgHom.equalizer f' g' :=
-    AlgHom.equalizerCongr eS eT (by ext; simp [f', g']) (by ext; simp [f', g'])
+    AlgHom.equalizerCongr eS eT (by ext; simp [f']) (by ext; simp [g'])
   exact Algebra.FiniteEtale.of_equiv cong.symm
 
 lemma Algebra.FiniteEtale.equalizer_of_rankAtStalk_eq {R S T : Type u} [CommRing R] [CommRing S]
@@ -414,10 +414,10 @@ lemma Algebra.FiniteEtale.equalizer_of_rankAtStalk_eq {R S T : Type u} [CommRing
     have : Algebra.FiniteEtale A (AlgHom.equalizer f' g') := by
       apply this (n := n) (m := m)
       · ext p
-        rw [Module.rankAtStalk_tensorProduct, hn]
+        rw [Module.rankAtStalk_baseChange, hn]
         rfl
       · ext p
-        rw [Module.rankAtStalk_tensorProduct, hm]
+        rw [Module.rankAtStalk_baseChange, hm]
         rfl
       exact hA
     have : Algebra.FiniteEtale A (A ⊗[R] AlgHom.equalizer f g) :=
@@ -433,7 +433,7 @@ lemma Algebra.FiniteEtale.equalizer_of_rankAtStalk_eq {R S T : Type u} [CommRing
     have : Algebra.FiniteEtale A (AlgHom.equalizer f' g') := by
       apply this (m := m)
       · ext p
-        rw [Module.rankAtStalk_tensorProduct, hm]
+        rw [Module.rankAtStalk_baseChange, hm]
         rfl
       · infer_instance
       · exact hA
@@ -476,7 +476,7 @@ theorem Algebra.Etale.equalizer {R S T : Type u} [CommRing R] [CommRing S] [Comm
     have : Algebra.FiniteEtale A (AlgHom.equalizer f' g') := by
       apply this (n := n)
       · ext p
-        rw [Module.rankAtStalk_tensorProduct, hn]
+        rw [Module.rankAtStalk_baseChange, hn]
         rfl
       · use (Module.rankAtStalk T ⟨p, hp⟩)
     exact Algebra.FiniteEtale.of_equiv (S := AlgHom.equalizer f' g') cong.symm

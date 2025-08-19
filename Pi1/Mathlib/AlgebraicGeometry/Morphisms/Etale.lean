@@ -45,7 +45,7 @@ instance : MorphismProperty.HasOfPostcompProperty
   rw [MorphismProperty.hasOfPostcompProperty_iff_le_diagonal]
   rintro X Y f ⟨hft, hfu⟩
   have : IsOpenImmersion (pullback.diagonal f) := by
-    apply FormallyUnramified.AlgebraicGeometry.FormallyUnramified.isOpenImmersion_diagonal
+    apply FormallyUnramified.isOpenImmersion_diagonal
   show IsEtale (pullback.diagonal f)
   infer_instance
 
@@ -67,8 +67,8 @@ instance : MorphismProperty.HasOfPostcompProperty @IsEtale @IsEtale := by
   intro X Y f hf
   constructor <;> infer_instance
 
-instance : HasPullbacks (Etale X) := by
-  unfold Etale
+instance : HasPullbacks (X.Etale) := by
+  unfold Scheme.Etale
   infer_instance
 
 instance : HasRingHomProperty @IsEtale RingHom.Etale where

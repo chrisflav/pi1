@@ -169,7 +169,7 @@ lemma baseChangeInvAux_map (p : MvPolynomial ι R) :
   simp [f, g]
   apply MvPolynomial.algHom_ext
   intro i
-  simp [f, g]
+  simp
 
 @[simp]
 lemma baseChangeInvAux_X (i : ι) :

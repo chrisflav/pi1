@@ -14,9 +14,9 @@ noncomputable def Algebra.TensorProduct.comm' {R S T : Type*} [CommRing R]
       simp only [LinearEquiv.coe_toAddEquiv, LinearEquiv.coe_addEquiv_apply] at hx hy
       simp [hx, hy]
     | tmul s t =>
-      simp only [LinearEquiv.coe_toAddEquiv, LinearEquiv.coe_addEquiv_apply, comm_tmul]
+      simp only [LinearEquiv.coe_toAddEquiv, LinearEquiv.coe_addEquiv_apply]
       show (_root_.TensorProduct.comm R S T) ((c • s) ⊗ₜ[R] t) = c • t ⊗ₜ[R] s
-      simp [comm_tmul, Algebra.smul_def, RingHom.algebraMap_toAlgebra]
+      simp [Algebra.smul_def, RingHom.algebraMap_toAlgebra]
 
 section
 
@@ -25,8 +25,8 @@ variable (R S A B C : Type*) [CommSemiring R] [Semiring A] [Semiring B]
   [IsScalarTower R S A] [Algebra R B] [Algebra R C]
 
 noncomputable
-def Algebra.TensorProduct.assoc' : (A ⊗[R] B) ⊗[R] C ≃ₐ[S] A ⊗[R] B ⊗[R] C where
-  __ := Algebra.TensorProduct.assoc R A B C
+def Algebra.TensorProduct.assoc' : A ⊗[R] B ⊗[R] C ≃ₐ[S] A ⊗[R] (B ⊗[R] C) where
+  toRingEquiv := Algebra.TensorProduct.assoc R R A B C
   commutes' r := by simp [one_def]
 
 @[simp]

@@ -2,6 +2,7 @@ import Mathlib.Algebra.BigOperators.Finprod
 import Mathlib.Algebra.BigOperators.Ring.Finset
 import Mathlib.Data.ENat.Lattice
 import Mathlib.Data.Set.Card
+import Mathlib.Data.Set.Card.Arithmetic
 import Mathlib.Order.CompletePartialOrder
 import Mathlib.Topology.LocalAtTarget
 import Mathlib.Topology.Separation.Connected
@@ -15,27 +16,6 @@ lemma Set.iUnion_sumElim {α ι σ : Type*} (s : ι → Set α) (t : σ → Set 
     ⋃ x, Sum.elim s t x = (⋃ x, s x) ∪ ⋃ x, t x := by
   ext
   simp
-
---
-lemma Set.Infinite.iUnion {α ι : Type*} {s : ι → Set α} {i : ι}
-    (hi : (s i).Infinite) : (⋃ i, s i).Infinite :=
-  fun h ↦ hi (h.subset (Set.subset_iUnion s i))
-
---
-lemma Set.encard_iUnion {α ι : Type*} [Finite ι] {s : ι → Set α}
-      (hs : Pairwise (Function.onFun Disjoint s)) : (⋃ i, s i).encard = ∑ᶠ i, (s i).encard := by
-  cases nonempty_fintype ι
-  classical
-  rw [finsum_eq_sum_of_fintype]
-  by_cases h : ∀ i, (s i).Finite
-  · rw [Fintype.sum_congr _ _ fun i ↦ (h i).encard_eq_coe_toFinset_card, ← Nat.cast_sum,
-      ← Finset.card_biUnion fun i _ j _ hij ↦ by simpa using hs hij,
-      (Set.finite_iUnion h).encard_eq_coe_toFinset_card]
-    congr
-    ext
-    simp
-  · obtain ⟨i, (hi : (s i).Infinite)⟩ := not_forall.mp h
-    simp [← Finset.add_sum_erase _ _ (Finset.mem_univ i), hi, hi.iUnion]
 
 --
 lemma ENat.card_lt_top_iff_finite {α : Type*} :
@@ -86,7 +66,7 @@ def ConnectedComponents.equivOfIsClopen {X ι : Type*} [TopologicalSpace X] {U :
       rw [Set.not_disjoint_iff]
       exact ⟨x, x.2, (hU₁ j).connectedComponent_subset y.2 (hxy ▸ mem_connectedComponent)⟩
     subst this
-    simp [← Set.image_val_inj, heq, heq, hxy]
+    simp [← Set.image_val_inj, heq, hxy]
 
 --
 lemma ConnectedComponents.nonempty_iff_nonempty :
@@ -115,8 +95,8 @@ include hclopen hdisj hunion in
 noncomputable
 def ConnectedComponents.equivOfIsClopenOfIsConnected (hconn : ∀ i, IsConnected (U i))  :
     ConnectedComponents X ≃ ι :=
-  have (i) : ConnectedSpace (U i) := isConnected_iff_connectedSpace.mp (hconn i)
-  have (i) : Unique (ConnectedComponents <| U i) := (nonempty_unique _).some
+  have _ (i) : ConnectedSpace (U i) := isConnected_iff_connectedSpace.mp (hconn i)
+  have _ (i) : Unique (ConnectedComponents <| U i) := (nonempty_unique _).some
   (equivOfIsClopen hclopen hdisj hunion).trans (.sigmaUnique _ _)
 
 open Set in
@@ -156,7 +136,7 @@ lemma ConnectedComponents.exists_fun_isClopen_of_infinite (X : Type*) [Topologic
       by_contra! h
       exact Infinite.not_finite <|
         .of_equiv _ (equivOfIsClopenOfIsConnected hU₁ hU₃ hU₄ fun i ↦ ⟨hU₂ i, h i⟩).symm
-    simp only [IsPreconnected, not_forall, Classical.not_imp, exists_and_left] at hi
+    simp only [IsPreconnected, not_forall] at hi
     obtain ⟨V, W, hV, hW, hle, hVU, hWU, h⟩ := hi
     rw [Set.not_nonempty_iff_eq_empty, ← Set.inter_assoc] at h
     have hunion : V ∩ U i ∪ W ∩ U i = U i := by rwa [← union_inter_distrib_right, inter_eq_right]
@@ -221,7 +201,7 @@ lemma ConnectedComponents.enatCard_le_encard_preimage_singleton {X Y : Type*} [T
   intro n U hU1 hU2 hU3 hU4
   have heq : f ⁻¹' {y} = ⋃ i, (U i ∩ f ⁻¹' {y}) := by
     conv_lhs => rw [← Set.univ_inter (f ⁻¹' {y}), ← hU4, Set.iUnion_inter]
-  rw [heq, Set.encard_iUnion fun i j hij ↦ .inter_left _ (.inter_right _ <| hU3 hij),
+  rw [heq, Set.encard_iUnion_of_finite fun i j hij ↦ .inter_left _ (.inter_right _ <| hU3 hij),
     finsum_eq_sum_of_fintype]
   trans ∑ i : Fin n, 1
   · simp

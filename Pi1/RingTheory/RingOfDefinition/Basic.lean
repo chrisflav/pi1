@@ -5,17 +5,7 @@ open TensorProduct
 
 section
 
-lemma _root_.AlgHom.cancel_right {R S T A : Type*} [CommSemiring R] [Semiring S] [Semiring T]
-    [Semiring A] [Algebra R S] [Algebra R T] [Algebra R A]
-    {g₁ g₂ : S →ₐ[R] T} {f : A →ₐ[R] S} (hf : Function.Surjective f) :
-    g₁.comp f = g₂.comp f ↔ g₁ = g₂ :=
-  ⟨fun h => AlgHom.ext <| hf.forall.2 (AlgHom.ext_iff.1 h), fun h => h ▸ rfl⟩
 
-lemma _root_.AlgHom.cancel_left {R S T A : Type*} [CommSemiring R] [Semiring S] [Semiring T]
-    [Semiring A] [Algebra R S] [Algebra R T] [Algebra R A]
-    {g₁ g₂ : S →ₐ[R] T} {f : T →ₐ[R] A} (hf : Function.Injective f) :
-    f.comp g₁ = f.comp g₂ ↔ g₁ = g₂ :=
-  ⟨fun h => AlgHom.ext <| fun _ ↦ hf.eq_iff.mp <| AlgHom.ext_iff.mp h _, fun h => h ▸ rfl⟩
 
 @[simp]
 lemma _root_.AlgEquiv.restrictScalars_symm_apply (R : Type*) {S A B : Type*}
@@ -47,48 +37,6 @@ lemma _root_.MvPolynomial.algebraTensorAlgEquiv_symm_map (R : Type*) [CommSemiri
   rw [← this]
   exact DFunLike.congr_fun (MvPolynomial.algebraTensorAlgEquiv_symm_comp_aeval R A) x
 
-lemma MvPolynomial.coeffs_C {R σ : Type*} [CommSemiring R] [DecidableEq R] (r : R) :
-    (C (σ := σ) r).coeffs = if r = 0 then ∅ else {r} := by
-  classical
-  aesop (add simp mem_coeffs_iff)
-
-lemma MvPolynomial.coeffs_C_subset {R σ : Type*} [CommSemiring R] (r : R) :
-    (C (σ := σ) r).coeffs ⊆ {r} := by
-  classical
-  rw [coeffs_C]
-  split <;> simp
-
-@[simp]
-lemma MvPolynomial.coeffs_mul_X {R σ : Type*} [CommSemiring R] (p : MvPolynomial σ R) (n : σ) :
-    (p * X n).coeffs = p.coeffs := by
-  classical
-  aesop (add simp mem_coeffs_iff)
-
-@[simp]
-lemma MvPolynomial.coeffs_X_mul {R σ : Type*} [CommSemiring R] (p : MvPolynomial σ R) (n : σ) :
-    (X n * p).coeffs = p.coeffs := by
-  classical
-  aesop (add simp mem_coeffs_iff)
-
-lemma MvPolynomial.coeffs_add {R σ : Type*} [CommSemiring R] [DecidableEq R]
-    {p q : MvPolynomial σ R} (h : Disjoint p.support q.support) :
-    (p + q).coeffs = p.coeffs ∪ q.coeffs := by
-  ext r
-  simp only [mem_coeffs_iff, mem_support_iff, coeff_add, ne_eq, Finset.mem_union]
-  have hl (n : σ →₀ ℕ) (hne : p.coeff n ≠ 0) : q.coeff n = 0 :=
-    not_mem_support_iff.mp <| h.not_mem_of_mem_left_finset (mem_support_iff.mpr hne)
-  have hr (n : σ →₀ ℕ) (hne : q.coeff n ≠ 0) : p.coeff n = 0 :=
-    not_mem_support_iff.mp <| h.not_mem_of_mem_right_finset (mem_support_iff.mpr hne)
-  have hor (n) (h : ¬coeff n p + coeff n q = 0) : coeff n p ≠ 0 ∨ coeff n q ≠ 0 := by
-    by_cases hp : coeff n p = 0 <;> aesop
-  refine ⟨fun ⟨n, hn1, hn2⟩ ↦ ?_, ?_⟩
-  · obtain (h|h) := hor n hn1
-    · exact Or.inl ⟨n, by simp [h, hn2, hl n h]⟩
-    · exact Or.inr ⟨n, by simp [h, hn2, hr n h]⟩
-  · rintro (⟨n, hn, rfl⟩|⟨n, hn, rfl⟩)
-    · exact ⟨n, by simp [hl n hn, hn]⟩
-    · exact ⟨n, by simp [hr n hn, hn]⟩
-
 lemma MvPolynomial.mem_range_map_of_coeffs_subset {R S σ : Type*} [CommSemiring R]
     [CommSemiring S] {f : R →+* S} {x : MvPolynomial σ S} (hx : (x.coeffs : Set _) ⊆ Set.range f) :
     x ∈ Set.range (MvPolynomial.map f) := by
@@ -111,21 +59,21 @@ lemma MvPolynomial.mem_range_map_of_coeffs_subset {R S σ : Type*} [CommSemiring
       obtain ⟨q, hq⟩ := ih hx.1
       obtain ⟨u, hu⟩ := hp hx.2
       exact ⟨q + u, by simp [hq, hu]⟩
-    · simpa [support_monomial, hs] using not_mem_support_iff.mp ha
+    · simpa [support_monomial, hs] using notMem_support_iff.mp ha
 
 end
 
 variable {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
-
-variable {P : Algebra.Presentation R S}
+variable {ι σ : Type*}
+variable {P : Algebra.Presentation R S ι σ}
 
 namespace Algebra.Presentation
 
 variable (P) in
 /-- The coefficients of a presentation are the coefficients of the relations. -/
-def coeffs : Set R := ⋃ (i : P.rels), (P.relation i).coeffs
+def coeffs : Set R := ⋃ (i : σ), (P.relation i).coeffs
 
-lemma coeffs_relation_subset_coeffs (x : P.rels) :
+lemma coeffs_relation_subset_coeffs (x : σ) :
     ((P.relation x).coeffs : Set R) ⊆ P.coeffs :=
   Set.subset_iUnion_of_subset x (by simp)
 
@@ -136,7 +84,7 @@ def core : Subalgebra ℤ R := Algebra.adjoin _ P.coeffs
 variable (P) in
 lemma coeffs_subset_core : P.coeffs ⊆ P.core := Algebra.subset_adjoin
 
-lemma coeffs_relation_subset_core (x : P.rels) :
+lemma coeffs_relation_subset_core (x : σ) :
     ((P.relation x).coeffs : Set R) ⊆ P.core :=
   subset_trans (P.coeffs_relation_subset_coeffs x) P.coeffs_subset_core
 
@@ -166,7 +114,7 @@ instance : P.IsCore P.Core where
 
 variable (R₀ : Type*) [CommRing R₀] [Algebra R₀ R] [Algebra R₀ S] [IsScalarTower R₀ R S]
 
-lemma aeval_map_core (x : MvPolynomial P.vars R₀) :
+lemma aeval_map_core (x : MvPolynomial ι R₀) :
     MvPolynomial.aeval P.val (MvPolynomial.map (algebraMap R₀ R) x) =
       MvPolynomial.aeval P.val x := by
   induction x using MvPolynomial.induction_on
@@ -176,30 +124,30 @@ lemma aeval_map_core (x : MvPolynomial P.vars R₀) :
 
 variable [P.IsCore R₀]
 
-lemma IsCore.coeffs_relation_mem_range (x : P.rels) :
+lemma IsCore.coeffs_relation_mem_range (x : σ) :
     ((P.relation x).coeffs : Set R) ⊆ Set.range (algebraMap R₀ R) :=
   subset_trans (P.coeffs_relation_subset_coeffs x) IsCore.coeffs_subset_range
 
-lemma IsCore.mem_range_map_core (x : P.rels) :
+lemma IsCore.mem_range_map_core (x : σ) :
     P.relation x ∈ Set.range (MvPolynomial.map (algebraMap R₀ R)) :=
   MvPolynomial.mem_range_map_of_coeffs_subset <| IsCore.coeffs_relation_mem_range R₀ x
 
 /-- The `r`-th relation of `P` as a polynomial in `R₀`. This is the (arbitrary) choice of a
 pre-image under the map `R₀[X] → R[X]`. -/
-noncomputable def coreRelation (r : P.rels) : MvPolynomial P.vars R₀ :=
-  (IsCore.mem_range_map_core R₀ r).choose
+noncomputable def coreRelation (r : σ) : MvPolynomial ι R₀ :=
+  (IsCore.mem_range_map_core (P := P) R₀ r).choose
 
-lemma map_coreRelation (r : P.rels) :
+lemma map_coreRelation (r : σ) :
     MvPolynomial.map (algebraMap R₀ R) (P.coreRelation R₀ r) = P.relation r :=
   (IsCore.mem_range_map_core R₀ r).choose_spec
 
 @[simp]
-lemma aeval_val_coreRelation (r : P.rels) :
-    (MvPolynomial.aeval P.val) (coreRelation R₀ r) = 0 := by
+lemma aeval_val_coreRelation (r : σ) :
+    (MvPolynomial.aeval P.val) (coreRelation (P := P) R₀ r) = 0 := by
   rw [← aeval_map_core, map_coreRelation, aeval_val_relation]
 
 @[simp]
-lemma algebraTensorAlgEquiv_symm_relation (r : P.rels) :
+lemma algebraTensorAlgEquiv_symm_relation (r : σ) :
     (MvPolynomial.algebraTensorAlgEquiv R₀ R).symm (P.relation r) =
       1 ⊗ₜ P.coreRelation R₀ r := by
   rw [← map_coreRelation R₀, MvPolynomial.algebraTensorAlgEquiv_symm_map]
@@ -214,7 +162,7 @@ lemma _root_.Ideal.Quotient.mk_span_range {R : Type*} [CommRing R]
 
 /-- The model of `S` over a core `R₀` is `R₀[X]` quotiented by the same relations. -/
 abbrev CoreModel : Type _ :=
-  MvPolynomial P.vars R₀ ⧸ (Ideal.span <| Set.range (P.coreRelation R₀))
+  MvPolynomial ι R₀ ⧸ (Ideal.span <| Set.range (P.coreRelation R₀))
 
 variable (P) in
 /-- (Implementation detail): The underlying `AlgHom` of `tensorCoreModelEquiv`. -/
@@ -227,7 +175,7 @@ noncomputable def tensorCoreModelHom : R ⊗[R₀] P.CoreModel R₀ →ₐ[R] S 
     fun _ _ ↦ Commute.all _ _
 
 @[simp]
-lemma tensorCoreModelHom_tmul (x : R) (y : MvPolynomial P.vars R₀) :
+lemma tensorCoreModelHom_tmul (x : R) (y : MvPolynomial ι R₀) :
     P.tensorCoreModelHom R₀ (x ⊗ₜ y) = algebraMap R S x * MvPolynomial.aeval P.val y :=
   rfl
 
@@ -247,7 +195,7 @@ noncomputable def tensorCoreModelInv : S →ₐ[R] R ⊗[R₀] P.CoreModel R₀ 
     (P.quotientEquiv.restrictScalars R).symm.toAlgHom
 
 @[simp]
-lemma tensorCoreModelInv_aeval_val (x : MvPolynomial P.vars R₀) :
+lemma tensorCoreModelInv_aeval_val (x : MvPolynomial ι R₀) :
     P.tensorCoreModelInv R₀ (MvPolynomial.aeval P.val x) = 1 ⊗ₜ[R₀] (Ideal.Quotient.mk _ x) := by
   rw [← aeval_map_core, ← Generators.algebraMap_apply, ← quotientEquiv_mk]
   simp [tensorCoreModelInv, -quotientEquiv_symm, -quotientEquiv_mk]

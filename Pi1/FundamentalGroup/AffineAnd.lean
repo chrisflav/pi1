@@ -11,7 +11,6 @@ import Pi1.Mathlib.CategoryTheory.MorphismProperty.UnderAdjunction
 import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Etale
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Finite
-import Pi1.Mathlib.AlgebraicGeometry.Morphisms.AffineAnd
 import Pi1.FundamentalGroup.AffineColimits
 import Pi1.Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
 import Mathlib.CategoryTheory.Limits.MorphismProperty
@@ -435,9 +434,9 @@ def _root_.AlgebraicGeometry.IsAffineOpen.ΓProp
     simp [Scheme.Hom.app_eq_appLE, Scheme.appLE_comp_appLE]
   map_id X := by
     ext : 1
-    simp only [Functor.id_obj, Functor.const_obj_obj, id_eq, eq_mpr_eq_cast, eq_mp_eq_cast,
-      Scheme.comp_coeBase, TopologicalSpace.Opens.map_comp_obj, cast_eq, Scheme.Hom.appLE,
-      homOfLE_leOfHom, homOfLE_refl, op_id, Scheme.comp_app, unop_id, Comma.id_hom,
+    simp only [Functor.id_obj, Functor.const_obj_obj,
+      Scheme.Hom.appLE,
+      homOfLE_leOfHom, homOfLE_refl, op_id, unop_id, Comma.id_hom,
       CategoryTheory.Comma.id_left, Scheme.id.base, Scheme.id_app, Category.id_comp,
       Under.homMk_hom, Under.homMk_right, CategoryTheory.Comma.id_right]
     apply CategoryTheory.Functor.map_id
@@ -560,10 +559,10 @@ def overSpecEquivUnderCompPushoutIso (hQi : RingHom.RespectsIso Q) {R S : CommRi
       (MorphismProperty.Under.pushout (RingHom.toMorphismProperty Q) ⊤ f) ≅
       (Over.pullback P ⊤ (Spec.map f)).op ⋙ (overSpecEquivUnder P hQi S).functor :=
   Functor.associator _ _ _ ≪≫
-    isoWhiskerLeft _ (Under.congrPushoutIso _ ⊤
+    Functor.isoWhiskerLeft _ (Under.congrPushoutIso _ ⊤
       (Spec.map f).appTop f (Scheme.ΓSpecIso R) (Scheme.ΓSpecIso S) (by simp)) ≪≫
       (Functor.associator _ _ _).symm ≪≫
-      isoWhiskerRight (pullbackΓPropIso P hQi _).symm _ ≪≫
+      Functor.isoWhiskerRight (pullbackΓPropIso P hQi _).symm _ ≪≫
       Functor.associator _ _ _
 
 lemma preservesColimitsOfShape_pullback_iff_preservesLimitsOfShape (hQi : RingHom.RespectsIso Q)
@@ -576,8 +575,9 @@ lemma preservesColimitsOfShape_pullback_iff_preservesLimitsOfShape (hQi : RingHo
       (Under.pushout (RingHom.toMorphismProperty Q) ⊤ f) ⋙
       (overSpecEquivUnder P hQi S).inverse ≅ (Over.pullback P ⊤ (Spec.map f)).op :=
     (Functor.associator _ _ _).symm ≪≫
-      isoWhiskerRight (overSpecEquivUnderCompPushoutIso P hQi f) _ ≪≫
-      Functor.associator _ _ _ ≪≫ isoWhiskerLeft _ (overSpecEquivUnder P hQi S).unitIso.symm ≪≫
+      Functor.isoWhiskerRight (overSpecEquivUnderCompPushoutIso P hQi f) _ ≪≫
+      Functor.associator _ _ _ ≪≫
+        Functor.isoWhiskerLeft _ (overSpecEquivUnder P hQi S).unitIso.symm ≪≫
       Functor.rightUnitor _
   let iso' : ((overSpecEquivUnder P hQi R).functor.rightOp ⋙
       (Under.pushout (RingHom.toMorphismProperty Q) ⊤ f).op ⋙
@@ -594,12 +594,12 @@ lemma preservesColimitsOfShape_pullback_iff_preservesLimitsOfShape (hQi : RingHo
       (overSpecEquivUnder P hQi R).inverse.leftOp ⋙ Over.pullback P ⊤ (Spec.map f) ⋙
       (overSpecEquivUnder P hQi S).functor.rightOp :=
     (Functor.rightUnitor _).symm ≪≫
-      isoWhiskerLeft _ e'' ≪≫
+      Functor.isoWhiskerLeft _ e'' ≪≫
       (Functor.associator _ _ _).symm ≪≫
-      isoWhiskerRight (Functor.leftUnitor _).symm _ ≪≫
-      isoWhiskerRight (isoWhiskerRight e' _) _ ≪≫
-      isoWhiskerRight (Functor.associator _ _ _) _ ≪≫
-      isoWhiskerRight (isoWhiskerLeft _ foo.symm) _ ≪≫ Functor.associator _ _ _
+      Functor.isoWhiskerRight (Functor.leftUnitor _).symm _ ≪≫
+      Functor.isoWhiskerRight (Functor.isoWhiskerRight e' _) _ ≪≫
+      Functor.isoWhiskerRight (Functor.associator _ _ _) _ ≪≫
+      Functor.isoWhiskerRight (Functor.isoWhiskerLeft _ foo.symm) _ ≪≫ Functor.associator _ _ _
   refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
   · convert preservesLimitsOfShape_of_op _ _
     convert preservesColimitsOfShape_of_natIso iso2.symm
@@ -644,8 +644,8 @@ lemma isPullback_openCoverOfBase_map {X Y Z T : Scheme.{u}} (f : X ⟶ Z) (g : Y
   · intro c
     refine pullback.hom_ext ?_ ?_
     · simp only [Scheme.Pullback.openCoverOfBase_map, PullbackCone.π_app_left,
-      PullbackCone.π_app_right, Category.assoc, limit.lift_π, PullbackCone.mk_pt, cospan_right,
-      PullbackCone.mk_π_app, Functor.const_obj_obj, cospan_one]
+      PullbackCone.π_app_right, Category.assoc, limit.lift_π, PullbackCone.mk_pt,
+      PullbackCone.mk_π_app]
       apply pullback.hom_ext
       · simp only [pullback.map]
         simp_rw [Category.assoc, pullback.lift_fst, pullback.lift_fst_assoc, c.condition_assoc]
@@ -710,7 +710,7 @@ lemma _root_.CategoryTheory.MorphismProperty.Over.colimit_post_pullback
     colimit.post (D ⋙ Over.pullback P Q f) (Over.pullback P Q (pullback.fst f g)) ≫
     (Over.pullback P Q (pullback.fst f g)).map (colimit.post D (Over.pullback P Q f)) =
     (HasColimit.isoOfNatIso
-      (Functor.associator _ _ _ ≪≫ isoWhiskerLeft D (Over.pullbackCondition P Q f g) ≪≫
+      (Functor.associator _ _ _ ≪≫ Functor.isoWhiskerLeft D (Over.pullbackCondition P Q f g) ≪≫
         (Functor.associator _ _ _).symm)).hom ≫
       colimit.post (D ⋙ Over.pullback P Q g) _ ≫
       (MorphismProperty.Over.pullback P Q (pullback.snd f g)).map
@@ -720,9 +720,9 @@ lemma _root_.CategoryTheory.MorphismProperty.Over.colimit_post_pullback
   apply colimit.hom_ext
   intro j
   simp only [Functor.comp_obj, colimit.ι_post, Functor.comp_map, HasColimit.isoOfNatIso_ι_hom_assoc,
-    Iso.trans_hom, isoWhiskerLeft_hom, Iso.symm_hom, NatTrans.comp_app, Functor.associator_hom_app,
-    whiskerLeft_app, Functor.associator_inv_app, Category.comp_id, Category.id_comp,
-    colimit.ι_post_assoc]
+    Iso.trans_hom, Functor.isoWhiskerLeft_hom, Iso.symm_hom, NatTrans.comp_app,
+    Functor.associator_hom_app, Functor.whiskerLeft_app, Functor.associator_inv_app,
+    Category.comp_id, Category.id_comp, colimit.ι_post_assoc]
   rw [← Functor.map_comp_assoc, colimit.ι_post, ← Functor.comp_map, ← Functor.comp_map]
   rw [NatTrans.naturality]
   simp
@@ -733,7 +733,7 @@ def _root_.CategoryTheory.Limits.colimit.arrowMkPostIsoOfIso {J C D : Type*} [Ca
     [Category C] [Category D] (K : J ⥤ C) (F F' : C ⥤ D)
     (e : F ≅ F') [HasColimit K] [HasColimit (K ⋙ F)] [HasColimit (K ⋙ F')] :
     Arrow.mk (colimit.post K F) ≅ Arrow.mk (colimit.post K F') :=
-  Arrow.isoMk (HasColimit.isoOfNatIso <| isoWhiskerLeft K e) (e.app _)
+  Arrow.isoMk (HasColimit.isoOfNatIso <| Functor.isoWhiskerLeft K e) (e.app _)
     (by apply colimit.hom_ext; simp)
 
 end

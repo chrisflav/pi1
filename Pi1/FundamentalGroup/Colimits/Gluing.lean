@@ -46,7 +46,7 @@ lemma Over.pullbackComp_fst_fst {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) (A : Ove
     Over.map_obj_left, Over.map_obj_hom, Functor.const_obj_obj, eqToHom_app, Functor.comp_map,
     Over.mapPullbackAdj_counit_app, Category.assoc, Over.comp_left, Over.homMk_left,
     Over.pullback_map_left, Over.eqToHom_left, eqToHom_refl, Category.comp_id, limit.lift_π_assoc,
-    id_eq, PullbackCone.mk_pt, cospan_left, PullbackCone.mk_π_app, limit.lift_π, Category.id_comp]
+    PullbackCone.mk_pt, cospan_left, PullbackCone.mk_π_app, limit.lift_π, Category.id_comp]
 
 end
 
@@ -70,7 +70,6 @@ lemma _root_.AlgebraicGeometry.opensRange_homOfLE {X : Scheme.{u}} {U U' : X.Ope
     apply Subtype.ext
     simp
 
-/-- -/
 def _root_.AlgebraicGeometry.pullbackHomOfLEIso' {X Y Z : Scheme.{u}}
     (f : X ⟶ Y) (g : Z ⟶ Y) [IsOpenImmersion g] :
     (f ⁻¹ᵁ g.opensRange).toScheme ≅ pullback f g :=
@@ -174,11 +173,10 @@ def Scheme.DirectedOpenCover.intersection (𝒰 : X.DirectedOpenCover) (i j : �
   map_prop k := by
     apply @IsOpenImmersion.of_comp _ _ _ _ (pullback.fst _ _) ?_ ?_
     · apply IsOpenImmersion.pullback_fst_of_right
-    · simp only [Set.coe_setOf, Set.mem_setOf_eq, limit.lift_π, PullbackCone.mk_pt,
+    · simp only [limit.lift_π, PullbackCone.mk_pt,
         PullbackCone.mk_π_app]
       infer_instance
 
-/-- -/
 def Scheme.DirectedOpenCover.glueMorphisms (𝒰 : X.DirectedOpenCover) {Y : Scheme.{u}}
     (g : ∀ i, 𝒰.obj i ⟶ Y) (h : ∀ {i j : 𝒰.J} (hij : i ≤ j), 𝒰.trans hij ≫ g j = g i) :
     X ⟶ Y :=
@@ -231,7 +229,6 @@ lemma ρres_pullbackHomOfLEIso_hom {i j : d.ι} (hij : d.U i ≤ d.U j) :
   rw [← cancel_mono (pullback.fst _ _)]
   simp [ρres', pullbackHomOfLEIso]
 
-/-- -/
 def ρresIsoρres' {i j : d.ι} (hij : d.U i ≤ d.U j) :
     Arrow.mk (d.ρres hij) ≅ Arrow.mk (d.ρres' hij) :=
   Arrow.isoMk (Iso.refl _) (pullbackHomOfLEIso hij _) (by simp [ρres_pullbackHomOfLEIso_hom])
@@ -360,7 +357,7 @@ def restrictRestrictIso {i j : d.ι} (hij : d.ℬ i ≤ d.ℬ j) :
       MorphismProperty.Over.pullback P Q (d.ℬ j).ι ⋙
         MorphismProperty.Over.pullback P Q (S.homOfLE hij) :=
     MorphismProperty.Over.pullbackCongr heq ≪≫ iso0
-  let iso2 := isoWhiskerLeft D iso1
+  let iso2 := D.isoWhiskerLeft iso1
   let iso3 := Functor.associator D
     (MorphismProperty.Over.pullback P Q (d.ℬ j).ι)
       (MorphismProperty.Over.pullback P Q (S.homOfLE hij))
@@ -465,9 +462,7 @@ lemma transition_transition {i j k : d.ι} (hij : d.ℬ i ≤ d.ℬ j) (hjk : d.
   apply (d.hcfo (hij.trans hjk)).hom_ext
   intro a
   ext : 1
-  simp only [Functor.const_obj_obj, transitionTransitionAux, eqToIso.inv, Over.comp_left,
-    cfo_ι_app_left, Over.map_obj_left, Over.eqToHom_left, eqToHom_refl, Over.map_map_left,
-    Category.id_comp, ι_transition_assoc, ι_transition, trans_trans_assoc]
+  simp only [Functor.const_obj_obj, transitionTransitionAux, eqToIso.inv]
   simp [ι_transition, ι_transition_assoc, trans_trans_assoc]
 
 lemma preGluingData_comp_aux {i j k : d.ι} (hij : d.ℬ i ≤ d.ℬ j) (hjk : d.ℬ j ≤ d.ℬ k) :
@@ -518,7 +513,7 @@ lemma ρres_isIso_aux {i j : d.ι} (hij : d.ℬ i ≤ d.ℬ j) :
       Functor.const_obj_obj, Functor.mapCocone_ι_app, MorphismProperty.Comma.comp_hom,
       Comma.comp_left, Scheme.Opens.diagram_hom, Functor.id_obj,
       MorphismProperty.Comma.Hom.hom_left, MorphismProperty.Over.pullback_map_left, Category.assoc,
-      limit.lift_π, id_eq, PullbackCone.mk_pt, PullbackCone.mk_π_app]
+      limit.lift_π, PullbackCone.mk_pt, PullbackCone.mk_π_app]
     erw [restrictRestrictIso_hom_app_left_fst_assoc]
     rw [← ι_transition]
     rfl
@@ -540,7 +535,7 @@ instance ρres_isIso {i j : d.ι} (hij : d.ℬ i ≤ d.ℬ j) : IsIso (d.preGlui
     rw [← cancel_mono (pullback.fst _ _)]
     simp only [Functor.id_obj, Functor.const_obj_obj, PreRelativeGluingData.ρres']
     simp only [Functor.mapCocone_pt, Functor.mapIso_hom, IsColimit.coconePointsIsoOfNatIso_hom,
-      Over.forget_map, bar', bar]
+      bar', bar]
     erw [pullback.lift_fst]
     erw [← PreRelativeGluingData.ρw_left, ρres_isIso_aux]
   rw [← this]
@@ -614,7 +609,7 @@ def gluedCoconeι (k : J) :
     (fun i ↦ ((d.c i).ι.app k).left ≫ d.gluingData.glued.ι i)
     (by
       intro i j hij
-      simp only [Over.mk_left, componentOpenCover_trans_ι, Functor.const_obj_obj]
+      simp only [componentOpenCover_trans_ι, Functor.const_obj_obj]
       rw [← ι_transition_assoc]
       show _ ≫ d.gluingData.ρ hij ≫ _ = _
       simp only [Functor.const_obj_obj, RelativeGluingData.Glued.openCover_ρ_map])
@@ -635,7 +630,7 @@ def gluedCoconeι (k : J) :
 lemma componentOpenCover_map_gluedCoconeι (k : J) (i : d.ι) :
     (d.componentOpenCover k).map i ≫ (d.gluedCoconeι k).left =
       ((d.c i).ι.app k).left ≫ d.gluingData.glued.ι i := by
-  simp only [Over.mk_left, gluedCoconeι, Functor.const_obj_obj]
+  simp only [gluedCoconeι, Functor.const_obj_obj]
   rw [Scheme.DirectedOpenCover.map_glueMorphismsOver_left]
   -- TODO: why do we have to give the proof again?!
   simp
@@ -658,7 +653,7 @@ def gluedCocone : Cocone D where
         simp only [componentOpenCover, Scheme.DirectedOpenCover.pullbackCover,
           Scheme.Cover.pullbackCover_J, Scheme.Cover.pullbackCover_obj,
           Scheme.Cover.pullbackCover_map, Scheme.Opens.diagram, pullbackDiagram,
-          Functor.comp_obj, Over.pullback_obj_left, Functor.comp_map, Over.pullback_map_left]
+          Functor.comp_obj, Functor.comp_map]
         erw [pullback.lift_fst]
         rfl
       simp
@@ -728,9 +723,7 @@ lemma aux3 (i : d.ι) (s : Cocone D)
       (MorphismProperty.Comma.isoFromComma (d.gluingData.glued.isoPullback i)).inv ≫
         (MorphismProperty.Over.pullback P Q (d.ℬ i).ι).map m
   have comp : d.gluingData.glued.ι i ≫ m.left = mᵢ.left ≫ pullback.fst s.pt.hom (d.ℬ i).ι := by
-    simp only [Over.pullback_obj_left, Functor.id_obj, gluingData_f, Over.comp_left, Over.mk_left,
-      Over.mk_hom, Over.pullback_map_left, Functor.const_obj_obj, Category.assoc, limit.lift_π,
-      id_eq, PullbackCone.mk_pt, PullbackCone.mk_π_app, mᵢ]
+    simp only [mᵢ]
     simp [MorphismProperty.Comma.isoFromComma]
     erw [d.gluingData.glued.isoPullback_inv_left_fst_assoc i]
   rw [comp]
@@ -761,8 +754,8 @@ def gluedIsColimit : IsColimit d.gluedCocone where
         pullback.fst s.pt.hom (d.ℬ i).ι)
       (fun {i j} hij ↦ by apply aux1)
       (fun i ↦ by
-        simp only [Functor.const_obj_obj, Functor.mapCocone_pt, Over.pullback_obj_left,
-          Functor.id_obj, Category.assoc, gluingData_f]
+        simp only [Functor.const_obj_obj, Functor.mapCocone_pt, Functor.id_obj,
+          Category.assoc, gluingData_f]
         have : pullback.snd s.pt.hom (d.ℬ i).ι =
           ((MorphismProperty.Over.pullback P Q (d.ℬ i).ι).mapCocone s).pt.hom := rfl
         rw [pullback.condition, this]

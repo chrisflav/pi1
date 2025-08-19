@@ -114,7 +114,7 @@ open TopologicalSpace
 
 example {T : Scheme.{u}} {C C' : d.CompatibleFamily T} (i : d.ι) (hg : C.g = C'.g) :
     C.g ⁻¹ᵁ d.U i = C'.g ⁻¹ᵁ d.U i :=
-  congrFun (congrArg _ (congrArg _ (congrArg _ (congrArg _ (congrArg _ (congrArg _ hg)))))) (d.U i)
+  congrFun ((congrArg _ (congrArg _ (congrArg _ (congrArg _ (congrArg _ hg)))))) (d.U i)
 
 lemma CompatibleFamily.eq_iff {T : Scheme.{u}} {C C' : d.CompatibleFamily T} :
     C = C' ↔ ∃ hg : C.g = C'.g, ∀ i, C.h i = (T.isoOfEq (by rw [hg])).hom ≫ C'.h i := by
@@ -165,7 +165,7 @@ lemma compatibleFamilyMap_comp {X Y Z : Scheme.{u}} (p : X ⟶ Y) (q : Y ⟶ Z)
   ext i : 1
   · simp
   · simp only [compatibleFamilyMap_g, Scheme.comp_coeBase, TopologicalSpace.Opens.map_comp_obj,
-      compatibleFamilyMap_h, eqToHom_refl, Category.id_comp]
+      compatibleFamilyMap_h]
     rw [morphismRestrict_comp]
     simp
 
@@ -240,7 +240,6 @@ private lemma 𝒱.map_ι (i : d.ι) (j : 𝒰.J) :
     (d.𝒱 hx i).map j ≫ (d.aux hx ⁻¹ᵁ (d.U i)).ι = ((d.H x j).g ⁻¹ᵁ (d.U i)).ι ≫ 𝒰.map j :=
   IsOpenImmersion.lift_fac _ _ _
 
-/-- -/
 lemma foo' {X Y : Scheme.{u}} {U : Y.Opens} (f : X ⟶ U) :
     X.topIso.inv ≫ (X.isoOfEq (by simp)).inv ≫ (f ≫ U.ι) ∣_ U = f := by
   rw [← cancel_mono U.ι]
@@ -488,7 +487,7 @@ lemma coveringSet_subset (U : Opens X) : coveringSet hℬ U ⊆ ℬ := by
 lemma sSup_coveringSet (U : Opens X) : U = sSup (coveringSet hℬ U) := by
   refine le_antisymm (fun u hu ↦ ?_) ?_
   · obtain ⟨V, hV⟩ := Opens.isBasis_iff_nbhd.mp hℬ hu
-    simp only [Opens.coe_sSup, Set.mem_setOf_eq, Set.mem_iUnion, SetLike.mem_coe, exists_prop]
+    simp only [Opens.coe_sSup, Set.mem_iUnion, SetLike.mem_coe, exists_prop]
     tauto
   · rw [sSup_le_iff]
     intro V hV
@@ -693,7 +692,6 @@ lemma 𝒲new_map_auxhGeneralnew {j : d.ι} (k : (d.𝒲new f j).J) :
 def 𝒲newJmkOfLE {j k : d.ι} (hkj : d.U k ≤ d.U j) (hki : d.U k ≤ d.U i) : (d.𝒲new f j).J :=
   ⟨k, by simp [hkj, hki]⟩
 
-/-- -/
 @[reassoc (attr := simp)]
 lemma 𝒲new_map_auxhGeneralnew' {j : d.ι} {k : d.ι} (hkj : d.U k ≤ d.U j) (hki : d.U k ≤ d.U i) :
     (d.𝒲new f j).map (d.𝒲newJmkOfLE f hkj hki) ≫ d.auxhGeneralnew f j =
@@ -716,7 +714,7 @@ def subfamily : d.CompatibleFamily T where
     simp only [morphismRestrict_ι, Category.assoc]
     apply (d.𝒲new f j).hom_ext
     intro k
-    simp only [𝒲new_map_auxhGeneralnew_assoc, d.w_assoc]
+    simp only [𝒲new_map_auxhGeneralnew_assoc]
     simp [auxhOfLE_f_assoc, 𝒲new_map, auxg]
   hcompρ j k hjk := by
     dsimp
@@ -749,11 +747,10 @@ lemma auxhGeneralnew_apply {i : d.ι} {T : Scheme.{u}} (f : T ⟶ d.X i) :
     d.auxhGeneralnew f i = (d.auxg f ⁻¹ᵁ d.U i).ι ≫ f := by
   apply (d.𝒲new _ i).hom_ext
   intro a
-  simp only [𝒲new_map_auxhGeneralnew, auxhOfLE_ρ, subfamily_g]
+  simp only [𝒲new_map_auxhGeneralnew, auxhOfLE_ρ]
   simp only [𝒲new_map, ← Category.assoc]
   simp
 
-/-- -/
 lemma subfamily_h' {i : d.ι} {T : Scheme.{u}} (f : T ⟶ d.X i) :
     (d.subfamily f).h i = (T.isoOfEq (by simp [subfamily_g])).hom ≫ T.topIso.hom ≫ f := by
   simp only [subfamily_h, auxhGeneralnew_apply, Scheme.topIso_hom, Scheme.isoOfEq_hom_ι_assoc]
@@ -889,7 +886,7 @@ lemma subsheaf_isOpenImmersion (i : d.ι) : IsOpenImmersion.presheaf (d.subsheaf
     · apply subfamily_injective
       simp [subfamily_apply_h]
       rw [← compatibleFamilyMap_comp]
-      simp only [Scheme.Opens.lift_fac, p]
+      simp only [Scheme.Opens.lift_fac]
       exact hab.symm
     · rintro q - hqb
       rw [← cancel_mono (C.g ⁻¹ᵁ d.U i).ι]
@@ -1026,9 +1023,9 @@ def mkGluedFromRepresentable (X : Scheme.{u}) (R : d.presheaf.RepresentableBy X)
       simp only [Category.assoc, Scheme.Opens.lift_fac, Category.id_comp, v, u]
       apply R.homEquiv.injective
       rw [R.homEquiv_comp]
-      simp only [Equiv.apply_symm_apply, Quiver.Hom.unop_op, u']
+      simp only [Equiv.apply_symm_apply, u']
       rw [← hRC']
-      simp only [Quiver.Hom.unop_op, Equiv.apply_symm_apply, C, C']
+      simp only [Equiv.apply_symm_apply, C, C']
       rw [← FunctorToTypes.naturality]
       rfl
     exact ⟨v, u, hvu, huv⟩

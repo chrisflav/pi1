@@ -1,18 +1,14 @@
 import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
 import Mathlib.AlgebraicGeometry.Morphisms.Flat
+import Mathlib.AlgebraicGeometry.Morphisms.Descent
+import Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
 import Mathlib.AlgebraicGeometry.Morphisms.UniversallyClosed
 import Mathlib.AlgebraicGeometry.Morphisms.UniversallyInjective
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
 import Mathlib.RingTheory.Ideal.GoingDown
 import Mathlib.RingTheory.Spectrum.Prime.Chevalley
-import Pi1.Mathlib.AlgebraicGeometry.Morphisms.RingHomProperties
-import Pi1.Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
-import Pi1.Mathlib.CategoryTheory.MorphismProperty.Limits
-import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
 import Pi1.Mathlib.AlgebraicGeometry.PullbackCarrier
-import Pi1.Mathlib.RingTheory.RingHom.Flat
 import Pi1.Mathlib.RingTheory.RingHom.FaithfullyFlat
-import Pi1.Mathlib.RingTheory.Spectrum.Prime.Topology
 import Pi1.Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
 
 universe u v
@@ -53,7 +49,8 @@ instance Flat.surjective_descendsAlong_surjective_inf_flat_inf_quasicompact :
 instance Flat.universallyClosed_descendsAlong_surjective_inf_flat_inf_quasicompact :
     DescendsAlong @UniversallyClosed (@Surjective ⊓ @Flat ⊓ @QuasiCompact) := by
   refine IsLocalAtTarget.descendsAlong_inf_quasiCompact _ _ ?_ ?_
-  · exact fun {X} _ ↦ X.exists_hom_isAffine_of_isLocalAtSource _ @Flat le_rfl
+  · rw [inf_comm]
+    exact inf_le_inf le_rfl (IsLocalIso.le_of_isLocalAtSource _)
   refine fun {R} S Y φ g ⟨_, _⟩ hfst ↦ ⟨universally_mk' _ _ fun {T} f _ s hs ↦ ?_⟩
   let p := pullback.fst (pullback.fst (Spec.map φ) f) (pullback.fst (Spec.map φ) g)
   let r : pullback (pullback.fst (Spec.map φ) f) (pullback.fst (Spec.map φ) g) ⟶ pullback f g :=
@@ -70,7 +67,8 @@ instance Flat.universallyOpen_descendsAlong_surjective_inf_flat_inf_quasicompact
     DescendsAlong @UniversallyOpen
       (@Surjective ⊓ @Flat ⊓ @QuasiCompact) := by
   refine IsLocalAtTarget.descendsAlong_inf_quasiCompact _ _ ?_ ?_
-  · exact fun {X} _ ↦ X.exists_hom_isAffine_of_isLocalAtSource _ @Flat le_rfl
+  · rw [inf_comm]
+    exact inf_le_inf le_rfl (IsLocalIso.le_of_isLocalAtSource _)
   refine fun {R} S Y φ g ⟨_, _⟩ hfst ↦ ⟨universally_mk' _ _ fun {T} f _ s hs ↦ ?_⟩
   let p := pullback.fst (pullback.fst (Spec.map φ) f) (pullback.fst (Spec.map φ) g)
   let r : pullback (pullback.fst (Spec.map φ) f) (pullback.fst (Spec.map φ) g) ⟶ pullback f g :=
@@ -123,8 +121,8 @@ instance Flat.universallyInjective_descendsAlong_surjective_inf_flat_inf_quasico
 instance Flat.isomorphisms_descendsAlong_surjective_inf_flat_inf_quasicompact :
     (isomorphisms Scheme.{u}).DescendsAlong (@Surjective ⊓ @Flat ⊓ @QuasiCompact) := by
   apply IsLocalAtTarget.descendsAlong_inf_quasiCompact
-  · intro X _
-    exact X.exists_hom_isAffine_of_isLocalAtSource _ @Flat le_rfl
+  · rw [inf_comm]
+    exact inf_le_inf le_rfl (IsLocalIso.le_of_isLocalAtSource _)
   · intro R S Y φ g h (hfst : IsIso _)
     have : IsAffine Y :=
       have : IsIso (pullback.fst (Spec.map φ) g) := ‹_›
@@ -161,7 +159,7 @@ instance Flat.isomorphisms_descendsAlong_surjective_inf_flat_inf_quasicompact :
     obtain ⟨ψ, rfl⟩ := Spec.map_surjective g
     apply of_pullback_fst_Spec_of_codescendsAlong (P := isomorphisms Scheme.{u})
       (Q' := RingHom.FaithfullyFlat) (Q := fun f ↦ Function.Bijective f) (P' := @Surjective ⊓ @Flat)
-    · exact RingHom.FaithfullyFlat.bijective_codescendsAlong
+    · exact RingHom.FaithfullyFlat.codescendsAlong_bijective
     · intro _ _ f hf
       rwa [← flat_and_surjective_SpecMap_iff, and_comm]
     · simp_rw [← isIso_SpecMap_iff]
@@ -230,7 +228,7 @@ instance (priority := low) Flat.isOpenImmersion {X Y : Scheme.{u}} (f : X ⟶ Y)
       simp only [f']
       conv_rhs => rw [heq]
       simp only [Scheme.comp_coeBase, TopCat.hom_comp, ContinuousMap.comp_apply,
-        Scheme.Opens.ι_base_apply, SetLike.coe_eq_coe, f']⟩
+        Scheme.Opens.ι_base_apply, f']⟩
     apply IsOpenImmersion.comp
   have hhomeo : IsHomeomorph f.base :=
     ⟨f.continuous, f.isOpenMap, f.injective, f.surjective⟩

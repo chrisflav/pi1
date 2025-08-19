@@ -31,7 +31,8 @@ end Extension
 namespace Generators
 
 variable {R S : Type u} [CommRing R] [CommRing S] [Algebra R S]
-variable (P : Generators R S)
+variable {ι : Type*}
+variable (P : Generators R S ι)
 variable (T : Type u) [CommRing T] [Algebra R T]
 
 noncomputable
@@ -41,14 +42,14 @@ def baseChangeFromBaseChange :
   toRingHom_algebraMap x := by
     simp only [toExtension_Ring, Extension.baseChange, toExtension_commRing, toExtension_algebra₂,
       AlgEquiv.toRingEquiv_eq_coe, RingEquiv.toRingHom_eq_coe, AlgEquiv.toRingEquiv_toRingHom,
-      TensorProduct.algebraMap_apply, id.map_eq_id, RingHom.id_apply, MvPolynomial.algebraMap_eq]
+      TensorProduct.algebraMap_apply, algebraMap_self, RingHom.id_apply, MvPolynomial.algebraMap_eq]
     show (MvPolynomial.algebraTensorAlgEquiv R T) (x ⊗ₜ[R] 1) = MvPolynomial.C x
     simp only [MvPolynomial.algebraTensorAlgEquiv_tmul, map_one, smul_def,
       MvPolynomial.algebraMap_eq, mul_one]
   algebraMap_toRingHom x := by
     simp only [Extension.baseChange, toExtension_Ring, toExtension_commRing, toExtension_algebra₂,
       AlgEquiv.toRingEquiv_eq_coe, RingEquiv.toRingHom_eq_coe, AlgEquiv.toRingEquiv_toRingHom,
-      algebraMap_apply, id.map_eq_id, RingHomCompTriple.comp_apply] at x ⊢
+      algebraMap_apply, algebraMap_self, RingHomCompTriple.comp_apply] at x ⊢
     show (MvPolynomial.aeval P.baseChange.val) (MvPolynomial.algebraTensorAlgEquiv R T x) = _
     induction x with
     | zero => simp
@@ -57,7 +58,7 @@ def baseChangeFromBaseChange :
     | tmul t x =>
       simp only [MvPolynomial.algebraTensorAlgEquiv_tmul, map_smul]
       rw [Algebra.smul_def]
-      simp only [TensorProduct.algebraMap_apply, id.map_eq_id, RingHom.id_apply, baseChange,
+      simp only [TensorProduct.algebraMap_apply, algebraMap_self, RingHom.id_apply, baseChange,
         ofSurjective, AlgHom.toRingHom_eq_coe, MvPolynomial.aeval_map_algebraMap]
       induction x using MvPolynomial.induction_on with
       | C r =>
@@ -84,17 +85,19 @@ def baseChangeToBaseChange :
     simp only [toExtension_Ring, toExtension_commRing, toExtension_algebra₂,
       baseChangeFromBaseChange, AlgEquiv.toRingEquiv_eq_coe, RingEquiv.toRingHom_eq_coe,
       AlgEquiv.toRingEquiv_toRingHom, AlgEquiv.symm_toRingEquiv, RingHom.coe_coe, algebraMap_apply,
-      id.map_eq_id, RingHomCompTriple.comp_apply] at this
+      algebraMap_self, RingHomCompTriple.comp_apply] at this
     convert this.symm
     show _ = (MvPolynomial.aeval P.baseChange.val)
       ((MvPolynomial.algebraTensorAlgEquiv R T) (((MvPolynomial.algebraTensorAlgEquiv R T)).symm x))
-    simp only [id.map_eq_id, toExtension_Ring, toExtension_commRing, toExtension_algebra₂,
+    simp only [algebraMap_self, toExtension_Ring, toExtension_commRing, toExtension_algebra₂,
       algebraMap_apply, MvPolynomial.map_aeval, RingHomCompTriple.comp_eq, baseChange_val,
       RingHom.id_apply, MvPolynomial.coe_eval₂Hom, AlgEquiv.apply_symm_apply]
     rfl
   toRingHom_algebraMap x := by
-    show (MvPolynomial.algebraTensorAlgEquiv R T).symm (MvPolynomial.C x) =
-      (algebraMap T P.toExtension.baseChange.Ring) x
+    simp only [toExtension_Ring, toExtension_commRing, AlgEquiv.toRingEquiv_eq_coe,
+      AlgEquiv.symm_toRingEquiv, RingEquiv.toRingHom_eq_coe, MvPolynomial.algebraMap_eq,
+      algebraMap_self, RingHom.id_apply]
+    show (MvPolynomial.algebraTensorAlgEquiv R T).symm _ = _
     rw [← MvPolynomial.algebraMap_eq, AlgEquiv.commutes]
     rfl
 

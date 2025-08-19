@@ -85,6 +85,8 @@ instance (R M N : Type*) [CommRing R] [AddCommGroup M] [AddCommGroup N]
   apply Function.Injective.prodMap <;>
     exact Module.Flat.rTensor_preserves_injective_linearMap _ Subtype.val_injective
 
+-- needed after mathlib bump
+set_option synthInstance.maxHeartbeats 0 in
 instance {ι : Type*} (R : Type*) [CommRing R] [_root_.Finite ι]
     (M : ι → Type*) [∀ i, AddCommGroup (M i)] [∀ i, Module R (M i)]
     [∀ i, Module.Flat R (M i)] :
@@ -128,7 +130,7 @@ lemma CodescendsAlong.of_forall_flat {R S : Type u} [CommRing R] [CommRing S] [A
   have : algebraMap A (A ⊗[R] S) = e.symm.toRingHom.comp
       (algebraMap A <| ∀ p : t, T p.1 ⊗[R] S) := by
     ext i x
-    simp [e, A, Pi.algebraMap_instAlgebraForall_apply, ← AlgEquiv.symm_toRingEquiv,
+    simp [e, A, Pi.algebraMap_instAlgebraForall_apply, -AlgEquiv.symm_toRingEquiv,
       AlgEquiv.piCongrRight, Algebra.TensorProduct.piRight]
   rw [this]
   apply hPi.1
@@ -247,23 +249,7 @@ lemma AlgHom.IsSplit.mk (f : A →ₐ[R] B) {E F : Type*} [_root_.Finite E] [_ro
     have := DFunLike.congr_fun h x
     simp only [AlgEquiv.toAlgHom_eq_coe, coe_comp, AlgHom.coe_coe, Function.comp_apply] at this
     ext i
-    simp [this, AlgHom.compRight, AlgEquiv.piCongrLeft, AlgEquiv.piCongrLeft']
-
-noncomputable
-def Algebra.TensorProduct.piScalarRight (R S A : Type*) [CommSemiring R] [CommSemiring S]
-    [Algebra R S] [CommSemiring A] [Algebra R A] [Algebra S A] [IsScalarTower R S A]
-    (ι : Type*) [Fintype ι] [DecidableEq ι] :
-    A ⊗[R] (ι → R) ≃ₐ[S] ι → A :=
-  (Algebra.TensorProduct.piRight R S A (fun _ : ι ↦ R)).trans <|
-    AlgEquiv.piCongrRight (fun _ ↦ Algebra.TensorProduct.rid R S A)
-
-@[simp]
-lemma Algebra.TensorProduct.piScalarRight_tmul (R S A : Type*) [CommSemiring R] [CommSemiring S]
-    [Algebra R S] [CommSemiring A] [Algebra R A] [Algebra S A] [IsScalarTower R S A]
-    (ι : Type*) [Fintype ι] [DecidableEq ι]
-    (x : A) (y : ι → R) :
-    piScalarRight R S A ι (x ⊗ₜ y) = fun i ↦ y i • x :=
-  rfl
+    simp [this, AlgHom.compRight]
 
 lemma AlgHom.compRight_apply' {E F : Type*} (R S : Type*) [CommRing R] [CommRing S] [Algebra R S]
     (σ : E → F) (x : F → S) :
@@ -324,14 +310,14 @@ lemma exists_isSplitOfRank [Module.Finite R A] [Algebra.Etale R A]
     obtain ⟨S, _, _, n, _, ho, ⟨q, rfl⟩, h⟩ := this p' ⟨_, hn⟩
     let _ : Algebra R S := Algebra.compHom S (algebraMap R (Localization.Away r))
     have : IsScalarTower R (Localization.Away r) S := IsScalarTower.of_algebraMap_eq' rfl
-    let e : S ⊗[Localization.Away r] Localization.Away r ⊗[R] A ≃ₐ[S] S ⊗[R] A :=
+    let e : S ⊗[Localization.Away r] (Localization.Away r ⊗[R] A) ≃ₐ[S] S ⊗[R] A :=
       TensorProduct.cancelBaseChange ..
     refine ⟨S, inferInstance, inferInstance, n, ?_, ?_, ⟨q, rfl⟩, ?_⟩
     · exact Module.Flat.trans R (Localization.Away r) S
     · rw [IsScalarTower.algebraMap_eq R (Localization.Away r) S, PrimeSpectrum.comap_comp,
         ContinuousMap.coe_comp]
       exact (PrimeSpectrum.localization_away_isOpenEmbedding _ r).isOpenMap.comp ho
-    · exact IsSplitOfRank.of_equiv (S := S ⊗[Localization.Away r] Localization.Away r ⊗[R] A) e
+    · exact IsSplitOfRank.of_equiv (S := S ⊗[Localization.Away r] (Localization.Away r ⊗[R] A)) e
   obtain ⟨n, hn⟩ := h
   obtain ⟨S, _, _, _, _, hS⟩ := Algebra.IsSplitOfRank.exists_isSplitOfRank_tensorProduct hn
   obtain ⟨p, rfl⟩ := PrimeSpectrum.specComap_surjective_of_faithfullyFlat (B := S) p
@@ -384,7 +370,7 @@ lemma exists_isSplit [Module.Finite R A] [Algebra.Etale R A]
       (TensorProduct.congr .refl eA |>.trans (TensorProduct.piScalarRight ..))
       (TensorProduct.congr .refl eB |>.trans (TensorProduct.piScalarRight ..)) σ
     ext a : 2
-    simpa [f', e] using congr(e ($(hσ) (1 ⊗ₜ eA a)))
+    simpa [TensorProduct.piScalarRight_tmul, f', e] using congr(e ($(hσ) (1 ⊗ₜ eA a)))
 
 local notation f " ≟ₐ " g => AlgHom.equalizer f g
 local notation S " ⊗ₘ " f => Algebra.TensorProduct.map (AlgHom.id S S) f
@@ -465,7 +451,7 @@ nonrec theorem tensorEqualizer_bijective_of_finite_of_etale (f g : A →ₐ[R] B
     [Module.Finite R A] [Algebra.Etale R A] [Module.Finite R B] [Algebra.Etale R B] :
     Function.Bijective (f.tensorEqualizer R S g) := by
   wlog hf : f.IsSplit
-  · apply RingHom.FaithfullyFlat.bijective_codescendsAlong.algHom_of_forall_exists_flat
+  · apply RingHom.FaithfullyFlat.codescendsAlong_bijective.algHom_of_forall_exists_flat
     · exact RingHom.Bijective.respectsIso
     · exact RingHom.Bijective.ofLocalizationSpan
     · intro p
@@ -482,7 +468,7 @@ nonrec theorem tensorEqualizer_bijective_of_finite_of_etale (f g : A →ₐ[R] B
   have : Function.Bijective (AlgHom.tensorEqualizer R S (.compRight R R σ) g') := by
     let _ : AddCommMonoid ↥(AlgHom.compRight R R σ ≟ₐ g') := AddCommGroup.toAddCommMonoid
     let _ : CommRing (S ⊗[R] ↥(AlgHom.compRight R R σ ≟ₐ g')) := inferInstance
-    apply RingHom.FaithfullyFlat.bijective_codescendsAlong.algHom_of_forall_exists_flat
+    apply RingHom.FaithfullyFlat.codescendsAlong_bijective.algHom_of_forall_exists_flat
       (B := TensorProduct.map (AlgHom.id R S) (.compRight R R σ) ≟ₐ TensorProduct.map (.id R S) g')
     · exact RingHom.Bijective.respectsIso
     · exact RingHom.Bijective.ofLocalizationSpan

@@ -47,6 +47,6 @@ lemma Algebra.FiniteType.FG_top_of_isFractionRing {R S K : Type*} [Field R]
     apply DFunLike.congr_fun this _
   rw [this]
   ext
-  simp only [AlgHom.mem_fieldRange, AlgHom.coe_id, id_eq, exists_eq, IntermediateField.mem_top, g]
+  simp only [AlgHom.mem_fieldRange, AlgHom.coe_id, id_eq, exists_eq, IntermediateField.mem_top]
   rw [← Algebra.map_top, ← hs, AlgHom.map_adjoin]
   simp [g]

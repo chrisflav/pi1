@@ -108,7 +108,6 @@ instance {Ω : Type u} [Field Ω] (X : FiniteEtale (Spec (.of Ω))) : Fintype X.
   have : Finite X.left := finite_of_isEtale_of_isAffineHom X.left X.hom
   Fintype.ofFinite X.left
 
-/-- -/
 @[simps]
 def forgetScheme (Ω : Type u) [Field Ω] : FiniteEtale (Spec (.of Ω)) ⥤ FintypeCat.{u} where
   obj X := FintypeCat.of X.left
@@ -158,7 +157,7 @@ instance (S : FintypeCat.{u}) :
     Spec.map (CommRingCat.ofHom <| algebraMap Ω _)
   have : IsEtale f := by
     rw [HasRingHomProperty.Spec_iff (P := @IsEtale)]
-    simp only [CommRingCat.hom_ofHom, RingHom.etale_algebraMap_iff]
+    simp only [CommRingCat.hom_ofHom, RingHom.etale_algebraMap]
     infer_instance
   have : Finite (Spec (CommRingCat.of (S.carrier → Ω))).toPresheafedSpace :=
     finite_of_isEtale_of_isAffineHom _ f
@@ -227,7 +226,7 @@ set_option pp.proofs true
 instance (X : Scheme.{u}) (R : Type u) [CommRing R] [X.Over (Spec (.of R))]
     [IsEtale (X ↘ Spec (.of R))] [IsAffineHom (X ↘ Spec (.of R))] :
     Algebra.Etale R Γ(X, ⊤) := by
-  rw [← RingHom.etale_algebraMap_iff, RingHom.algebraMap_toAlgebra]
+  rw [← RingHom.etale_algebraMap, RingHom.algebraMap_toAlgebra]
   apply RingHom.Etale.respectsIso.2
   simp [Scheme.Hom.appLE]
   have : IsAffine X := isAffine_of_isAffineHom (X ↘ Spec (.of R))
@@ -310,7 +309,7 @@ lemma _root_.AlgebraicGeometry.IsFiniteEtale.isoSpecFun_hom_SpecMap [IsSepClosed
   have : IsAffine X := isAffine_of_isAffineHom (X ↘ Spec (.of Ω))
   rw [← cancel_epi X.isoSpec.inv]
   conv_rhs => rw [← Scheme.isoSpec_inv_naturality]
-  simp only [IsFiniteEtale.isoSpecFun, IsFiniteEtale.isoSpecPi, RingEquiv.toRingHom_eq_coe,
+  simp only [IsFiniteEtale.isoSpecFun, IsFiniteEtale.isoSpecPi,
     Iso.trans_assoc, Iso.trans_hom, Functor.mapIso_hom, Iso.op_hom, RingEquiv.toCommRingCatIso_hom,
     Scheme.Spec_map, Quiver.Hom.unop_op, Iso.symm_hom, RingEquiv.toCommRingCatIso_inv,
     Category.assoc, Iso.inv_hom_id_assoc, Scheme.isoSpec_Spec_inv, ← Spec.map_comp]
@@ -348,7 +347,7 @@ def forgetInventIso [IsSepClosed Ω] : 𝟭 (FiniteEtale _) ≅ forgetScheme Ω 
       apply MorphismProperty.Over.Hom.ext
       simp only [FiniteEtale, Functor.id_obj, Functor.comp_obj, inventScheme_obj,
         forgetScheme_obj_carrier, mk_left, Functor.id_map, IsFiniteEtale.isoSpecFun,
-        RingEquiv.toRingHom_eq_coe, MorphismProperty.Comma.comp_hom, Comma.comp_left,
+        MorphismProperty.Comma.comp_hom, Comma.comp_left,
         MorphismProperty.Over.isoMk_hom_left, Iso.trans_hom, Functor.mapIso_hom, Iso.op_hom,
         Iso.symm_hom, RingEquiv.toCommRingCatIso_inv, Scheme.Spec_map, Quiver.Hom.unop_op,
         Functor.comp_map, inventScheme_map, forgetScheme_map, MorphismProperty.Over.homMk_hom,
@@ -413,23 +412,25 @@ instance (X : Type*) [TopologicalSpace X] [LocallyConnectedSpace X] :
     connectedComponents_preimage_singleton]
   exact isOpen_connectedComponent
 
-def _root_.AlgebraicGeometry.Scheme.connCompOpen {X : Scheme.{u}} [Finite (ConnectedComponents X)]
-    (i : ConnectedComponents X) : X.Opens :=
+def _root_.AlgebraicGeometry.Scheme.connCompOpen {X : Scheme.{u}}
+    [Finite (_root_.ConnectedComponents X)]
+    (i : _root_.ConnectedComponents X) : X.Opens :=
   ⟨ConnectedComponents.mk ⁻¹' {i}, by
     rw [ConnectedComponents.isQuotientMap_coe.isOpen_preimage]
     exact isOpen_discrete {i}⟩
 
 -- TODO: find the correct assumptions
 def _root_.AlgebraicGeometry.Scheme.connectedComponents (X : Scheme.{u})
-      [Finite (ConnectedComponents X)] :
+      [Finite (_root_.ConnectedComponents X)] :
     X.OpenCover where
-  J := ConnectedComponents X
+  J := _root_.ConnectedComponents X
   obj c := X.connCompOpen c
   map c := (X.connCompOpen c).ι
   f x := ConnectedComponents.mk x
   covers x := by simp [Scheme.connCompOpen]
 
-instance {X : Scheme.{u}} [Finite (ConnectedComponents X)] (i : ConnectedComponents X) :
+instance {X : Scheme.{u}} [Finite (_root_.ConnectedComponents X)]
+    (i : _root_.ConnectedComponents X) :
     ConnectedSpace (X.connectedComponents.obj i) := by
   apply isConnected_iff_connectedSpace.mp
   simp only [Scheme.connCompOpen, TopologicalSpace.Opens.coe_mk]
@@ -437,7 +438,8 @@ instance {X : Scheme.{u}} [Finite (ConnectedComponents X)] (i : ConnectedCompone
   rw [connectedComponents_preimage_singleton]
   exact isConnected_connectedComponent
 
-instance {X : Scheme.{u}} [Finite (ConnectedComponents X)] (i : ConnectedComponents X) :
+instance {X : Scheme.{u}} [Finite (_root_.ConnectedComponents X)]
+    (i : _root_.ConnectedComponents X) :
     IsClosedImmersion (X.connectedComponents.map i) where
   base_closed := ⟨(X.connectedComponents.map i).isOpenEmbedding.isEmbedding, by
     simp [Scheme.connectedComponents, Scheme.connCompOpen,
@@ -470,8 +472,10 @@ instance _root_.AlgebraicGeometry.IsFiniteEtale.surjective {X Y : Scheme.{u}} (f
   apply one_le_finrank_map
 
 lemma _root_.AlgebraicGeometry.IsFiniteEtale.isIso_of_isIso_snd' {X Y Z : Scheme.{u}} (f : X ⟶ Z)
-    (g : Y ⟶ Z) [IsFiniteEtale f] [Finite (ConnectedComponents Z)]
-    [∀ i : ConnectedComponents Z, Nonempty ↑(Limits.pullback g (Z.connectedComponents.map i))]
+    (g : Y ⟶ Z) [IsFiniteEtale f]
+    [Finite (_root_.ConnectedComponents Z)]
+    [∀ i : _root_.ConnectedComponents Z, Nonempty ↑(Limits.pullback g
+      (Z.connectedComponents.map i))]
     [IsIso (pullback.snd f g)] : IsIso f := by
   show MorphismProperty.isomorphisms _ _
   rw [IsLocalAtTarget.iff_of_openCover (P := MorphismProperty.isomorphisms Scheme.{u})
@@ -495,7 +499,8 @@ lemma isIso_of_isIso_left {A B : FiniteEtale X} (f : A ⟶ B) [IsIso f.left] : I
   have : IsIso ((forget X ⋙ Over.forget X).map f) := ‹_›
   exact isIso_of_reflects_iso f (forget X ⋙ Over.forget X)
 
-instance [ConnectedSpace X] (Y : FiniteEtale X) : Finite (ConnectedComponents Y.left) := by
+instance [ConnectedSpace X] (Y : FiniteEtale X) :
+    Finite (_root_.ConnectedComponents Y.left) := by
   have : ConnectedSpace ↑↑((Functor.fromPUnit X).obj Y.right).toPresheafedSpace := by
     dsimp
     infer_instance

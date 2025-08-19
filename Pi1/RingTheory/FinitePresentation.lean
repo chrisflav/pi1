@@ -3,7 +3,6 @@ import Mathlib.Algebra.Module.FinitePresentation
 import Mathlib.RingTheory.FinitePresentation
 import Mathlib.RingTheory.Etale.Pi
 import Mathlib.RingTheory.RingHom.FinitePresentation
-import Pi1.Mathlib.Algebra.Module.FinitePresentation
 import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
 
 universe u
@@ -230,7 +229,7 @@ private lemma MvPolynomial.free_and_finite_quotient_of_monic {R ι : Type*} [Fin
       apply AdjoinRoot.algHom_ext
       simp [u, v, v']
       rw [Ideal.Quotient.liftₐ_apply]
-      simp [toMvPolynomial, MvPolynomial.aeval_rename]
+      simp [toMvPolynomial]
     have h2 : ((u.comp v).restrictScalars R) =
         ((AlgHom.id A B).restrictScalars R) := by
       apply Ideal.Quotient.algHom_ext
@@ -238,7 +237,7 @@ private lemma MvPolynomial.free_and_finite_quotient_of_monic {R ι : Type*} [Fin
       intro i
       simp [u, v, v']
       rw [Ideal.Quotient.liftₐ_apply]
-      simp [Ideal.Quotient.mkₐ]
+      simp
       cases i
       · simp
         show Ideal.Quotient.mk _ _ = Ideal.Quotient.mk _ _

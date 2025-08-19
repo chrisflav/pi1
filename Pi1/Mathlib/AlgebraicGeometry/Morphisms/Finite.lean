@@ -15,24 +15,6 @@ namespace AlgebraicGeometry
 instance : HasOfPostcompProperty @IsProper @IsSeparated where
   of_postcomp f g _ _ := IsProper.of_comp_of_isSeparated f g
 
-lemma IsAffineHom.of_comp {X Y Z : Scheme.{u}}
-    (f : X ⟶ Y) (g : Y ⟶ Z) [IsAffineHom g] [IsAffineHom (f ≫ g)] :
-    IsAffineHom f := by
-  wlog hZ : IsAffine Z
-  · rw [IsLocalAtTarget.iff_of_openCover (P := @IsAffineHom) (Z.affineCover.pullbackCover g)]
-    intro i
-    dsimp [Scheme.Cover.pullbackHom]
-    have _ : IsAffineHom
-        (pullback.snd f (pullback.fst g (Z.affineCover.map i)) ≫ pullback.snd _ _) := by
-      rw [← pullbackRightPullbackFstIso_hom_snd, cancel_left_of_respectsIso (P := @IsAffineHom)]
-      exact MorphismProperty.pullback_snd _ _ ‹_›
-    have _ : IsAffineHom (pullback.snd g (Z.affineCover.map i)) :=
-      MorphismProperty.pullback_snd _ _ ‹_›
-    apply this _ (pullback.snd _ _)
-    exact Scheme.isAffine_affineCover Z i
-  have : IsAffine Y := isAffine_of_isAffineHom g
-  have : IsAffine X := isAffine_of_isAffineHom (f ≫ g)
-  infer_instance
 
 namespace IsFinite
 

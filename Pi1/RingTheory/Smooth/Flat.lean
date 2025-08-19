@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Judith Ludwig, Christian Merten
 -/
 import Pi1.RingTheory.Smooth.NoetherianDescent
-import Pi1.Mathlib.Algebra.Algebra.Hom
 import Mathlib
 
 universe u v
