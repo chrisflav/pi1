@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christian Merten
 -/
 import Pi1.RingTheory.Smooth.KaehlerLocalization
-import Pi1.Mathlib.RingTheory.Presentation
 import Mathlib.RingTheory.Smooth.StandardSmooth
 import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
 import Mathlib.RingTheory.Etale.Kaehler

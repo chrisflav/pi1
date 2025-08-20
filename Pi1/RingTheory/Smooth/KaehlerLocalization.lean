@@ -22,9 +22,6 @@ canonical `S`-presentation of `T`.
 
 -/
 
-set_option linter.unusedTactic false
-set_option linter.unreachableTactic false
-
 open TensorProduct MvPolynomial
 
 namespace Algebra.Generators
