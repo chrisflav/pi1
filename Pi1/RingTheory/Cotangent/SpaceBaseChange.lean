@@ -11,6 +11,25 @@ open TensorProduct
 
 namespace Algebra
 
+namespace TensorProduct
+
+variable {R S T A : Type*} [CommRing R] [CommRing S] [Algebra R S]
+  [CommRing T] [Algebra R T]
+  [CommRing A] [Algebra R A]
+
+attribute [local instance] rightAlgebra
+
+def commRight : S ⊗[R] T ≃ₐ[S] T ⊗[R] S where
+  __ := (TensorProduct.comm R S T).toRingEquiv
+  commutes' _ := rfl
+
+variable {M : Type*} [AddCommGroup M] [Module R M] [Algebra A T]
+  [Module A M] [Algebra R A] [IsScalarTower R A M]
+  [Algebra R T] [IsScalarTower R A T]
+  [SMulCommClass R A T]
+
+end TensorProduct
+
 namespace Extension
 
 variable {R S : Type u} [CommRing R] [CommRing S] [Algebra R S]

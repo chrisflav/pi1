@@ -7,7 +7,6 @@ import Mathlib.Algebra.Category.Ring.Under.Limits
 import Mathlib.AlgebraicGeometry.Morphisms.Affine
 import Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Mathlib.CategoryTheory.MorphismProperty.OverAdjunction
-import Pi1.Mathlib.CategoryTheory.Comma.Over.Basic
 import Pi1.FundamentalGroup.Colimits.Gluing
 
 /-!

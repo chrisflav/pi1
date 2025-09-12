@@ -18,7 +18,6 @@ import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Smooth
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
 import Pi1.Mathlib.AlgebraicGeometry.PullbackCarrier
 import Pi1.Mathlib.AlgebraicGeometry.RelativeGluing
-import Pi1.Mathlib.CategoryTheory.Comma.Over.Basic
 import Pi1.Mathlib.CategoryTheory.Galois.IsFundamentalGroup
 import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
 import Pi1.Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
@@ -30,6 +29,7 @@ import Pi1.Mathlib.RingTheory.Flat.Equalizer
 import Pi1.Mathlib.RingTheory.Geometric
 import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
 import Pi1.Mathlib.RingTheory.IsTensorProduct
+import Pi1.Mathlib.RingTheory.LocalProperties.Exactness
 import Pi1.Mathlib.RingTheory.Presentation
 import Pi1.Mathlib.RingTheory.RingHom.Bijective
 import Pi1.Mathlib.RingTheory.RingHom.Etale

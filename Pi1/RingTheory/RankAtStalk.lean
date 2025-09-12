@@ -6,6 +6,7 @@ import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
 import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
 import Mathlib.RingTheory.Support
 import Mathlib.RingTheory.TensorProduct.IsBaseChangePi
+import Pi1.Mathlib.RingTheory.LocalProperties.Exactness
 import Pi1.Mathlib.RingTheory.RingHom.Integral
 
 universe u
@@ -35,30 +36,7 @@ variable {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M]
 
 attribute [local instance] Module.free_of_flat_of_isLocalRing
 
-/-- A prime `p` is in the range of `Spec S → Spec R` if the fiber over `p` is nontrivial. -/
-lemma PrimeSpectrum.mem_rangeComap_iff_nontrivial {S : Type*} [CommRing S]
-    [Algebra R S] (p : PrimeSpectrum R) :
-    Nontrivial (p.asIdeal.ResidueField ⊗[R] S) ↔ p ∈ Set.range (algebraMap R S).specComap := by
-  let k := p.asIdeal.ResidueField
-  refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
-  · obtain ⟨m, hm⟩ := Ideal.exists_maximal (k ⊗[R] S)
-    use (Algebra.TensorProduct.includeRight).specComap ⟨m, hm.isPrime⟩
-    ext : 1
-    rw [← PrimeSpectrum.specComap_comp_apply,
-      ← Algebra.TensorProduct.includeLeftRingHom_comp_algebraMap, specComap_comp_apply]
-    simp [Ideal.eq_bot_of_prime, k, ← RingHom.ker_eq_comap_bot]
-  · obtain ⟨q, rfl⟩ := h
-    let f : k ⊗[R] S →ₐ[R] q.asIdeal.ResidueField :=
-      Algebra.TensorProduct.lift (Ideal.ResidueField.mapₐ _ _ rfl)
-        (IsScalarTower.toAlgHom _ _ _) (fun _ _ ↦ Commute.all ..)
-    exact RingHom.domain_nontrivial f.toRingHom
-
 namespace Module
-
-
-
-
-
 
 open LocalizedModule Localization
 
@@ -69,18 +47,13 @@ instance {R : Type*} [CommSemiring R] (S : Submonoid R)
 
 variable [Flat R M] [Module.Finite R M]
 
-/-- `M` has positive rank at `p` if the "fiber" over `p` is non-trivial. -/
-lemma rankAtStalk_pos_iff_nontrivial (p : PrimeSpectrum R) :
-    0 < rankAtStalk M p ↔ Nontrivial (p.asIdeal.ResidueField ⊗[R] M) := by
-  rw [rankAtStalk_eq, finrank_pos_iff]
-
 end Module
 
 variable {S : Type*} [CommRing S] [Algebra R S] [Module.Flat R S] [Module.Finite R S]
 
 lemma Algebra.rankAtStalk_pos_iff_mem_range_specComap (p : PrimeSpectrum R) :
     0 < Module.rankAtStalk (R := R) S p ↔ p ∈ Set.range (algebraMap R S).specComap := by
-  rw [Module.rankAtStalk_pos_iff_nontrivial, p.mem_rangeComap_iff_nontrivial]
+  rw [Module.rankAtStalk_eq, Module.finrank_pos_iff, p.nontrivial_iff_mem_rangeComap]
 
 /-- The rank is positive at all stalks if and only if the induced map on prime spectra is
 surjective. -/
@@ -90,34 +63,28 @@ lemma Algebra.rankAtStalk_pos_iff_specComap_surjective :
   simp_rw [rankAtStalk_pos_iff_mem_range_specComap, ← Set.range_eq_univ,
     Set.eq_univ_iff_forall]
 
+attribute [local instance] Algebra.TensorProduct.rightAlgebra in
+instance (Rₚ : Type*) [CommSemiring Rₚ] [Algebra R Rₚ] (p : Ideal R) [p.IsPrime]
+    [IsLocalization.AtPrime Rₚ p] :
+    IsLocalizedModule.AtPrime p (IsScalarTower.toAlgHom R S (Rₚ ⊗[R] S) : S →ₗ[R] Rₚ ⊗[R] S) := by
+  rw [IsLocalizedModule.AtPrime, isLocalizedModule_iff_isBaseChange (S := p.primeCompl) (A := Rₚ)]
+  exact TensorProduct.isBaseChange _ _ _
+
+attribute [local instance] Algebra.TensorProduct.rightAlgebra
+
 lemma Algebra.comap_surjective_iff_injective_of_finite :
-    Function.Surjective (algebraMap R S).specComap ↔ Function.Injective (algebraMap R S) := by
-  refine ⟨fun h ↦ ?_, fun h ↦ Algebra.IsIntegral.specComap_surjective_of_injective h⟩
-  have (P : Ideal R) [P.IsPrime] : IsLocalizedModule P.primeCompl
-      (TensorProduct.includeRight : S →ₐ[R] Localization.AtPrime P ⊗[R] S).toLinearMap := by
-    rw [isLocalizedModule_iff_isBaseChange (S := P.primeCompl) (A := Localization.AtPrime P)]
-    exact TensorProduct.isBaseChange _ _ _
-  apply injective_of_isLocalized_maximal (fun P _ ↦ Localization.AtPrime P)
-    (fun P _ ↦ Algebra.linearMap _ _) (fun P _ ↦ Localization.AtPrime P ⊗[R] S)
-    (fun P _ ↦ Algebra.TensorProduct.includeRight.toLinearMap)
-    (Algebra.linearMap R S) _
-  intro P _
-  convert_to Function.Injective
-    ((Algebra.linearMap (Localization.AtPrime P) (Localization.AtPrime P ⊗[R] S)).restrictScalars R)
-  rw [DFunLike.coe_fn_eq]
-  apply IsLocalizedModule.linearMap_ext P.primeCompl (Algebra.linearMap _ _)
-    (Algebra.TensorProduct.includeRight.toLinearMap)
-  ext
-  simp only [LinearMap.coe_comp, Function.comp_apply, linearMap_apply, map_one,
-    LinearMap.coe_restrictScalars]
-  have : Algebra.linearMap R (Localization.AtPrime P) 1 = 1 := by simp
-  rw [← this, IsLocalizedModule.map_apply]
-  simp only [linearMap_apply, map_one, AlgHom.toLinearMap_apply]
+    (algebraMap R S).specComap.Surjective ↔ Function.Injective (algebraMap R S) := by
+  refine ⟨fun h ↦ ?_, fun h ↦
+    have : FaithfulSMul R S := (faithfulSMul_iff_algebraMap_injective R S).mpr h
+    Algebra.IsIntegral.specComap_surjective⟩
+  apply injective_of_isLocalization_isMaximal (fun P _ ↦ Localization.AtPrime P)
+    (fun P _ ↦ Localization.AtPrime P ⊗[R] S)
+  intro p _
   apply (faithfulSMul_iff_algebraMap_injective _ _).mp
-  obtain ⟨⟨Q, _⟩, hQ⟩ := h ⟨P, inferInstance⟩
-  have : Q.LiesOver P := ⟨(congr($(hQ).asIdeal)).symm⟩
-  have : Nontrivial (Localization.AtPrime P ⊗[R] S) := by
-    let f : Localization.AtPrime P ⊗[R] S →ₐ[R] Localization.AtPrime Q :=
+  obtain ⟨⟨Q, _⟩, hQ⟩ := h ⟨p, inferInstance⟩
+  have : Q.LiesOver p := ⟨(congr($(hQ).asIdeal)).symm⟩
+  have : Nontrivial (Localization.AtPrime p ⊗[R] S) := by
+    let f : Localization.AtPrime p ⊗[R] S →ₐ[R] Localization.AtPrime Q :=
       Algebra.TensorProduct.lift (IsScalarTower.toAlgHom R _ _)
         (IsScalarTower.toAlgHom R S _) (fun _ _ ↦ Commute.all _ _)
     exact f.domain_nontrivial
@@ -161,35 +128,18 @@ lemma Algebra.bijective_algebraMap_of_free [Nontrivial R] [Module.Free R S]
 
 lemma Algebra.surjective_algebraMap_of_rankAtStalk_le_one
       (h : ∀ p, Module.rankAtStalk (R := R) S p ≤ 1) : Function.Surjective (algebraMap R S) := by
-  have (P : Ideal R) [P.IsPrime] : IsLocalizedModule P.primeCompl
-      (TensorProduct.includeRight : S →ₐ[R] Localization.AtPrime P ⊗[R] S).toLinearMap := by
-    rw [isLocalizedModule_iff_isBaseChange (S := P.primeCompl) (A := Localization.AtPrime P)]
-    exact TensorProduct.isBaseChange _ _ _
-  apply surjective_of_isLocalized_maximal (fun P _ ↦ Localization.AtPrime P)
-    (fun P _ ↦ Algebra.linearMap _ _) (fun P _ ↦ Localization.AtPrime P ⊗[R] S)
-    (fun P _ ↦ Algebra.TensorProduct.includeRight.toLinearMap)
-    (Algebra.linearMap R S) _
-  intro P _
-  convert_to Function.Surjective
-    ((Algebra.linearMap (Localization.AtPrime P) (Localization.AtPrime P ⊗[R] S)).restrictScalars R)
-  rw [DFunLike.coe_fn_eq]
-  apply IsLocalizedModule.linearMap_ext P.primeCompl (Algebra.linearMap _ _)
-    (Algebra.TensorProduct.includeRight.toLinearMap)
-  ext
-  simp only [LinearMap.coe_comp, Function.comp_apply, linearMap_apply, map_one,
-    LinearMap.coe_restrictScalars]
-  have : Algebra.linearMap R (Localization.AtPrime P) 1 = 1 := by simp
-  rw [← this, IsLocalizedModule.map_apply]
-  simp only [linearMap_apply, map_one, AlgHom.toLinearMap_apply]
-  have := h ⟨P, inferInstance⟩
-  by_cases h : Module.rankAtStalk S ⟨P, inferInstance⟩ = 0
-  · have : Subsingleton (Localization.AtPrime P ⊗[R] S) := by
-      apply Module.subsingleton_of_rank_zero (R := Localization.AtPrime P)
+  apply surjective_of_isLocalization_isMaximal (fun P _ ↦ Localization.AtPrime P)
+    (fun P _ ↦ Localization.AtPrime P ⊗[R] S)
+  intro p _
+  have := h ⟨p, inferInstance⟩
+  by_cases h : Module.rankAtStalk S ⟨p, inferInstance⟩ = 0
+  · have : Subsingleton (Localization.AtPrime p ⊗[R] S) := by
+      apply Module.subsingleton_of_rank_zero (R := Localization.AtPrime p)
       simp [← Module.finrank_eq_rank,
-        ← Module.rankAtStalk_eq_finrank_tensorProduct ⟨P, inferInstance⟩, h]
+        ← Module.rankAtStalk_eq_finrank_tensorProduct ⟨p, inferInstance⟩, h]
     exact Function.surjective_to_subsingleton _
   · refine (Algebra.bijective_algebraMap_of_free ?_).2
-    rw [← Module.rankAtStalk_eq_finrank_tensorProduct ⟨P, inferInstance⟩]
+    rw [← Module.rankAtStalk_eq_finrank_tensorProduct ⟨p, inferInstance⟩]
     omega
 
 variable (R) (S) in
@@ -215,6 +165,7 @@ lemma Algebra.rankAtStalk_le_one_iff_surjective :
     (∀ p, Module.rankAtStalk (R := R) S p ≤ 1) ↔ Function.Surjective (algebraMap R S) :=
   (Module.Flat.tfae_algebraMap_surjective R S).out 2 0
 
+/-- If `S` is a finite, flat `R`-algebra of constant rank `1`, `S` is isomorphic to `R`.-/
 lemma Algebra.bijective_of_rankAtStalk {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
     [Module.Finite R S] [Module.Flat R S] (h : Module.rankAtStalk (R := R) S = 1) :
     Function.Bijective (algebraMap R S) :=
