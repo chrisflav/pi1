@@ -1,5 +1,6 @@
 import Mathlib.CategoryTheory.Limits.MorphismProperty
-import Pi1.FundamentalGroup.AffineColimits
+import Mathlib.CategoryTheory.MorphismProperty.OverAdjunction
+-- import Pi1.FundamentalGroup.AffineColimits
 
 open CategoryTheory Limits
 

@@ -1,4 +1,4 @@
-import Mathlib.RingTheory.TensorProduct.Basic
+import Mathlib.RingTheory.TensorProduct.Maps
 
 open TensorProduct
 
@@ -26,7 +26,7 @@ variable (R S A B C : Type*) [CommSemiring R] [Semiring A] [Semiring B]
 
 noncomputable
 def Algebra.TensorProduct.assoc' : A ⊗[R] B ⊗[R] C ≃ₐ[S] A ⊗[R] (B ⊗[R] C) where
-  toRingEquiv := Algebra.TensorProduct.assoc R R A B C
+  toRingEquiv := Algebra.TensorProduct.assoc R R R A B C
   commutes' r := by simp [one_def]
 
 @[simp]

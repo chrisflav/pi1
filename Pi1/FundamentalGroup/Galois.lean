@@ -83,11 +83,11 @@ instance (X : Scheme.{u}) : PreGaloisCategory (FiniteEtale X) where
       simp [U, A]
 
 lemma finite_of_isEtale_of_isAffineHom (X : Scheme.{u}) {Ω : Type u} [Field Ω]
-    (f : X ⟶ Spec (.of Ω)) [IsEtale f] [IsAffineHom f] :
+    (f : X ⟶ Spec (.of Ω)) [Etale f] [IsAffineHom f] :
     Finite X := by
   have : IsAffine X := isAffine_of_isAffineHom f
-  have : IsEtale f := inferInstance
-  rw [HasRingHomProperty.iff_of_isAffine (P := @IsEtale)] at this
+  have : Etale f := inferInstance
+  rw [HasRingHomProperty.iff_of_isAffine (P := @Etale)] at this
   let e : Γ(Spec (CommRingCat.of Ω), ⊤) ≃+* Ω :=
     (Scheme.ΓSpecIso (.of Ω)).commRingCatIsoToRingEquiv
   algebraize [(f.appTop.hom.comp e.symm.toRingHom)]
@@ -111,7 +111,7 @@ instance {Ω : Type u} [Field Ω] (X : FiniteEtale (Spec (.of Ω))) : Fintype X.
 @[simps]
 def forgetScheme (Ω : Type u) [Field Ω] : FiniteEtale (Spec (.of Ω)) ⥤ FintypeCat.{u} where
   obj X := FintypeCat.of X.left
-  map {X Y} f := f.left.base
+  map {X Y} f := ⟨f.left.base⟩
 
 variable (Ω : Type u) [Field Ω]
 
@@ -152,14 +152,14 @@ def inventScheme (Ω : Type u) [Field Ω] : FintypeCat.{u} ⥤ FiniteEtale (Spec
     rfl
 
 instance (S : FintypeCat.{u}) :
-    Fintype (Spec (CommRingCat.of (S.carrier → Ω))).toPresheafedSpace :=
-  let f : Spec (CommRingCat.of (S.carrier → Ω)) ⟶ Spec (.of Ω) :=
+    Fintype (Spec (CommRingCat.of (S.obj → Ω))).toPresheafedSpace :=
+  let f : Spec (CommRingCat.of (S.obj → Ω)) ⟶ Spec (.of Ω) :=
     Spec.map (CommRingCat.ofHom <| algebraMap Ω _)
-  have : IsEtale f := by
-    rw [HasRingHomProperty.Spec_iff (P := @IsEtale)]
+  have : Etale f := by
+    rw [HasRingHomProperty.Spec_iff (P := @Etale)]
     simp only [CommRingCat.hom_ofHom, RingHom.etale_algebraMap]
     infer_instance
-  have : Finite (Spec (CommRingCat.of (S.carrier → Ω))).toPresheafedSpace :=
+  have : Finite (Spec (CommRingCat.of (S.obj → Ω))).toPresheafedSpace :=
     finite_of_isEtale_of_isAffineHom _ f
   Fintype.ofFinite _
 
@@ -173,22 +173,41 @@ def specPiEquiv (ι : Type u) [Finite ι] (K : Type u) [Field K] :
 lemma specPiEquiv_symm_apply (ι : Type u) [Finite ι] (K : Type u) [Field K]
     (i : ι) : (specPiEquiv ι K).symm i =
       (Spec.map <| CommRingCat.ofHom <| Pi.evalRingHom _ i).base default := by
-  simp [specPiEquiv, Iso.schemeIsoToHomeo, ← Scheme.comp_base_apply]
+  simp [specPiEquiv, Iso.schemeIsoToHomeo, ← Scheme.Hom.comp_apply]
 
 def inventForgetIso : inventScheme Ω ⋙ forgetScheme Ω ≅ 𝟭 FintypeCat :=
   Iso.symm <| NatIso.ofComponents
     (fun S ↦ FintypeCat.equivEquivIso (specPiEquiv S Ω).symm)
     (fun {S T} f ↦ by
       simp only [Functor.id_obj, Functor.comp_obj, inventScheme_obj, Functor.id_map,
-        forgetScheme_obj_carrier, mk_left, Functor.comp_map, inventScheme_map]
+        forgetScheme_obj_obj, mk_left, Functor.comp_map, inventScheme_map]
       ext x
-      simp only [forgetScheme_obj_carrier, mk_left, FintypeCat.equivEquivIso, Equiv.coe_fn_mk,
-        Equiv.symm_symm, FintypeCat.comp_apply, specPiEquiv_symm_apply, forgetScheme_map,
-        MorphismProperty.Over.homMk_hom, Over.homMk_left]
+      simp only [forgetScheme_obj_obj, mk_left, FintypeCat.equivEquivIso, Equiv.coe_fn_mk,
+        Equiv.symm_symm]
+      simp only [← FintypeCat.hom_apply]
       have : (Pi.evalRingHom (fun i ↦ Ω) x).comp
           (Pi.ringHom fun s ↦ Pi.evalRingHom (fun a ↦ Ω) (f s)) = Pi.evalRingHom _ (f x) := rfl
-      rw [← Scheme.comp_base_apply, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
-      rw [this])
+      /- This was:
+      ```
+      rw [← Scheme.Hom.comp_apply, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+      erw [this]
+      ```
+      before the bump to 4.29.0-rc6 (related to the refactor of `FintypeCat`)
+      -/
+      dsimp
+      erw [ConcreteCategory.comp_apply]
+      erw [ConcreteCategory.comp_apply]
+      rw [← FintypeCat.hom_apply]
+      rw [← FintypeCat.hom_apply]
+      rw [← FintypeCat.hom_apply]
+      rw [← FintypeCat.hom_apply]
+      rw [forgetScheme_map_hom]
+      simp only [FintypeCat.homMk]
+      simp [← FintypeCat.hom_apply]
+      rw [← Scheme.Hom.comp_apply, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+      erw [this]
+      rfl
+      )
 
 instance (X : Scheme.{u}) (R : CommRingCat.{u}) [X.Over (Spec R)] (U : X.Opens) :
     Algebra R Γ(X, U) :=
@@ -216,25 +235,23 @@ lemma appLE_comp_algebraMap {X Y : Scheme.{u}} (f : X ⟶ Y) (R : Type u) [CommR
     (f.appLE U V hUV).hom.comp (algebraMap R Γ(Y, U)) = algebraMap R Γ(X, V) := by
   ext r
   simp only [RingHom.algebraMap_toAlgebra, Iso.commRingCatIsoToRingEquiv,
-    RingEquiv.toRingHom_eq_coe, RingHom.coe_comp, RingHom.coe_coe, Function.comp_apply,
-    RingEquiv.ofHomInv_symm_apply]
+    RingEquiv.toRingHom_eq_coe, RingHom.coe_comp, RingHom.coe_coe, Function.comp_apply]
   rw [← CommRingCat.comp_apply]
-  rw [Scheme.appLE_comp_appLE]
   simp
 
-set_option pp.proofs true
+-- set_option pp.proofs true
 instance (X : Scheme.{u}) (R : Type u) [CommRing R] [X.Over (Spec (.of R))]
-    [IsEtale (X ↘ Spec (.of R))] [IsAffineHom (X ↘ Spec (.of R))] :
+    [Etale (X ↘ Spec (.of R))] [IsAffineHom (X ↘ Spec (.of R))] :
     Algebra.Etale R Γ(X, ⊤) := by
   rw [← RingHom.etale_algebraMap, RingHom.algebraMap_toAlgebra]
   apply RingHom.Etale.respectsIso.2
   simp [Scheme.Hom.appLE]
   have : IsAffine X := isAffine_of_isAffineHom (X ↘ Spec (.of R))
-  apply HasRingHomProperty.appTop @IsEtale
+  apply HasRingHomProperty.appTop @Etale
   infer_instance
 
 instance (X : Scheme.{u}) (R : Type u) [Field R] [X.Over (Spec (.of R))]
-    [IsEtale (X ↘ Spec (.of R))] [IsAffineHom (X ↘ Spec (.of R))] :
+    [Etale (X ↘ Spec (.of R))] [IsAffineHom (X ↘ Spec (.of R))] :
     Module.Finite R Γ(X, ⊤) :=
   Algebra.FormallyUnramified.finite_of_free R Γ(X, ⊤)
 
@@ -274,24 +291,25 @@ def _root_.AlgebraicGeometry.IsFiniteEtale.isoSpecFun [IsSepClosed Ω] (X : Sche
   have : IsArtinianRing Γ(X, ⊤) := isArtinian_of_tower Ω inferInstance
   let e : X ≃ MaximalSpectrum Γ(X, ⊤) :=
     X.isoSpec.schemeIsoToHomeo.toEquiv.trans IsArtinianRing.primeSpectrumEquivMaximalSpectrum
-  have : _root_.IsReduced ↑Γ(X, ⊤) :=
-    Algebra.FormallyUnramified.isReduced_of_field Ω Γ(X, ⊤)
-  let eo : Γ(X, ⊤) ≃ₐ[Ω] _ := { __ := IsArtinianRing.equivPi Γ(X, ⊤), commutes' := fun r ↦ rfl }
-  have : Algebra.FormallyEtale Ω (Π (m : MaximalSpectrum Γ(X, ⊤)), (Γ(X, ⊤) ⧸ m.asIdeal)) :=
+  let R := Γ(X, ⊤)
+  have : _root_.IsReduced R :=
+    Algebra.FormallyUnramified.isReduced_of_field Ω R
+  let eo : Γ(X, ⊤) ≃ₐ[Ω] _ := (IsArtinianRing.equivPi R).restrictScalars Ω
+  have : Algebra.FormallyEtale Ω (Π (m : MaximalSpectrum R), (R ⧸ m.asIdeal)) :=
     Algebra.FormallyEtale.of_equiv eo
-  have (m : MaximalSpectrum Γ(X, ⊤)) : Algebra.FormallyEtale Ω (Γ(X, ⊤) ⧸ m.asIdeal) := by
+  have (m : MaximalSpectrum R) : Algebra.FormallyEtale Ω (R ⧸ m.asIdeal) := by
     rw [Algebra.FormallyEtale.pi_iff] at this
     exact this m
-  let _ (m : MaximalSpectrum Γ(X, ⊤)) : Field (Γ(X, ⊤) ⧸ m.asIdeal) :=
+  let _ (m : MaximalSpectrum R) : Field (Γ(X, ⊤) ⧸ m.asIdeal) :=
     Ideal.Quotient.field m.asIdeal
-  have (m : MaximalSpectrum Γ(X, ⊤)) : Algebra.IsSeparable Ω (Γ(X, ⊤) ⧸ m.asIdeal) := by
+  have (m : MaximalSpectrum R) : Algebra.IsSeparable Ω (R ⧸ m.asIdeal) := by
     rw [← Algebra.FormallyEtale.iff_isSeparable]
     infer_instance
-  have hb (m : MaximalSpectrum Γ(X, ⊤)) :
+  have hb (m : MaximalSpectrum R) :
       Function.Bijective (algebraMap Ω (Γ(X, ⊤) ⧸ m.asIdeal)) :=
     ⟨FaithfulSMul.algebraMap_injective _ _,
-      IsSepClosed.algebraMap_surjective Ω (Γ(X, ⊤) ⧸ m.asIdeal)⟩
-  let a (m : MaximalSpectrum Γ(X, ⊤)) : Γ(X, ⊤) ⧸ m.asIdeal ≃+* Ω :=
+      IsSepClosed.algebraMap_surjective Ω (R ⧸ m.asIdeal)⟩
+  let a (m : MaximalSpectrum R) : Γ(X, ⊤) ⧸ m.asIdeal ≃+* Ω :=
     (RingEquiv.ofBijective _ (hb m)).symm
   let o : (Π (m : MaximalSpectrum Γ(X, ⊤)), Γ(X, ⊤) ⧸ m.asIdeal) ≃+* (X → Ω) :=
     (RingEquiv.piCongrRight a).trans (RingEquiv.piCongrLeft (fun _ ↦ Ω) e.symm)
@@ -317,8 +335,10 @@ lemma _root_.AlgebraicGeometry.IsFiniteEtale.isoSpecFun_hom_SpecMap [IsSepClosed
   have : IsArtinianRing Γ(X, ⊤) := isArtinian_of_tower Ω inferInstance
   have : _root_.IsReduced ↑Γ(X, ⊤) := Algebra.FormallyUnramified.isReduced_of_field Ω Γ(X, ⊤)
   ext x
+  dsimp
   apply (IsArtinianRing.equivPi Γ(X, ⊤)).injective
   ext j
+  dsimp [← AlgEquiv.symm_toRingEquiv]
   simp [RingHom.algebraMap_toAlgebra]
   rw [IsArtinianRing.equivPi_apply]
   simp [Scheme.Hom.appTop, Scheme.Hom.appLE, Iso.commRingCatIsoToRingEquiv]
@@ -346,11 +366,11 @@ def forgetInventIso [IsSepClosed Ω] : 𝟭 (FiniteEtale _) ≅ forgetScheme Ω 
     (MorphismProperty.Over.isoMk (IsFiniteEtale.isoSpecFun Ω X.left))) <| fun {X Y} f ↦ by
       apply MorphismProperty.Over.Hom.ext
       simp only [FiniteEtale, Functor.id_obj, Functor.comp_obj, inventScheme_obj,
-        forgetScheme_obj_carrier, mk_left, Functor.id_map, IsFiniteEtale.isoSpecFun,
+        forgetScheme_obj_obj, mk_left, Functor.id_map, IsFiniteEtale.isoSpecFun,
         MorphismProperty.Comma.comp_hom, Comma.comp_left,
         MorphismProperty.Over.isoMk_hom_left, Iso.trans_hom, Functor.mapIso_hom, Iso.op_hom,
         Iso.symm_hom, RingEquiv.toCommRingCatIso_inv, Scheme.Spec_map, Quiver.Hom.unop_op,
-        Functor.comp_map, inventScheme_map, forgetScheme_map, MorphismProperty.Over.homMk_hom,
+        Functor.comp_map, inventScheme_map, forgetScheme_map_hom, MorphismProperty.Over.homMk_hom,
         Over.homMk_left, Category.assoc]
       simp only [IsFiniteEtale.isoSpecPi, Iso.trans_hom, Functor.mapIso_hom, Iso.op_hom,
         RingEquiv.toCommRingCatIso_hom, Scheme.Spec_map, Quiver.Hom.unop_op, Category.assoc]
@@ -364,21 +384,24 @@ def forgetInventIso [IsSepClosed Ω] : 𝟭 (FiniteEtale _) ≅ forgetScheme Ω 
         RingEquiv.symm_trans_apply, RingEquiv.piCongrRight_symm, RingEquiv.symm_symm]
       apply (IsArtinianRing.equivPi Γ(X.left, ⊤)).injective
       ext j
-      simp only [RingEquiv.apply_symm_apply, RingEquiv.piCongrRight_apply,
+      dsimp [← AlgEquiv.symm_toRingEquiv]
+      simp only [AlgEquiv.apply_symm_apply, RingEquiv.piCongrRight_apply,
         RingEquiv.piCongrLeft_symm_apply, Equiv.symm_symm, RingEquiv.piCongrLeft'_apply,
         Equiv.symm_trans_apply, Homeomorph.coe_symm_toEquiv, Pi.ringHom_apply, Pi.evalRingHom_apply,
         RingEquiv.coe_ofBijective]
       rw [IsArtinianRing.equivPi_naturality_apply]
-      simp only [RingEquiv.apply_symm_apply, Pi.ringHom_apply, RingHom.coe_comp,
-        Function.comp_apply, Pi.evalRingHom_apply, RingEquiv.piCongrRight_apply,
-        RingEquiv.piCongrLeft_symm_apply, Equiv.symm_symm, RingEquiv.piCongrLeft'_apply,
-        Equiv.symm_trans_apply, Homeomorph.coe_symm_toEquiv, RingEquiv.coe_ofBijective,
-        Ideal.quotientMap_algebraMap, appTop_left_algebraMap, Ideal.Quotient.mk_algebraMap,
-        algebraMap.coe_inj]
+      simp only [AlgEquiv.apply_symm_apply, Pi.ringHom_apply, RingHom.coe_comp, Function.comp_apply,
+        Pi.evalRingHom_apply, RingEquiv.piCongrRight_apply, RingEquiv.piCongrLeft_symm_apply,
+        Equiv.symm_symm, RingEquiv.piCongrLeft'_apply, Equiv.symm_trans_apply,
+        Homeomorph.coe_symm_toEquiv, RingEquiv.coe_ofBijective, Ideal.quotientMap_algebraMap,
+        appTop_left_algebraMap, Ideal.Quotient.mk_algebraMap, algebraMap.coe_inj]
       congr 1
+      simp only [forgetScheme]
       simp only [Iso.schemeIsoToHomeo, Scheme.homeoOfIso_symm, Scheme.homeoOfIso_apply,
         Iso.symm_hom]
-      rw [← Scheme.comp_base_apply, ← Scheme.isoSpec_inv_naturality]
+      rw [← FintypeCat.hom_apply]
+      dsimp [- FintypeCat.hom_apply]
+      rw [← Scheme.Hom.comp_apply, ← Scheme.isoSpec_inv_naturality]
       simp only [Scheme.comp_coeBase, TopCat.hom_comp, ContinuousMap.comp_apply]
       rfl
 
@@ -423,15 +446,20 @@ def _root_.AlgebraicGeometry.Scheme.connCompOpen {X : Scheme.{u}}
 def _root_.AlgebraicGeometry.Scheme.connectedComponents (X : Scheme.{u})
       [Finite (_root_.ConnectedComponents X)] :
     X.OpenCover where
-  J := _root_.ConnectedComponents X
-  obj c := X.connCompOpen c
-  map c := (X.connCompOpen c).ι
-  f x := ConnectedComponents.mk x
-  covers x := by simp [Scheme.connCompOpen]
+  I₀ := _root_.ConnectedComponents X
+  X c := X.connCompOpen c
+  f c := (X.connCompOpen c).ι
+  mem₀ := by
+    rw [Scheme.ofArrows_mem_precoverage_iff]
+    refine ⟨?_, ?_⟩
+    · intro x
+      use .mk x
+      simp [Scheme.connCompOpen]
+    · infer_instance
 
 instance {X : Scheme.{u}} [Finite (_root_.ConnectedComponents X)]
     (i : _root_.ConnectedComponents X) :
-    ConnectedSpace (X.connectedComponents.obj i) := by
+    ConnectedSpace (X.connectedComponents.X i) := by
   apply isConnected_iff_connectedSpace.mp
   simp only [Scheme.connCompOpen, TopologicalSpace.Opens.coe_mk]
   obtain ⟨x, rfl⟩ := ConnectedComponents.surjective_coe i
@@ -440,8 +468,8 @@ instance {X : Scheme.{u}} [Finite (_root_.ConnectedComponents X)]
 
 instance {X : Scheme.{u}} [Finite (_root_.ConnectedComponents X)]
     (i : _root_.ConnectedComponents X) :
-    IsClosedImmersion (X.connectedComponents.map i) where
-  base_closed := ⟨(X.connectedComponents.map i).isOpenEmbedding.isEmbedding, by
+    IsClosedImmersion (X.connectedComponents.f i) where
+  isClosedEmbedding := ⟨(X.connectedComponents.f i).isOpenEmbedding.isEmbedding, by
     simp [Scheme.connectedComponents, Scheme.connCompOpen,
       ConnectedComponents.isQuotientMap_coe.isClosed_preimage]⟩
 
@@ -475,22 +503,22 @@ lemma _root_.AlgebraicGeometry.IsFiniteEtale.isIso_of_isIso_snd' {X Y Z : Scheme
     (g : Y ⟶ Z) [IsFiniteEtale f]
     [Finite (_root_.ConnectedComponents Z)]
     [∀ i : _root_.ConnectedComponents Z, Nonempty ↑(Limits.pullback g
-      (Z.connectedComponents.map i))]
+      (Z.connectedComponents.f i))]
     [IsIso (pullback.snd f g)] : IsIso f := by
   show MorphismProperty.isomorphisms _ _
-  rw [IsLocalAtTarget.iff_of_openCover (P := MorphismProperty.isomorphisms Scheme.{u})
+  rw [IsZariskiLocalAtTarget.iff_of_openCover (P := MorphismProperty.isomorphisms Scheme.{u})
     Z.connectedComponents]
   intro i
   simp
   dsimp [Scheme.Cover.pullbackHom]
-  let g' := pullback.snd g (Z.connectedComponents.map i)
-  have : pullback.snd (pullback.snd f (Z.connectedComponents.map i)) g' =
-      (pullbackLeftPullbackSndIso f (Z.connectedComponents.map i) g').hom ≫
+  let g' := pullback.snd g (Z.connectedComponents.f i)
+  have : pullback.snd (pullback.snd f (Z.connectedComponents.f i)) g' =
+      (pullbackLeftPullbackSndIso f (Z.connectedComponents.f i) g').hom ≫
       (pullback.congrHom rfl pullback.condition.symm).hom ≫
-      (pullbackAssoc f g g (Z.connectedComponents.map i)).inv ≫
+      (pullbackAssoc f g g (Z.connectedComponents.f i)).inv ≫
       (pullback.map _ _ _ _ (pullback.snd _ _) (𝟙 _) (𝟙 _) rfl rfl) := by
     apply pullback.hom_ext <;> simp [g']
-  have : IsIso (pullback.snd (pullback.snd f (Z.connectedComponents.map i)) g') := by
+  have : IsIso (pullback.snd (pullback.snd f (Z.connectedComponents.f i)) g') := by
     rw [this]
     infer_instance
   apply IsFiniteEtale.isIso_of_isIso_snd _ g'
@@ -523,26 +551,26 @@ instance {Y : Scheme.{u}} [Nonempty Y] (g : Y ⟶ X) [ConnectedSpace X] :
         (pullbackRightPullbackFstIso B.hom g f.left).inv, isomorphisms.iff, this]
       infer_instance
     have (i : _root_.ConnectedComponents B.left) :
-        Nonempty ↑(Limits.pullback (pullback.fst B.hom g) (B.left.connectedComponents.map i)) := by
-      let e := pullbackRightPullbackFstIso B.hom g (B.left.connectedComponents.map i)
-      have : Nonempty ↑(Limits.pullback (B.left.connectedComponents.map i ≫ B.hom) g) := by
+        Nonempty ↑(Limits.pullback (pullback.fst B.hom g) (B.left.connectedComponents.f i)) := by
+      let e := pullbackRightPullbackFstIso B.hom g (B.left.connectedComponents.f i)
+      have : Nonempty ↑(Limits.pullback (B.left.connectedComponents.f i ≫ B.hom) g) := by
         obtain ⟨y⟩ := ‹Nonempty Y›
-        have : IsFiniteEtale (B.left.connectedComponents.map i ≫ B.hom) := by
+        have : IsFiniteEtale (B.left.connectedComponents.f i ≫ B.hom) := by
           apply MorphismProperty.comp_mem
           constructor
           infer_instance
-        have : Nonempty (B.left.connectedComponents.obj i) := inferInstance
-        have : Surjective (B.left.connectedComponents.map i ≫ B.hom) := by
+        have : Nonempty (B.left.connectedComponents.X i) := inferInstance
+        have : Surjective (B.left.connectedComponents.f i ≫ B.hom) := by
           convert IsFiniteEtale.surjective _
           simp
           infer_instance
           infer_instance
           infer_instance
-        obtain ⟨z, hz⟩ := (B.left.connectedComponents.map i ≫ B.hom).surjective (g.base y)
+        obtain ⟨z, hz⟩ := (B.left.connectedComponents.f i ≫ B.hom).surjective (g.base y)
         obtain ⟨o, _⟩ := Scheme.Pullback.exists_preimage_pullback _ _ hz
         use o
       exact ((pullbackSymmetry _ _).hom ≫ (pullbackRightPullbackFstIso B.hom g
-        (B.left.connectedComponents.map i)).hom).homeomorph.nonempty
+        (B.left.connectedComponents.f i)).hom).homeomorph.nonempty
     apply IsFiniteEtale.isIso_of_isIso_snd' f.left (pullback.fst B.hom g)
   apply isIso_of_isIso_left
 

@@ -13,7 +13,7 @@ section General
 lemma isClosedImmersion_of_isPreimmersion_of_isClosed
     {X Y : Scheme.{u}} (f : X ⟶ Y) [IsPreimmersion f] (hf : IsClosed (Set.range f.base)) :
     IsClosedImmersion f where
-  base_closed := ⟨Scheme.Hom.isEmbedding f, hf⟩
+  isClosedEmbedding := ⟨Scheme.Hom.isEmbedding f, hf⟩
 
 lemma isClosedImmersion_iff_isClosed_range_of_isPreimmersion {X Y : Scheme.{u}}
     (f : X ⟶ Y) [IsPreimmersion f] :

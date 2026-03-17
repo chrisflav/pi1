@@ -47,28 +47,14 @@ lemma IntermediateField.FG.finite_of_isAlgebraic {F E : Type*}
     {L : IntermediateField F E} (hL : L.FG)
     [Algebra.IsAlgebraic F E] :
     Module.Finite F L := by
-  apply IntermediateField.finite_of_fg_of_isAlgebraic
-  obtain ⟨s, hs⟩ := hL
-  use s.preimage L.subtype L.subtype_injective.injOn
-  apply IntermediateField.map_injective (IsScalarTower.toAlgHom F L E)
-  simp only [Subalgebra.toSubsemiring_subtype, coe_type_toSubalgebra, RingHom.coe_coe,
-    Finset.coe_preimage, IntermediateField.adjoin_map]
-  convert hs
-  · show L.val '' (L.val ⁻¹' _) = _
-    rw [Set.image_preimage_eq_of_subset]
-    simp [← hs, subset_adjoin]
-  · ext
-    simp
+  have : Algebra.EssFiniteType F ↥L := by
+    rwa [IntermediateField.essFiniteType_iff]
+  apply Algebra.finite_of_essFiniteType_of_isAlgebraic
 
 section
 
 variable {R A B C : Type*} [CommSemiring R] [Semiring A] [Semiring B] [Semiring C]
   [Algebra R A] [Algebra R B] [Algebra R C]
-
-@[simp]
-lemma AlgEquiv.toRingHom_trans (f : A ≃ₐ[R] B) (g : B ≃ₐ[R] C) :
-    (f.trans g : A →+* C) = (g : B →+* C).comp f :=
-  rfl
 
 @[simp]
 lemma AlgEquiv.toRingHom_refl :
@@ -231,7 +217,7 @@ def homEquivAlgHom (X : FiniteEtale (Spec (.of k))) :
         rw [RingHom.algebraMap_toAlgebra]
         dsimp [Scheme.Hom.appTop]
         convert this
-        · simp [Scheme.Hom.appLE]
+        · simp [Scheme.Hom.appLE, Scheme.Hom.appTop]
         · dsimp [Iso.commRingCatIsoToRingEquiv]
           rw [← CommRingCat.comp_apply]
           rw [← CommRingCat.comp_apply]

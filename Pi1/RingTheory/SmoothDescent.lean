@@ -30,10 +30,8 @@ lemma FormallySmooth.of_formallySmooth_tensorProduct
     (T : Type u) [CommRing T] [Algebra R T]
     [FormallySmooth T (T ⊗[R] S)] [Module.FaithfullyFlat R T] :
     FormallySmooth R S := by
-  rw [FormallySmooth.iff_subsingleton_and_projective]
+  rw [formallySmooth_iff]
   constructor
-  · have : Subsingleton (T ⊗[R] H1Cotangent R S) := (tensorH1CotangentOfFlat R S T).subsingleton
-    exact Module.FaithfullyFlat.lTensor_reflects_triviality R T (H1Cotangent R S)
   · let _ : Algebra T (S ⊗[R] T) := TensorProduct.includeRight.toRingHom.toAlgebra
     let e : S ⊗[R] T ≃ₐ[T] T ⊗[R] S :=
       AlgEquiv.ofRingEquiv (f := TensorProduct.comm R S T) <| by simp [RingHom.algebraMap_toAlgebra]
@@ -43,5 +41,7 @@ lemma FormallySmooth.of_formallySmooth_tensorProduct
     have : Module.Flat (S ⊗[R] T) ((S ⊗[R] T) ⊗[S] Ω[S⁄R]) := .of_linearEquiv e'
     have : Module.Flat S (Ω[S⁄R]) := Module.Flat.of_flat_tensorProduct _ _ (S ⊗[R] T)
     exact Module.Flat.projective_of_finitePresentation
+  · have : Subsingleton (T ⊗[R] H1Cotangent R S) := (tensorH1CotangentOfFlat R S T).subsingleton
+    exact Module.FaithfullyFlat.lTensor_reflects_triviality R T (H1Cotangent R S)
 
 end Algebra

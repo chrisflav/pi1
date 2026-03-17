@@ -10,6 +10,8 @@ linter.style.longLine = true
 # regressions from v4.19
 linter.unusedTactic = false
 linter.unreachableTactic = false
+backward.isDefEq.respectTransparency = false
+maxSynthPendingDepth = 3
 
 [[require]]
 name = "mathlib"

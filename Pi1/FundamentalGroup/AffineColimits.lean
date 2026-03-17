@@ -7,14 +7,14 @@ import Mathlib.Algebra.Category.Ring.Under.Limits
 import Mathlib.AlgebraicGeometry.Morphisms.Affine
 import Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Mathlib.CategoryTheory.MorphismProperty.OverAdjunction
-import Pi1.FundamentalGroup.Colimits.Gluing
+import Mathlib.AlgebraicGeometry.ColimitsOver
 
 /-!
 # Category of schemes affine over an affine base
 
 -/
 
-universe t u
+universe w t u
 
 noncomputable section
 
@@ -105,6 +105,7 @@ def CategoryTheory.Limits.coneEquivFan {C D : Type*} [Category C] [Category D] (
   unitIso := eqToIso rfl
   counitIso := eqToIso rfl
 
+@[implicit_reducible]
 def CategoryTheory.Limits.preservesLimitsOfShapeDiscrete {C D J : Type*} [Category C] [Category D]
     (F : C ⥤ D) [∀ (f : J → C), PreservesLimit (Discrete.functor f) F] :
     PreservesLimitsOfShape (Discrete J) F where
@@ -192,10 +193,12 @@ def isColimitOfIsLimitMapOp {c : Cocone K} (h : IsLimit (F.op.mapCone c.op)) :
     IsColimit (F.mapCocone c) :=
   IsColimit.ofCoconeEquiv (opOpCoconeEquiv (K ⋙ F)) h.op
 
+@[implicit_reducible]
 def preservesColimitOfOp [PreservesLimit K.op F.op] :
     PreservesColimit K F where
   preserves {_} hc := ⟨isColimitOfIsLimitMapOp (isLimitOfPreserves F.op hc.op)⟩
 
+@[implicit_reducible]
 def preservesColimitsOfShapeOfOp [PreservesLimitsOfShape Jᵒᵖ F.op] :
     PreservesColimitsOfShape J F where
   preservesColimit {K} := preservesColimitOfOp F K
@@ -209,34 +212,32 @@ namespace AlgebraicGeometry
 section
 
 variable {P Q : MorphismProperty Scheme.{u}} [Q.IsMultiplicative] [P.IsStableUnderBaseChange]
-  [Q.IsStableUnderBaseChange] [P.IsStableUnderComposition]
+  [Q.IsStableUnderBaseChange] [P.IsMultiplicative]
   [Q.IsStableUnderComposition]
-variable {S : Scheme.{u}} {J : Type t} [UnivLE.{t, u}] [Category J] (D : J ⥤ P.Over Q S)
-variable (d : ColimitGluingData D)
-variable [∀ {i j : d.ι} (hij : d.ℬ i ≤ d.ℬ j),
-  PreservesColimitsOfShape J (MorphismProperty.Over.map Q (d.hPhom hij))]
-variable [∀ (i j : d.ι) (hij : d.ℬ i ≤ d.ℬ j),
-  PreservesColimitsOfShape J (MorphismProperty.Over.pullback P Q (S.homOfLE hij))]
-variable [IsLocalAtTarget P]
+variable {S : Scheme.{u}} {J : Type t} [Category J] (D : J ⥤ P.Over ⊤ S)
+  {𝒰 : Scheme.OpenCover.{w} S} [Small.{u} 𝒰.I₀] [Category 𝒰.I₀] [Quiver.IsThin 𝒰.I₀]
+  [𝒰.LocallyDirected]
+variable (d : 𝒰.ColimitGluingData D)
+--variable [∀ {i j : d.ι} (hij : d.ℬ i ≤ d.ℬ j),
+--  PreservesColimitsOfShape J (MorphismProperty.Over.map Q (d.hPhom hij))]
+variable [∀ (i j : 𝒰.I₀) (hij : i ⟶ j),
+  PreservesColimitsOfShape J (MorphismProperty.Over.pullback P ⊤ (𝒰.trans hij))]
+variable [IsZariskiLocalAtTarget P]
 
-def ColimitGluingData.mapCoconePullback (i : d.ι) :
-    (MorphismProperty.Over.pullback P Q (d.ℬ i).ι).mapCocone d.gluedCocone ≅ d.c i := by
-  refine Cocones.ext ?_ ?_
-  · exact MorphismProperty.Comma.isoFromComma (d.gluingData.glued.isoPullback i)
-  · intro j
-    ext : 1
-    rw [← cancel_mono (d.gluingData.glued.ι i)]
-    simp only [Functor.comp_obj, MorphismProperty.Over.pullback_obj_left, Functor.mapCocone_pt,
-      Functor.const_obj_obj, Functor.mapCocone_ι_app, RelativeGluingData.Glued.isoPullback,
-      gluingData_f, Over.pullback_obj_left, Over.mk_left, Over.mk_hom,
-      MorphismProperty.Comma.isoFromComma_hom, MorphismProperty.Comma.comp_hom,
-      MorphismProperty.Comma.homFromCommaOfIsIso_hom, Comma.comp_left,
-      MorphismProperty.Over.pullback_map_left, Over.isoMk_hom_left, Iso.trans_hom, Category.assoc]
-    conv_lhs => rw [← RelativeGluingData.Glued.iso_inv_ι]
-    rw [Iso.hom_inv_id_assoc]
-    simp only [pullbackRestrictIsoRestrict_hom_ι]
-    erw [pullback.lift_fst]
-    apply componentOpenCover_map_gluedCoconeι
+@[reassoc (attr := simp)]
+lemma Scheme.Cover.ColimitGluingData.pullbackGluedIso_hom (i : 𝒰.I₀) :
+    (d.pullbackGluedIso i).hom.left ≫ colimit.ι d.relativeGluingData.functor i =
+      pullback.fst _ _ := by
+  simp [pullbackGluedIso, glued]
+
+def Scheme.Cover.ColimitGluingData.mapCoconePullback (i : 𝒰.I₀) :
+    (MorphismProperty.Over.pullback P ⊤ (𝒰.f i)).mapCocone
+      d.gluedCocone ≅ d.cocone i := by
+  refine Cocone.ext (d.pullbackGluedIso i) ?_
+  intro j
+  ext : 1
+  rw [← cancel_mono (d.relativeGluingData.cover.f i)]
+  simp [glued, ColimitGluingData.fst_gluedCocone_ι]
 
 end
 
@@ -260,7 +261,7 @@ lemma Γ_isPushout {P : Scheme.{u}} {fst : P ⟶ X} {snd : P ⟶ Y} (h : IsPullb
   haveI : IsAffine P := .of_isIso iso.hom
   let h' : IsPullback (AffineScheme.ofHom fst) (AffineScheme.ofHom snd)
       (AffineScheme.ofHom f) (AffineScheme.ofHom g) := by
-    apply IsPullback.of_map (F := AffineScheme.forgetToScheme) h.w
+    apply IsPullback.of_map (F := AffineScheme.forgetToScheme.{u}) (ObjectProperty.hom_ext _ h.w)
     exact h
   have h'' := AffineScheme.Γ.rightOp.map_isPullback h'
   have h2 := h''.unop
@@ -305,12 +306,11 @@ def Over.Spec : Over (op A) ⥤ Over (Spec A) :=
   Over.post Scheme.Spec
 
 def Over.Γ : (Over S)ᵒᵖ ⥤ Under Γ(S, ⊤) where
-  obj X := Under.mk (X.unop.hom.app ⊤)
+  obj X := Under.mk X.unop.hom.appTop
   map {X Y} f :=
-    Under.homMk (f.unop.left.app ⊤) <| by
+    Under.homMk f.unop.left.appTop <| by
       dsimp
-      erw [← Scheme.comp_app]
-      rw [Over.w]
+      rw [← Scheme.Hom.comp_appTop, Over.w]
 
 end General
 
@@ -365,11 +365,13 @@ instance (X : Affine S) : IsAffine ((𝟭 Scheme).obj X.left) := inferInstanceAs
 
 def toAffine : Affine S ⥤ Over (AffineScheme.mk S inferInstance) where
   obj X := Over.mk (AffineScheme.ofHom X.hom)
-  map {X Y} f := Over.homMk (AffineScheme.ofHom f.left) (Over.w f.1)
+  map {X Y} f := Over.homMk (AffineScheme.ofHom f.left) <| by
+    apply ObjectProperty.hom_ext
+    exact (CategoryTheory.Over.w f.1)
 
 def fromAffine : Over (AffineScheme.mk S inferInstance) ⥤ Affine S where
-  obj X := Affine.mk X.hom
-  map {X Y} f := MorphismProperty.Over.homMk f.left (Over.w f)
+  obj X := Affine.mk X.hom.hom
+  map {X Y} f := MorphismProperty.Over.homMk f.left.hom congr($((Over.w f)).hom)
 
 lemma toAffine_fromAffine : toAffine S ⋙ fromAffine S = 𝟭 _ := rfl
 lemma fromAffine_toAffine : fromAffine S ⋙ toAffine S = 𝟭 _ := rfl
@@ -438,6 +440,9 @@ instance [IsAffine S] : HasLimitsOfShape J (Affine S)ᵒᵖ :=
 instance hasColimitsOfShape_of_isAffine : HasColimitsOfShape J (Affine S) :=
   Limits.hasColimitsOfShape_of_hasLimitsOfShape_op
 
+instance : HasColimitsOfShape J (MorphismProperty.Over @IsAffineHom ⊤ S) :=
+  hasColimitsOfShape_of_isAffine _
+
 variable (T : Scheme.{u}) [IsAffine T] (f : T ⟶ S)
 
 instance [Flat f] : PreservesFiniteLimits (Under.pushout (f.app ⊤)) := by
@@ -456,30 +461,24 @@ instance preservesColimitsOfShapePullback [PreservesLimitsOfShape Jᵒᵖ (Under
 instance [Flat f] : PreservesFiniteColimits (pullback f) where
   preservesFiniteColimits _ := inferInstance
 
+instance [Flat f] :
+    PreservesFiniteColimits (MorphismProperty.Over.pullback @IsAffineHom ⊤ f) :=
+  inferInstanceAs <| PreservesFiniteColimits (pullback f)
+
 end AffineBase
 
 section
 
 variable {J : Type t} [UnivLE.{t, u}] [SmallCategory J] [FinCategory J] (D : J ⥤ Affine S)
 
+instance (i) : IsAffine (S.directedAffineCover.X i) :=
+  i.2
+
 variable {S} in
-def colimitGluingData : ColimitGluingData D where
-  ι := S.affineOpens
-  ℬ := fun U ↦ U.1
-  hℬ := by simpa using isBasis_affine_open S
-  hP := inferInstance
-  hQ := inferInstance
-  c := fun U ↦
-    let K : J ⥤ Affine U.1.toScheme :=
-      Scheme.Opens.diagram D U.1
-    colimit.cocone K
-  hc := fun U ↦
-    let K : J ⥤ Affine U.1.toScheme :=
-      Scheme.Opens.diagram D U.1
-    colimit.isColimit K
-  hPhom := fun _ ↦ inferInstance
-  hQhom := fun _ ↦ trivial
-  hQ_trivial := by simp
+def colimitGluingData : S.directedAffineCover.ColimitGluingData D where
+  cocone _ := colimit.cocone _
+  isColimit _ := colimit.isColimit _
+  prop_trans := by infer_instance
 
 instance : HasColimit D where
   exists_colimit := by
@@ -490,7 +489,7 @@ instance : HasColimit D where
         PreservesColimitsOfShape J (pullback (S.homOfLE hUV)) :=
       inferInstance
     use (colimitGluingData D).gluedCocone
-    exact (colimitGluingData D).gluedIsColimit
+    exact (colimitGluingData D).isColimitGluedCocone
 
 end
 
@@ -528,10 +527,10 @@ instance {U : Scheme.{u}} (f : U ⟶ S) [IsOpenImmersion f] [IsAffine U] :
   haveI {U V : S.affineOpens} (hUV : U.1 ≤ V.1) :
       PreservesColimitsOfShape J (pullback (S.homOfLE hUV)) :=
     inferInstance
-  have hc := (colimitGluingData D).gluedIsColimit
+  have hc := (colimitGluingData D).isColimitGluedCocone
   apply CategoryTheory.Limits.preservesColimit_of_preserves_colimit_cocone hc
   let iso := (colimitGluingData D).mapCoconePullback D ⟨V, hV⟩
-  exact ((colimitGluingData D).hc ⟨V, hV⟩).ofIsoColimit iso.symm
+  exact ((colimitGluingData D).isColimit ⟨V, hV⟩).ofIsoColimit iso.symm
 
 end Affine
 

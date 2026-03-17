@@ -41,8 +41,9 @@ lemma RingHom.OfLocalizationSpan.of_exists_of_isPrime
     rw [_root_.eq_top_iff]
     rintro p -
     simp only [TopologicalSpace.Opens.iSup_mk, TopologicalSpace.Opens.carrier_eq_coe,
-      PrimeSpectrum.basicOpen_eq_zeroLocus_compl, TopologicalSpace.Opens.coe_mk, Set.mem_iUnion,
-      Set.mem_compl_iff, PrimeSpectrum.mem_zeroLocus, Set.singleton_subset_iff, SetLike.mem_coe]
+      PrimeSpectrum.basicOpen_eq_zeroLocus_compl]
+    simp only [TopologicalSpace.Opens.mem_mk, Set.mem_iUnion, Set.mem_compl_iff,
+      PrimeSpectrum.mem_zeroLocus, Set.singleton_subset_iff, SetLike.mem_coe]
     use p
     apply hu₁
   · rintro ⟨p, ⟨p, rfl⟩⟩

@@ -9,10 +9,11 @@ variable {R A M M' : Type*} [CommSemiring R] [CommSemiring A] [Algebra R A] (S :
   [AddCommMonoid M] [Module R M] [AddCommMonoid M'] [Module R M']
   [IsLocalization S A]
 
-instance IsLocalizedModule.module_isScalarTower (f : M →ₗ[R] M') [IsLocalizedModule S f] :
-    letI : Module A M' := IsLocalizedModule.module S f
-    IsScalarTower R A M' :=
-  (IsLocalizedModule.iso S f).symm.isScalarTower A
+--instance IsLocalizedModule.module_isScalarTower (f : M →ₗ[R] M') [IsLocalizedModule S f] :
+--    letI : Module A M' := IsLocalizedModule.module S f
+--    IsScalarTower R A M' :=
+--  letI : Module A (LocalizedModule S M) := IsLocalizedModule.module S f
+--  (IsLocalizedModule.iso S f).symm.isScalarTower A
 
 end
 

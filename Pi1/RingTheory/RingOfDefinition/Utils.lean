@@ -29,7 +29,7 @@ def MvPolynomial.Set.coefficients (S : Set (MvPolynomial ι R)) : Set R :=
 theorem MvPolynomial.coefficients_finite (p : MvPolynomial ι R) :
     Set.Finite (MvPolynomial.coefficients p) := by
   apply Set.Finite.image
-  change Set.Finite (Finsupp.support p).toSet
+  change Set.Finite (Finsupp.support p : Set (ι →₀ ℕ))
   rw [← Finsupp.fun_support_eq]
   exact Finsupp.finite_support p
 

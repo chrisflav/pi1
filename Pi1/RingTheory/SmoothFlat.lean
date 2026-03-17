@@ -1,6 +1,4 @@
-import Mathlib.RingTheory.Flat.Basic
-import Mathlib.RingTheory.Smooth.Basic
-import Pi1.RingTheory.Smooth.Flat
+import Mathlib.RingTheory.Smooth.Flat
 
 universe u
 

@@ -20,7 +20,7 @@ lemma Set.iUnion_sumElim {α ι σ : Type*} (s : ι → Set α) (t : σ → Set 
 --
 lemma ENat.card_lt_top_iff_finite {α : Type*} :
     ENat.card α < ⊤ ↔ Finite α := by
-  simp [← not_iff_not]
+  simp
 
 section
 
@@ -173,7 +173,7 @@ lemma ConnectedComponents.exists_fun_isClopen_of_infinite (X : Type*) [Topologic
 --
 lemma ConnectedComponents.discreteTopology_iff (X : Type*) [TopologicalSpace X] :
     DiscreteTopology (ConnectedComponents X) ↔ ∀ x : X, IsOpen (connectedComponent x) := by
-  simp_rw [← singletons_open_iff_discrete, ← connectedComponents_preimage_singleton,
+  simp_rw [discreteTopology_iff_isOpen_singleton, ← connectedComponents_preimage_singleton,
     isQuotientMap_coe.isOpen_preimage, surjective_coe.forall]
 
 /-- If `f : X → Y` is an open and closed map to and `Y` is connected, the number of connected
@@ -227,6 +227,8 @@ lemma IsOpenMap.finite_connectedComponents_of_finite_preimage_singleton {X Y : T
     (hfc : Continuous f) (hf₁ : IsOpenMap f) (hf₂ : IsClosedMap f) (h : ∀ y, (f ⁻¹' {y}).Finite) :
     Finite (ConnectedComponents X) := by
   suffices h : ∀ (y : ConnectedComponents Y), Finite (ConnectedComponents (f ⁻¹' (mk ⁻¹' {y}))) by
+    have : Finite ((i : ConnectedComponents Y) × ConnectedComponents ↑(f ⁻¹' (mk ⁻¹' {i}))) :=
+      finite_of_compact_of_discrete
     refine .of_equiv _ (equivOfIsClopen (U := fun y ↦ f ⁻¹' (mk ⁻¹' {y})) ?_ ?_ ?_).symm
     · exact fun y ↦ (isClopen_discrete {y}).preimage (continuous_coe.comp hfc)
     · exact fun i j hij ↦ (Disjoint.preimage mk (by simpa)).preimage f

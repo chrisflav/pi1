@@ -22,49 +22,6 @@ lemma Ideal.under_mem_minimalPrimes (R : Type*) {S : Type*} [CommRing R] [CommRi
   obtain rfl : p = Q := le_antisymm (hp.2 ⟨hQ, bot_le⟩ hQle) hQle
   rw [ho.1]
 
-lemma RingHom.Flat.tensorProductMap_left {R S A B C : Type*}
-    [CommRing R] [CommRing S] [Algebra R S] [CommRing A] [Algebra R A] [Algebra S A]
-    [IsScalarTower R S A] [CommRing B] [Algebra R B] [CommRing C] [Algebra R C] [Algebra S C]
-    [IsScalarTower R S C] (f : A →ₐ[S] C)-- (g : B →ₐ[R] D)
-    (hf : f.toRingHom.Flat) : (Algebra.TensorProduct.map f (.id R B)).Flat := by
-  algebraize [f.toRingHom, (Algebra.TensorProduct.map f (.id R B)).toRingHom]
-  have : IsScalarTower R A C := .of_algHom (f.restrictScalars R)
-  let e : C ⊗[R] B ≃ₐ[A] (A ⊗[R] B) ⊗[A] C :=
-    ((Algebra.TensorProduct.cancelBaseChange R A A C B).symm).trans
-      (Algebra.TensorProduct.comm ..).symm
-  have : (Algebra.TensorProduct.map f (AlgHom.id R B)).toRingHom =
-      (e.symm : _ →+* _).comp (algebraMap (A ⊗[R] B) ((A ⊗[R] B) ⊗[A] C)) := by
-    ext x
-    induction x with
-    | zero => simp
-    | add x y hx hy => simp_all [add_tmul]
-    | tmul x y => simp [e, Algebra.smul_def, RingHom.algebraMap_toAlgebra]
-  rw [this]
-  apply RingHom.Flat.comp
-  · rw [RingHom.flat_algebraMap_iff]
-    infer_instance
-  · apply RingHom.Flat.of_bijective e.symm.bijective
-
-lemma RingHom.Flat.tensorProductMap {R S A B C D : Type*}
-    [CommRing R] [CommRing S] [Algebra R S] [CommRing A] [Algebra R A] [Algebra S A]
-    [IsScalarTower R S A] [CommRing B] [Algebra R B] [CommRing C] [Algebra R C] [Algebra S C]
-    [IsScalarTower R S C] [CommRing D] [Algebra R D] (f : A →ₐ[S] C) (g : B →ₐ[R] D)
-    (hf : f.toRingHom.Flat) (hg : g.toRingHom.Flat) :
-    (Algebra.TensorProduct.map f g).Flat := by
-  have : Algebra.TensorProduct.map f g =
-      (Algebra.TensorProduct.map (.id _ _) g).comp (Algebra.TensorProduct.map f (.id _ _)) := by
-    ext <;> rfl
-  rw [this]
-  refine RingHom.Flat.comp (.tensorProductMap_left _ hf) ?_
-  show (Algebra.TensorProduct.map (AlgHom.id R C) g).Flat
-  have : Algebra.TensorProduct.map (AlgHom.id R C) g =
-      AlgHom.comp (Algebra.TensorProduct.comm ..).toAlgHom
-        ((Algebra.TensorProduct.map g (AlgHom.id R C)).comp <|
-          (Algebra.TensorProduct.comm ..).toAlgHom) := by ext <;> rfl
-  rw [this]
-  exact (RingHom.Flat.of_bijective (Algebra.TensorProduct.comm R C B).bijective).comp
-    (.tensorProductMap_left _ hg) |>.comp <| .of_bijective (AlgEquiv.bijective _)
-
 lemma Algebra.TensorProduct.exists_intermediateField_isSeparable_and_mem_range
     (Ω : Type*) [Field Ω] [Algebra k Ω] [Algebra.IsSeparable k Ω] (x : Ω ⊗[k] R) :
     ∃ (K : IntermediateField k Ω), Algebra.IsSeparable k K ∧ Module.Finite k K ∧
@@ -126,7 +83,7 @@ lemma subsingleton_minimalPrimes_of_isSeparable
     Algebra.TensorProduct.map (IsScalarTower.toAlgHom _ _ _) (AlgHom.id k R)
   let _ : Algebra (K ⊗[k] R) (Ω ⊗[k] R) := f.toRingHom.toAlgebra
   have : f.toRingHom.Flat := by
-    refine .tensorProductMap _ _ ?_ (.of_bijective <| Function.Involutive.bijective (congrFun rfl))
+    refine .tensorProductMap ?_ (.of_bijective <| Function.Involutive.bijective (congrFun rfl))
     simp only [AlgHom.toRingHom_eq_coe, IsScalarTower.coe_toAlgHom, RingHom.flat_algebraMap_iff]
     infer_instance
   have : Module.Flat (K ⊗[k] R) (Ω ⊗[k] R) := this
@@ -213,14 +170,15 @@ lemma PrimeSpectrum.irreducibleSpace_of_isSeparable
     apply subsingleton_minimalPrimes_of_isSeparable
     intro K _ _ _ _
     exact (H K).1
-  ⟨((Algebra.TensorProduct.isIntegral_includeRight k R Ω).specComap_surjective <|
+  ⟨((Algebra.TensorProduct.isIntegral_includeRight k R Ω).comap_surjective <|
     Algebra.TensorProduct.includeRight_injective (algebraMap k Ω).injective).nonempty⟩
 
 lemma PrimeSpectrum.comap_quotientMk_surjective_of_le_nilradical {R : Type*} [CommRing R]
     (I : Ideal R) (hle : I ≤ nilradical R) :
     Function.Surjective (PrimeSpectrum.comap <| Ideal.Quotient.mk I) := by
-  simpa [← Set.range_eq_univ, range_comap_of_surjective _ _ Ideal.Quotient.mk_surjective,
-    zeroLocus_eq_univ_iff]
+  rwa [← Set.range_eq_univ, range_comap_of_surjective, zeroLocus_eq_univ_iff,
+    Ideal.mk_ker, SetLike.coe_subset_coe]
+  exact Ideal.Quotient.mk_surjective
 
 open Algebra
 
@@ -237,17 +195,10 @@ lemma nontrivial_of_expChar (R : Type*) [AddMonoidWithOne R] (q : ℕ) [hq : Exp
     rw [not_nontrivial_iff_subsingleton] at h
     exact hq.ne_one (CharP.eq R ‹_› h.charP)
 
-lemma Function.Surjective.preirreducibleSpace {X Y : Type*} [TopologicalSpace X]
-    [TopologicalSpace Y] (f : X → Y) (hfc : Continuous f) (hf : Function.Surjective f)
-    [PreirreducibleSpace X] : PreirreducibleSpace Y where
-  isPreirreducible_univ := by
-    rw [← hf.range_eq, ← Set.image_univ]
-    exact (PreirreducibleSpace.isPreirreducible_univ).image _ hfc.continuousOn
-
 lemma IsHomeomorph.irreducibleSpace {X Y : Type*} [TopologicalSpace X]
     [TopologicalSpace Y] (f : X → Y) (hf : IsHomeomorph f)
     [IrreducibleSpace X] : IrreducibleSpace Y := by
-  have := hf.surjective.preirreducibleSpace _ hf.continuous
+  have := hf.surjective.preirreducibleSpace hf.continuous
   exact ⟨(hf.homeomorph).symm.surjective.nonempty⟩
 
 lemma IsPurelyInseparable.of_surjective {F E : Type*} [CommRing F] [CommRing E] [Algebra F E]

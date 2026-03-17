@@ -11,17 +11,6 @@ universe u
 
 namespace RingHom
 
-lemma Smooth.respectsIso : RespectsIso Smooth := by
-  apply Smooth.stableUnderComposition.respectsIso
-  introv
-  algebraize [e.toRingHom]
-  rw [Smooth]
-  have : IsLocalization.Away (1 : R) S := by
-    apply IsLocalization.away_of_isUnit_of_bijective
-    simp only [isUnit_one]
-    exact e.bijective
-  exact Algebra.Smooth.of_isLocalization_Away 1
-
 lemma Smooth.ofLocalizationSpan : OfLocalizationSpan Smooth := by
   apply ofLocalizationSpanTarget.ofLocalizationSpan
   exact (stableUnderComposition.stableUnderCompositionWithLocalizationAway

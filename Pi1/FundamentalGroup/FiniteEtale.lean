@@ -88,13 +88,13 @@ namespace AlgebraicGeometry
 /-- A morphism is finite étale if it is finite and étale. -/
 @[mk_iff]
 class IsFiniteEtale {X Y : Scheme.{u}} (f : X ⟶ Y) : Prop
-  extends IsFinite f, IsEtale f
+  extends IsFinite f, Etale f
 
 namespace IsFiniteEtale
 
 open MorphismProperty
 
-lemma eq_inf : @IsFiniteEtale = (@IsFinite ⊓ @IsEtale : MorphismProperty Scheme.{u}) := by
+lemma eq_inf : @IsFiniteEtale = (@IsFinite ⊓ @Etale : MorphismProperty Scheme.{u}) := by
   ext f
   rw [isFiniteEtale_iff]
   rfl
@@ -108,10 +108,10 @@ instance : IsStableUnderBaseChange @IsFiniteEtale := by
   infer_instance
 
 instance : HasOfPostcompProperty @IsFiniteEtale @IsFiniteEtale := by
-  have : HasOfPostcompProperty @IsEtale (@IsFinite ⊓ @IsEtale) := by
-    apply HasOfPostcompProperty.of_le (Q := @IsEtale) (W := @IsEtale)
+  have : HasOfPostcompProperty @Etale (@IsFinite ⊓ @Etale) := by
+    apply HasOfPostcompProperty.of_le (Q := @Etale) (W := @Etale)
     exact inf_le_right
-  have : HasOfPostcompProperty @IsFinite (@IsFinite ⊓ @IsEtale) := by
+  have : HasOfPostcompProperty @IsFinite (@IsFinite ⊓ @Etale) := by
     apply HasOfPostcompProperty.of_le (Q := @IsFinite) (W := @IsFinite)
     exact inf_le_left
   rw [eq_inf]
@@ -123,10 +123,10 @@ instance : HasAffineProperty @IsFiniteEtale (affineAnd RingHom.FiniteEtale) := b
   · infer_instance
   · ext X Y f _
     simp only [affineAnd_apply, RingHom.FiniteEtale.iff_finite_and_etale]
-    show _ ↔ IsFinite f ∧ IsEtale f
+    show _ ↔ IsFinite f ∧ Etale f
     simp only [HasAffineProperty.iff_of_isAffine (P := @IsFinite), and_assoc, and_congr_right_iff]
     intro h
-    rw [HasRingHomProperty.iff_of_isAffine (P := @IsEtale)]
+    rw [HasRingHomProperty.iff_of_isAffine (P := @Etale)]
     rw [RingHom.Etale.iff_locally_isStandardSmoothOfRelativeDimension, and_comm]
 
 instance {X Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) [IsFiniteEtale f] [IsFiniteEtale g] :

@@ -32,7 +32,6 @@ lemma Algebra.rankAtStalk_eq_of_isPushout (R S : Type*) [CommRing R] [CommRing S
   have := Module.rankAtStalk_eq_of_equiv (Algebra.IsPushout.equiv R R' S S').symm.toLinearEquiv
   rw [Module.rankAtStalk_eq_of_equiv (Algebra.IsPushout.equiv R R' S S').symm.toLinearEquiv,
     Module.rankAtStalk_baseChange]
-  rfl
 
 lemma Algebra.IsPushout.of_bijective_left (R S T : Type*) [CommRing R] [CommRing S] [Algebra R S]
     [CommRing T] [Algebra R T] [Algebra S T] [IsScalarTower R S T]
@@ -71,7 +70,7 @@ attribute [local instance] Algebra.TensorProduct.rightAlgebra in
 lemma RingHom.finrank_comp_right_of_bijective {R S T : Type*} [CommRing R] [CommRing S] [CommRing T]
     (f : R →+* S) (g : S →+* T) (hg : Function.Bijective f) (h1 : g.Finite) (h2 : g.Flat)
     (x : PrimeSpectrum S) :
-    (g.comp f).finrank (f.specComap x) = g.finrank x := by
+    (g.comp f).finrank (PrimeSpectrum.comap f x) = g.finrank x := by
   algebraize [f, g, (g.comp f)]
   have : Module.Finite R T := h1.comp <| .of_surjective _ hg.2
   have : Module.Flat R T := (RingHom.Flat.of_bijective hg).comp h2
@@ -125,7 +124,7 @@ lemma IsAffine.finrank_of_isPullback {Y T : Scheme.{u}} [IsAffine S] [IsAffine T
   convert CommRingCat.finrank_eq_of_isPushout this
     (HasRingHomProperty.appTop (P := @Flat) _ inferInstance)
     ((HasAffineProperty.iff_of_isAffine (P := @IsFinite).mp inferInstance).2) (T.isoSpec.hom.base t)
-  rw [← Scheme.comp_base_apply, ← Scheme.isoSpec_hom_naturality]
+  rw [← Scheme.Hom.comp_apply, ← Scheme.isoSpec_hom_naturality]
   rfl
 
 lemma IsAffine.finrank_snd {T : Scheme.{u}} [IsAffine S] [IsAffine T]
@@ -144,38 +143,39 @@ lemma IsAffine.finrank_comp_left_of_isIso {X Y Z : Scheme.{u}} [IsAffine Z]
   exact IsPullback.of_horiz_isIso (by simp)
 
 def finrank {X S : Scheme.{u}} (f : X ⟶ S) (s : S) : ℕ :=
-  IsAffine.finrank (pullback.snd f (S.affineOpenCover.map s)) (S.affineOpenCover.covers s).choose
+  IsAffine.finrank (pullback.snd f (S.affineOpenCover.f <| S.affineOpenCover.idx s))
+    (S.affineOpenCover.covers s).choose
 
 lemma finrank_eq_finrank_snd_of_isAffine {T : Scheme.{u}} (g : T ⟶ S) [IsAffine T] (t : T) [Flat f]
     [IsFinite f] : finrank f (g.base t) = IsAffine.finrank (pullback.snd f g) t := by
-  let i := S.affineOpenCover.map (g.base t)
+  let i := S.affineOpenCover.f (S.affineOpenCover.idx (g.base t))
   dsimp only [finrank]
   let Y := pullback i g
   obtain ⟨y, hyl, hyr⟩ := Scheme.Pullback.exists_preimage_pullback
     (S.affineOpenCover.covers <| g.base t).choose t
     ((S.affineOpenCover.covers <| g.base t).choose_spec)
-  let U := Spec (Y.affineOpenCover.obj y)
+  let U := Spec (Y.affineOpenCover.X (Y.affineOpenCover.idx y))
   let z : U := (Y.affineOpenCover.covers y).choose
   have : IsFinite (pullback.snd f g) := MorphismProperty.pullback_snd _ _ inferInstance
-  have : IsFinite (pullback.snd f (S.affineOpenCover.map ((ConcreteCategory.hom g.base) t))) :=
+  have : IsFinite (pullback.snd f (S.affineOpenCover.f ((ConcreteCategory.hom g.base) t))) :=
     MorphismProperty.pullback_snd _ _ inferInstance
   trans IsAffine.finrank
-      (pullback.snd (pullback.snd f g) (Y.affineOpenCover.map y ≫ pullback.snd _ _)) z
+      (pullback.snd (pullback.snd f g) (Y.affineOpenCover.f _ ≫ pullback.snd _ _)) z
   · symm
     refine IsAffine.finrank_of_isPullback _ _ ?_ ?_ ?_ _ _ ?_
-    · exact pullback.map _ _ _ _ (pullback.fst f g) (Y.affineOpenCover.map y ≫ pullback.fst _ _) g
+    · exact pullback.map _ _ _ _ (pullback.fst f g) (Y.affineOpenCover.f _ ≫ pullback.fst _ _) g
         pullback.condition.symm (by simp [← pullback.condition]; rfl)
-    · exact Y.affineOpenCover.map y ≫ pullback.fst _ _
+    · exact Y.affineOpenCover.f _ ≫ pullback.fst _ _
     · apply isPullback_map_fst_fst
     · rw [← hyl]
-      simp only [Scheme.affineOpenCover_obj, Spec.toLocallyRingedSpace_obj,
-        Scheme.affineOpenCover_map, Scheme.comp_coeBase, TopCat.hom_comp, ContinuousMap.comp_apply,
+      simp only [Scheme.affineOpenCover_X, Spec.toLocallyRingedSpace_obj,
+        Scheme.affineOpenCover_f, Scheme.Hom.comp_base, TopCat.hom_comp, ContinuousMap.comp_apply,
         Scheme.affineOpenCover_f]
       congr
       exact (Y.affineOpenCover.covers y).choose_spec
-  · convert IsAffine.finrank_snd (pullback.snd f g) (Y.affineOpenCover.map y ≫ pullback.snd _ _) z
-    simp only [← hyr, Scheme.affineOpenCover_f, Scheme.affineOpenCover_obj, TopCat.hom_comp,
-      Spec.toLocallyRingedSpace_obj, Scheme.affineOpenCover_map, Scheme.comp_coeBase,
+  · convert IsAffine.finrank_snd (pullback.snd f g) (Y.affineOpenCover.f _ ≫ pullback.snd _ _) z
+    simp only [← hyr, Scheme.affineOpenCover_f, Scheme.affineOpenCover_X, TopCat.hom_comp,
+      Spec.toLocallyRingedSpace_obj, Scheme.affineOpenCover_f, Scheme.Hom.comp_base,
       ContinuousMap.comp_apply]
     congr
     exact (Y.affineOpenCover.covers y).choose_spec.symm
@@ -207,7 +207,7 @@ lemma finrank_SpecMap_eq_finrank {R S : CommRingCat.{u}} (f : R ⟶ S) [IsFinite
   congr
   simp only [Scheme.isoSpec_Spec_hom]
   show (Spec.map _).base _ = _
-  rw [← Scheme.comp_base_apply, ← Spec.map_comp]
+  rw [← Scheme.Hom.comp_apply, ← Spec.map_comp]
   simp
   apply (HasAffineProperty.SpecMap_iff_of_affineAnd
     (P := @IsFinite) (Q := RingHom.Finite) inferInstance RingHom.finite_respectsIso _).mp
@@ -242,17 +242,18 @@ lemma finrank_comp_left_of_isIso {X Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z
     [IsFinite g] [LocallyOfFinitePresentation g] : finrank (f ≫ g) = finrank g := by
   ext z
   rw [finrank, finrank]
-  let e : pullback (f ≫ g) (Z.affineOpenCover.map z) ≅ pullback g (Z.affineOpenCover.map z) :=
-    (pullbackRightPullbackFstIso g (Z.affineOpenCover.map z) f).symm ≪≫
-      asIso (pullback.snd f (pullback.fst g (Z.affineOpenCover.map z)))
+  let e : pullback (f ≫ g) (Z.affineOpenCover.f (Z.affineOpenCover.idx z)) ≅
+      pullback g (Z.affineOpenCover.f (Z.affineOpenCover.idx z)) :=
+    (pullbackRightPullbackFstIso g (Z.affineOpenCover.f (Z.affineOpenCover.idx z)) f).symm ≪≫
+      asIso (pullback.snd f (pullback.fst g (Z.affineOpenCover.f _)))
   have : e.hom ≫ pullback.snd _ _ = pullback.snd _ _ := by simp [e]
   rw [← this, IsAffine.finrank_comp_left_of_isIso]
 
 lemma finrank_pullback_snd {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z)
     [Flat f] [IsFinite f] [LocallyOfFinitePresentation f] (y : Y) :
     finrank (pullback.snd f g) y = finrank f (g.base y) := by
-  let R := Y.affineOpenCover.obj y
-  let i : Spec R ⟶ Y := Y.affineOpenCover.map y
+  let R := Y.affineOpenCover.X (Y.affineOpenCover.idx y)
+  let i : Spec R ⟶ Y := Y.affineOpenCover.f (Y.affineOpenCover.idx y)
   let y' : Spec R := Y.affineOpenCover.covers y |>.choose
   have h1 : i.base y' = y := Y.affineOpenCover.covers y |>.choose_spec
   have h2 : (i ≫ g).base y' = g.base y := by simp [h1]
@@ -269,12 +270,14 @@ nonrec lemma finrank_of_isPullback {P X Y Z : Scheme.{u}} (fst : P ⟶ X) (snd :
 nonrec lemma one_le_finrank_map [Flat f] [IsFinite f] [LocallyOfFinitePresentation f] (x : X) :
     1 ≤ finrank f (f.base x) := by
   wlog hY : ∃ R, Y = Spec R
-  · let g : Spec (Y.affineOpenCover.obj _) ⟶ Y := Y.affineOpenCover.map (f.base x)
+  · let g : Spec (Y.affineOpenCover.X _) ⟶ Y :=
+      Y.affineOpenCover.f (Y.affineOpenCover.idx <| f.base x)
     let y' := Y.affineOpenCover.covers (f.base x) |>.choose
-    have heq : g.base y' = f.base x := Y.affineOpenCover.covers (f.base x) |>.choose_spec
+    have heq : g.base y' = f.base x :=
+      Y.affineOpenCover.covers (f.base x) |>.choose_spec
     rw [← heq, ← finrank_pullback_snd]
     obtain ⟨z, hzl, hzr⟩ :=
-      Scheme.Pullback.exists_preimage_pullback (f := f) (g := g) x y' (by simp [← heq])
+      Scheme.Pullback.exists_preimage_pullback (f := f) (g := g) x y' heq.symm
     have heq : y' = (pullback.snd f g).base z := hzr.symm
     rw [heq]
     refine this _ _ ⟨_, rfl⟩
@@ -301,7 +304,7 @@ nonrec lemma one_le_finrank_iff_surjective [Flat f] [IsFinite f] [LocallyOfFinit
     1 ≤ finrank f ↔ Surjective f := by
   refine ⟨fun h ↦ ?_, fun _ ↦ ?_⟩
   · wlog hY : ∃ R, Y = Spec R
-    · rw [IsLocalAtTarget.iff_of_openCover (P := @Surjective) Y.affineCover]
+    · rw [IsZariskiLocalAtTarget.iff_of_openCover (P := @Surjective) Y.affineCover]
       intro i
       dsimp only [Scheme.Cover.pullbackHom]
       refine this _ (fun y ↦ ?_) ⟨_, rfl⟩
@@ -332,7 +335,7 @@ nonrec lemma one_le_finrank_iff_surjective [Flat f] [IsFinite f] [LocallyOfFinit
 lemma Scheme.exists_Spec_base_eq {X : Scheme.{u}} (x : X) :
     ∃ (R : CommRingCat.{u}) (f : Spec R ⟶ X) (_ : IsOpenImmersion f) (y : Spec R),
     f.base y = x :=
-  ⟨X.affineOpenCover.obj x, X.affineOpenCover.map x, inferInstance, X.affineOpenCover.covers x⟩
+  ⟨X.affineOpenCover.X _, X.affineOpenCover.f _, inferInstance, X.affineOpenCover.covers x⟩
 
 nonrec lemma isLocallyConstant_finrank : IsLocallyConstant (finrank f) := by
   wlog hY : ∃ R, Y = Spec R
@@ -379,7 +382,8 @@ nonrec lemma isIso_iff_rank_eq [Flat f] [IsFinite f] [LocallyOfFinitePresentatio
   refine ⟨fun h ↦ finrank_eq_one_of_isIso f, fun h ↦ ?_⟩
   wlog hY : ∃ R, Y = Spec R
   · show MorphismProperty.isomorphisms _ _
-    rw [IsLocalAtTarget.iff_of_openCover (P := MorphismProperty.isomorphisms Scheme) Y.affineCover]
+    rw [IsZariskiLocalAtTarget.iff_of_openCover
+      (P := MorphismProperty.isomorphisms Scheme) Y.affineCover]
     intro i
     dsimp [Scheme.Cover.pullbackHom]
     refine this _ ?_ ⟨_, rfl⟩

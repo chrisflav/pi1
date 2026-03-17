@@ -2,7 +2,6 @@ import Mathlib
 import Pi1.RingTheory.FiniteEtale.Equalizer
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Pi1.Mathlib.RingTheory.Flat.Equalizer
-import Pi1.Mathlib.RingTheory.RingHom.Bijective
 
 set_option linter.unusedTactic false
 
@@ -106,20 +105,20 @@ lemma CodescendsAlong.of_forall_flat {R S : Type u} [CommRing R] [CommRing S] [A
     (hPi : RespectsIso P) (hPl : OfLocalizationSpan P) (hP : CodescendsAlong P FaithfullyFlat)
     {ι : Type u} (T : ι → Type u) [∀ i, CommRing (T i)]
     [∀ i, Algebra R (T i)] [∀ i, Module.Flat R (T i)]
-    (ho : ∀ i, IsOpen <| Set.range (algebraMap R (T i)).specComap)
-    (hunion : ⋃ i, Set.range (algebraMap R (T i)).specComap = Set.univ)
+    (ho : ∀ i, IsOpen <| Set.range <| PrimeSpectrum.comap (algebraMap R (T i)))
+    (hunion : ⋃ i, Set.range (PrimeSpectrum.comap (algebraMap R (T i))) = Set.univ)
     (H : ∀ i, P (algebraMap (T i) (T i ⊗[R] S))) :
     P (algebraMap R S) := by
   classical
   let U (i : ι) : Set (PrimeSpectrum R) :=
-    Set.range <| (algebraMap R (T i)).specComap
+    Set.range <| PrimeSpectrum.comap (algebraMap R (T i))
   obtain ⟨t, ht⟩ := isCompact_univ.elim_finite_subcover U (fun p ↦ ho _) (hunion ▸ le_rfl)
   let A : Type u := ∀ (p : t), T p.1
   have : Module.FaithfullyFlat R A := by
-    apply Module.FaithfullyFlat.of_specComap_surjective
+    apply Module.FaithfullyFlat.of_comap_surjective
     intro p
     obtain ⟨i, hi, q, rfl⟩ := Set.mem_iUnion₂.mp (ht (Set.mem_univ p))
-    use (Pi.evalRingHom (fun p : t ↦ T p.1) ⟨i, hi⟩).specComap q
+    use (PrimeSpectrum.comap <| Pi.evalRingHom (fun p : t ↦ T p.1) ⟨i, hi⟩) q
     rfl
   apply hP.algebraMap_tensorProduct (R := R) (S := A) (T := S)
   rwa [faithfullyFlat_algebraMap_iff]
@@ -140,8 +139,8 @@ lemma CodescendsAlong.of_forall_exists_flat {R S : Type u} [CommRing R] [CommRin
     (hPi : RespectsIso P) (hPl : OfLocalizationSpan P)
     (hP : CodescendsAlong P FaithfullyFlat)
     (H : ∀ (p : PrimeSpectrum R), ∃ (T : Type u) (_ : CommRing T) (_ : Algebra R T),
-      p ∈ Set.range (algebraMap R T).specComap ∧ Module.Flat R T ∧
-      IsOpen (Set.range <| (algebraMap R T).specComap) ∧
+      p ∈ Set.range (PrimeSpectrum.comap (algebraMap R T)) ∧ Module.Flat R T ∧
+      IsOpen (Set.range <| PrimeSpectrum.comap (algebraMap R T)) ∧
       P (algebraMap T (T ⊗[R] S))) :
     P (algebraMap R S) := by
   choose T h1 h2 hmem _ ho hT using H
@@ -179,15 +178,16 @@ lemma CodescendsAlong.algHom_of_forall_exists_flat {R A B : Type u} [CommRing R]
     (hP : CodescendsAlong P FaithfullyFlat)
     (f : A →ₐ[R] B)
     (H : ∀ (p : PrimeSpectrum R), ∃ (T : Type u) (_ : CommRing T) (_ : Algebra R T),
-      p ∈ Set.range (algebraMap R T).specComap ∧ Module.Flat R T ∧
-      IsOpen (Set.range <| (algebraMap R T).specComap) ∧
+      p ∈ Set.range (PrimeSpectrum.comap (algebraMap R T)) ∧ Module.Flat R T ∧
+      IsOpen (Set.range <| PrimeSpectrum.comap (algebraMap R T)) ∧
       P (Algebra.TensorProduct.map (.id T T) f).toRingHom) :
     P f.toRingHom := by
   algebraize [f.toRingHom]
   apply hP.of_forall_exists_flat _ hPi hPl
   intro p
-  obtain ⟨T, _, _, ⟨q, hq⟩, hflat, ho, hp⟩ := H ((algebraMap R A).specComap p)
-  have heq : Set.range (algebraMap A (A ⊗[R] T)).specComap =
+  obtain ⟨T, _, _, ⟨q, hq⟩, hflat, ho, hp⟩ :=
+    H (PrimeSpectrum.comap (algebraMap R A) p)
+  have heq : Set.range (PrimeSpectrum.comap (algebraMap A (A ⊗[R] T))) =
       (PrimeSpectrum.comap (algebraMap R A)) ⁻¹'
         (Set.range <| PrimeSpectrum.comap (algebraMap R T)) :=
     PrimeSpectrum.range_comap_tensorProduct R A T
@@ -214,12 +214,10 @@ lemma CodescendsAlong.algHom_of_forall_exists_flat {R A B : Type u} [CommRing R]
   refine ⟨A ⊗[R] T, inferInstance, inferInstance, ?_, inferInstance, ?_, ?_⟩
   · rw [heq]
     use q
-    exact hq
   · rw [heq]
-    exact ho.preimage (PrimeSpectrum.comap (algebraMap R A)).2
+    exact ho.preimage (PrimeSpectrum.continuous_comap _)
   · rw [hdiag']
-    exact hPi.2 _ (Algebra.TensorProduct.comm R A T).toRingEquiv
-      (hPi.1 _ e.toRingEquiv hp)
+    exact hPi.2 _ (Algebra.TensorProduct.comm R A T).toRingEquiv (hPi.1 _ _ hp)
 
 end RingHom
 
@@ -300,7 +298,7 @@ lemma exists_isSplitOfRank [Module.Finite R A] [Algebra.Etale R A]
     ∃ (S : Type u) (_ : CommRing S) (_ : Algebra R S) (n : ℕ),
       Module.Flat R S ∧
       IsOpenMap (PrimeSpectrum.comap (algebraMap R S)) ∧
-      p ∈ Set.range (algebraMap R S).specComap ∧
+      p ∈ Set.range (PrimeSpectrum.comap (algebraMap R S)) ∧
       Algebra.IsSplitOfRank n S (S ⊗[R] A) := by
   wlog h : ∃ (n : ℕ), Module.rankAtStalk (R := R) A = n
   · obtain ⟨r, hr, hn⟩ := Algebra.exists_cover_rankAtStalk_eq A p.asIdeal
@@ -314,13 +312,12 @@ lemma exists_isSplitOfRank [Module.Finite R A] [Algebra.Etale R A]
       TensorProduct.cancelBaseChange ..
     refine ⟨S, inferInstance, inferInstance, n, ?_, ?_, ⟨q, rfl⟩, ?_⟩
     · exact Module.Flat.trans R (Localization.Away r) S
-    · rw [IsScalarTower.algebraMap_eq R (Localization.Away r) S, PrimeSpectrum.comap_comp,
-        ContinuousMap.coe_comp]
+    · rw [IsScalarTower.algebraMap_eq R (Localization.Away r) S, PrimeSpectrum.comap_comp]
       exact (PrimeSpectrum.localization_away_isOpenEmbedding _ r).isOpenMap.comp ho
     · exact IsSplitOfRank.of_equiv (S := S ⊗[Localization.Away r] (Localization.Away r ⊗[R] A)) e
   obtain ⟨n, hn⟩ := h
   obtain ⟨S, _, _, _, _, hS⟩ := Algebra.IsSplitOfRank.exists_isSplitOfRank_tensorProduct hn
-  obtain ⟨p, rfl⟩ := PrimeSpectrum.specComap_surjective_of_faithfullyFlat (B := S) p
+  obtain ⟨p, rfl⟩ := PrimeSpectrum.comap_surjective_of_faithfullyFlat (B := S) p
   have homap : IsOpenMap (PrimeSpectrum.comap (algebraMap R S)) :=
     PrimeSpectrum.isOpenMap_comap_of_hasGoingDown_of_finitePresentation
   refine ⟨S, inferInstance, inferInstance, n, ?_, homap, ⟨p, rfl⟩, hS⟩
@@ -332,7 +329,7 @@ lemma exists_isSplit [Module.Finite R A] [Algebra.Etale R A]
     ∃ (S : Type u) (_ : CommRing S) (_ : Algebra R S),
       Module.Flat R S ∧
       IsOpenMap (PrimeSpectrum.comap (algebraMap R S)) ∧
-      p ∈ Set.range (algebraMap R S).specComap ∧
+      p ∈ Set.range (PrimeSpectrum.comap (algebraMap R S)) ∧
       (TensorProduct.map (AlgHom.id S S) f).IsSplit := by
   classical
   wlog h : ∃ (n : ℕ), IsSplitOfRank n R A
@@ -341,7 +338,7 @@ lemma exists_isSplit [Module.Finite R A] [Algebra.Etale R A]
     let _ : Algebra R S' := Algebra.compHom S' (algebraMap R S)
     have : IsScalarTower R S S' := .of_algebraMap_eq' rfl
     refine ⟨S', inferInstance, inferInstance, Module.Flat.trans R S S', ?_, ⟨q, rfl⟩, ?_⟩
-    · rw [IsScalarTower.algebraMap_eq R S S', PrimeSpectrum.comap_comp, ContinuousMap.coe_comp]
+    · rw [IsScalarTower.algebraMap_eq R S S', PrimeSpectrum.comap_comp]
       exact ho₁.comp ho₂
     · rwa [AlgHom.IsSplit.iff_of_isScalarTower S]
   obtain ⟨n, hn⟩ := h
@@ -353,7 +350,7 @@ lemma exists_isSplit [Module.Finite R A] [Algebra.Etale R A]
     let _ : Algebra R S' := Algebra.compHom S' (algebraMap R S)
     have : IsScalarTower R S S' := .of_algebraMap_eq' rfl
     refine ⟨S', inferInstance, inferInstance, Module.Flat.trans R S S', ?_, ⟨q, rfl⟩, ?_⟩
-    · rw [IsScalarTower.algebraMap_eq R S S', PrimeSpectrum.comap_comp, ContinuousMap.coe_comp]
+    · rw [IsScalarTower.algebraMap_eq R S S', PrimeSpectrum.comap_comp]
       exact ho₁.comp ho₂
     · rwa [AlgHom.IsSplit.iff_of_isScalarTower S]
   obtain ⟨⟨eA⟩⟩ := hn
