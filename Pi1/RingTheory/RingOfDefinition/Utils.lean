@@ -31,7 +31,7 @@ theorem MvPolynomial.coefficients_finite (p : MvPolynomial ι R) :
   apply Set.Finite.image
   change Set.Finite (Finsupp.support p : Set (ι →₀ ℕ))
   rw [← Finsupp.fun_support_eq]
-  exact Finsupp.finite_support p
+  exact Finsupp.hasFiniteSupport p
 
 theorem MvPolynomial.Set.coefficients_finite_of_finite (S : Set (MvPolynomial ι R))
     (hf : Set.Finite S) : Set.Finite (MvPolynomial.Set.coefficients S) := by

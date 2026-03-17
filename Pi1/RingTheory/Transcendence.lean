@@ -10,7 +10,7 @@ lemma Algebra.finite_of_intermediateFieldFG_of_isAlgebraic
   obtain ⟨s, hs⟩ := h
   have : Algebra.FiniteType k K := by
     use s
-    rw [← IntermediateField.adjoin_algebraic_toSubalgebra
+    rw [← IntermediateField.adjoin_toSubalgebra_of_isAlgebraic
       (fun x hx ↦ Algebra.IsAlgebraic.isAlgebraic x)]
     simpa [← IntermediateField.toSubalgebra_inj] using hs
   exact Algebra.IsIntegral.finite

@@ -167,7 +167,7 @@ lemma exists_isSplitOfRank_tensorProduct [Etale R S] [Module.Finite R S] {n : �
       let e := e₁.trans <| e₂.trans <| e₃.trans <| e₄.trans e₅
       refine ⟨V, inferInstance, inferInstance, ?_, ?_, ?_⟩
       · have : Module.FaithfullyFlat R S := by
-          apply Module.FaithfullyFlat.of_specComap_surjective
+          apply Module.FaithfullyFlat.of_comap_surjective
           rw [← Algebra.rankAtStalk_pos_iff_specComap_surjective]
           intro p
           simp [hn]

@@ -370,7 +370,7 @@ def forgetInventIso [IsSepClosed Ω] : 𝟭 (FiniteEtale _) ≅ forgetScheme Ω 
         MorphismProperty.Comma.comp_hom, Comma.comp_left,
         MorphismProperty.Over.isoMk_hom_left, Iso.trans_hom, Functor.mapIso_hom, Iso.op_hom,
         Iso.symm_hom, RingEquiv.toCommRingCatIso_inv, Scheme.Spec_map, Quiver.Hom.unop_op,
-        Functor.comp_map, inventScheme_map, forgetScheme_map_hom, MorphismProperty.Over.homMk_hom,
+        Functor.comp_map, inventScheme_map, MorphismProperty.Over.homMk_hom,
         Over.homMk_left, Category.assoc]
       simp only [IsFiniteEtale.isoSpecPi, Iso.trans_hom, Functor.mapIso_hom, Iso.op_hom,
         RingEquiv.toCommRingCatIso_hom, Scheme.Spec_map, Quiver.Hom.unop_op, Category.assoc]
@@ -402,7 +402,7 @@ def forgetInventIso [IsSepClosed Ω] : 𝟭 (FiniteEtale _) ≅ forgetScheme Ω 
       rw [← FintypeCat.hom_apply]
       dsimp [- FintypeCat.hom_apply]
       rw [← Scheme.Hom.comp_apply, ← Scheme.isoSpec_inv_naturality]
-      simp only [Scheme.comp_coeBase, TopCat.hom_comp, ContinuousMap.comp_apply]
+      simp only [Scheme.Hom.comp_base, TopCat.hom_comp, ContinuousMap.comp_apply]
       rfl
 
 def equivFintypeCat [IsSepClosed Ω] : FiniteEtale (Spec <| .of Ω) ≌ FintypeCat.{u} :=
@@ -428,7 +428,7 @@ instance [IsSepClosed Ω] : PreservesFiniteLimits (pullback ξ) := by
 
 instance (X : Type*) [TopologicalSpace X] [LocallyConnectedSpace X] :
     DiscreteTopology (ConnectedComponents X) := by
-  rw [← singletons_open_iff_discrete]
+  rw [discreteTopology_iff_isOpen_singleton]
   intro i
   obtain ⟨x, rfl⟩ := ConnectedComponents.surjective_coe i
   rw [← ConnectedComponents.isQuotientMap_coe.isOpen_preimage,
@@ -533,7 +533,7 @@ instance [ConnectedSpace X] (Y : FiniteEtale X) :
     dsimp
     infer_instance
   exact Y.hom.isOpenMap.finite_connectedComponents_of_finite_preimage_singleton Y.hom.continuous
-    Y.hom.isClosedMap (fun y ↦ IsFinite.finite_preimage_singleton _ y)
+    Y.hom.isClosedMap (fun y ↦ Scheme.Hom.finite_preimage_singleton _ y)
 
 open MorphismProperty
 

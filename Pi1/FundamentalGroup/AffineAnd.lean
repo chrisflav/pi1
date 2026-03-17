@@ -351,21 +351,21 @@ def _root_.AlgebraicGeometry.IsAffineOpen.ΓProp
     exact (this U hU).2
   map {X Y} f := MorphismProperty.Under.homMk
       (f.unop.left.appLE (X.unop.hom ⁻¹ᵁ U) (Y.unop.hom ⁻¹ᵁ U)
-      (by rw [← Scheme.preimage_comp, CategoryTheory.Over.w])) <| by
-    simp [Scheme.Hom.app_eq_appLE, Scheme.appLE_comp_appLE]
+      (by rw [← Scheme.Hom.comp_preimage, CategoryTheory.Over.w])) <| by
+    simp [Scheme.Hom.app_eq_appLE, Scheme.Hom.appLE_comp_appLE]
   map_id X := by
     ext : 1
     simp only [Functor.id_obj, Functor.const_obj_obj,
       Scheme.Hom.appLE,
       homOfLE_leOfHom, homOfLE_refl, op_id, unop_id, Comma.id_hom,
-      CategoryTheory.Comma.id_left, Scheme.id.base, Scheme.id_app, Category.id_comp,
+      CategoryTheory.Comma.id_left, Scheme.Hom.id_app, Category.id_comp,
       Under.homMk_hom, Under.homMk_right, CategoryTheory.Comma.id_right]
     apply CategoryTheory.Functor.map_id
   map_comp {X Y Z} f g := by
     ext : 1
     show Scheme.Hom.appLE (g.unop.left ≫ f.unop.left) _ _ _ =
       Scheme.Hom.appLE _ _ _ _ ≫ Scheme.Hom.appLE _ _ _ _
-    rw [Scheme.appLE_comp_appLE]
+    rw [Scheme.Hom.appLE_comp_appLE]
 
 @[simps! obj_hom]
 def ΓProp (hQi : RingHom.RespectsIso Q) (S : Scheme.{u}) [IsAffine S] :
