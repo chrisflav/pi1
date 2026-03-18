@@ -13,14 +13,15 @@ lemma exists_preimage_of_isPullback {P X Y Z : Scheme.{u}} {fst : P ⟶ X} {snd 
   let e := h.isoPullback
   obtain ⟨z, hzl, hzr⟩ := AlgebraicGeometry.Scheme.Pullback.exists_preimage_pullback x y hxy
   use h.isoPullback.inv.base z
-  simp [← Scheme.comp_base_apply, hzl, hzr]
+  simp [← Scheme.Hom.comp_apply, hzl, hzr]
 
 lemma image_preimage_eq_of_isPullback {P X Y Z : Scheme.{u}} {fst : P ⟶ X} {snd : P ⟶ Y}
     {f : X ⟶ Z} {g : Y ⟶ Z} (h : IsPullback fst snd f g) (s : Set X) :
     snd.base '' (fst.base ⁻¹' s) = g.base ⁻¹' (f.base '' s) := by
   refine subset_antisymm ?_ (fun x hx ↦ ?_)
-  · rw [Set.image_subset_iff, ← Set.preimage_comp, ← TopCat.coe_comp, ← Scheme.comp_base, ← h.1.1]
-    rw [Scheme.comp_base, TopCat.coe_comp, ← Set.image_subset_iff, Set.image_comp]
+  · rw [Set.image_subset_iff, ← Set.preimage_comp, ← TopCat.coe_comp, ← Scheme.Hom.comp_base,
+        ← h.1.1]
+    rw [Scheme.Hom.comp_base, TopCat.coe_comp, ← Set.image_subset_iff, Set.image_comp]
     exact Set.image_mono (Set.image_preimage_subset _ _)
   · obtain ⟨y, hy, heq⟩ := hx
     obtain ⟨o, hl, hr⟩ := exists_preimage_of_isPullback h y x heq

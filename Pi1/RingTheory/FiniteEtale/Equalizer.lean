@@ -107,7 +107,7 @@ lemma Algebra.exists_cover_rankAtStalk_eq {R : Type*} (S : Type*) [CommRing R] [
   apply heq
   apply hrU
   simp only [PrimeSpectrum.basicOpen_eq_zeroLocus_compl, Set.mem_compl_iff,
-    PrimeSpectrum.mem_zeroLocus, Ideal.coe_comap, Set.singleton_subset_iff, Set.mem_preimage,
+    PrimeSpectrum.mem_zeroLocus, Set.singleton_subset_iff,
     SetLike.mem_coe]
   obtain ⟨-, b⟩ := (IsLocalization.isPrime_iff_isPrime_disjoint (.powers r) _ q.asIdeal).mp q.2
   rw [Set.disjoint_left] at b

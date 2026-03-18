@@ -209,7 +209,7 @@ def homEquivAlgHom (X : FiniteEtale (Spec (.of k))) :
         have := congr((CommRingCat.Hom.hom (Scheme.ΓSpecIso (CommRingCat.of K)).hom)
           ($(Over.w x).appTop.hom
             ((Scheme.ΓSpecIso (CommRingCat.of k)).commRingCatIsoToRingEquiv.symm a)))
-        dsimp only [Functor.const_obj_obj, Over.mk_left, Scheme.comp_app,
+        dsimp only [Functor.const_obj_obj, Over.mk_left, Scheme.Hom.comp_app,
           TopologicalSpace.Opens.map_top, CommRingCat.hom_comp, RingHom.coe_comp,
           Function.comp_apply, Functor.id_obj, Over.mk_hom] at this
         dsimp only [Over.mk_left, RingHom.toMonoidHom_eq_coe, OneHom.toFun_eq_coe,
@@ -217,7 +217,7 @@ def homEquivAlgHom (X : FiniteEtale (Spec (.of k))) :
         rw [RingHom.algebraMap_toAlgebra]
         dsimp [Scheme.Hom.appTop]
         convert this
-        · simp [Scheme.Hom.appLE, Scheme.Hom.appTop]
+        · simp [Scheme.Hom.appLE]
         · dsimp [Iso.commRingCatIsoToRingEquiv]
           rw [← CommRingCat.comp_apply]
           rw [← CommRingCat.comp_apply]
@@ -256,7 +256,7 @@ lemma homEquivAlgHom_smul (X : FiniteEtale (Spec (.of k))) [IsConnected X] (g : 
     (homEquivAlgHom k K X) (g • x) = g • (homEquivAlgHom k K X x) := by
   rw [homEquivAlgHom]
   dsimp only [Over.mk_left, AlgHom.toRingHom_eq_coe, Equiv.coe_fn_mk, algEquiv_smul_hom,
-    Scheme.comp_app, TopologicalSpace.Opens.map_top, CommRingCat.hom_comp]
+    Scheme.Hom.comp_app, TopologicalSpace.Opens.map_top, CommRingCat.hom_comp]
   rw [AlgEquiv.smul_algHom_def]
   ext1 a
   dsimp only [AlgHom.coe_mk, RingHom.coe_comp, Function.comp_apply, AlgHom.coe_comp, AlgHom.coe_coe]

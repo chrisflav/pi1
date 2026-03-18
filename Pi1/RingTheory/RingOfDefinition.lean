@@ -93,7 +93,7 @@ lemma exists_preimage_of_coefficients' (f : R →+* S) (t : MvPolynomial ι S)
   choose c h1 h2 using this
   let p : (ι →₀ ℕ) →₀ R := Finsupp.ofSupportFinite c <| by
     apply Set.Finite.subset
-    · exact Finsupp.finite_support t
+    · exact Finsupp.hasFiniteSupport t
     · intro m minc h
       exact minc (h2 m h)
   use p
@@ -119,7 +119,7 @@ lemma exists_preimage_of_coefficients (t : MvPolynomial ι S)
   choose c h1 h2 using this
   let p : (ι →₀ ℕ) →₀ R := Finsupp.ofSupportFinite c <| by
     apply Set.Finite.subset
-    · exact Finsupp.finite_support t
+    · exact Finsupp.hasFiniteSupport t
     · intro m minc h
       exact minc (h2 m h)
   use p
