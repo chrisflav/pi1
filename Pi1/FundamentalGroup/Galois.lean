@@ -3,9 +3,14 @@ Copyright (c) 2025 Christian Merten. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christian Merten
 -/
-import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Etale
-import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Smooth
+import Mathlib.AlgebraicGeometry.Morphisms.Etale
+import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
+import Mathlib.CategoryTheory.MorphismProperty.Limits
+import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
+import Pi1.Mathlib.RingTheory.RingHom.Etale
+import Pi1.Mathlib.RingTheory.RingHom.Smooth
+import Pi1.RingTheory.Smooth.StandardSmoothSmooth
 import Pi1.Mathlib.AlgebraicGeometry.Limits
 import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
 import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations

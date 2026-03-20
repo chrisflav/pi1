@@ -1,5 +1,5 @@
 import Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
-import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Constructors
+import Mathlib.AlgebraicGeometry.Morphisms.Constructors
 
 universe u
 

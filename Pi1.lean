@@ -5,15 +5,10 @@ import Pi1.FundamentalGroup.Galois
 import Pi1.FundamentalGroup.Point
 import Pi1.FundamentalGroup.Rank
 import Pi1.Mathlib.Algebra.Algebra.Equiv
-import Pi1.Mathlib.Algebra.Module.LocalizedModule.Basic
-import Pi1.Mathlib.AlgebraicGeometry.Cover.Directed
 import Pi1.Mathlib.AlgebraicGeometry.Limits
-import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Constructors
-import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Etale
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Finite
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
-import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Smooth
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
 import Pi1.Mathlib.AlgebraicGeometry.PullbackCarrier
 import Pi1.Mathlib.CategoryTheory.Galois.IsFundamentalGroup
@@ -46,7 +41,6 @@ import Pi1.RingTheory.KaehlerBaseChange
 import Pi1.RingTheory.KerTensor
 import Pi1.RingTheory.RankAtStalk
 import Pi1.RingTheory.RingOfDefinition
-import Pi1.RingTheory.RingOfDefinition.Basic
 import Pi1.RingTheory.RingOfDefinition.Ideal
 import Pi1.RingTheory.RingOfDefinition.Utils
 import Pi1.RingTheory.Smooth.KaehlerLocalization

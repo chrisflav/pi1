@@ -9,8 +9,15 @@ import Mathlib.CategoryTheory.Limits.MorphismProperty
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.Composition
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.UnderAdjunction
 import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
-import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Etale
+import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
+import Mathlib.CategoryTheory.MorphismProperty.Limits
+import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
+import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Finite
+import Pi1.Mathlib.RingTheory.RingHom.Etale
+import Pi1.Mathlib.RingTheory.RingHom.Smooth
+import Pi1.RingTheory.SmoothFlat
+import Pi1.RingTheory.Smooth.StandardSmoothSmooth
 import Pi1.FundamentalGroup.AffineColimits
 import Pi1.Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
 import Mathlib.CategoryTheory.Limits.MorphismProperty
