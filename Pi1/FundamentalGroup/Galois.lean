@@ -537,8 +537,8 @@ instance [ConnectedSpace X] (Y : FiniteEtale X) :
   have : ConnectedSpace ↑↑((Functor.fromPUnit X).obj Y.right).toPresheafedSpace := by
     dsimp
     infer_instance
-  exact Y.hom.isOpenMap.finite_connectedComponents_of_finite_preimage_singleton Y.hom.continuous
-    Y.hom.isClosedMap (fun y ↦ Scheme.Hom.finite_preimage_singleton _ y)
+  exact Y.hom.isOpenMap.finite_connectedComponents_of_finite_preimage_singleton Y.hom.isClosedMap
+    Y.hom.continuous (fun y ↦ Scheme.Hom.finite_preimage_singleton _ y)
 
 open MorphismProperty
 

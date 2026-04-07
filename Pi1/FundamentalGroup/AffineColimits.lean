@@ -369,6 +369,7 @@ def toAffine : Affine S ⥤ Over (AffineScheme.mk S inferInstance) where
     apply ObjectProperty.hom_ext
     exact (CategoryTheory.Over.w f.1)
 
+noncomputable
 def fromAffine : Over (AffineScheme.mk S inferInstance) ⥤ Affine S where
   obj X := Affine.mk X.hom.hom
   map {X Y} f := MorphismProperty.Over.homMk f.left.hom congr($((Over.w f)).hom)
