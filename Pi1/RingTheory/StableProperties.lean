@@ -1,4 +1,4 @@
-import Pi1.Mathlib.CategoryTheory.MorphismProperty.UnderAdjunction
+import Mathlib.CategoryTheory.MorphismProperty.OverAdjunction
 import Pi1.FundamentalGroup.AffineAnd
 import Mathlib
 

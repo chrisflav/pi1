@@ -14,7 +14,7 @@ import Pi1.RingTheory.Smooth.StandardSmoothSmooth
 import Pi1.Mathlib.AlgebraicGeometry.Limits
 import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
 import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
-import Pi1.Mathlib.Topology.Connected.Clopen
+import Mathlib.Topology.Connected.CardComponents
 import Pi1.FundamentalGroup.FiniteEtale
 import Pi1.FundamentalGroup.Rank
 import Pi1.RingTheory.FinitePresentation
