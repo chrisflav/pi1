@@ -14,7 +14,7 @@ import Pi1.RingTheory.Smooth.StandardSmoothSmooth
 import Pi1.Mathlib.AlgebraicGeometry.Limits
 import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
 import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
-import Pi1.Mathlib.Topology.Connected.Clopen
+import Mathlib.Topology.Connected.CardComponents
 import Pi1.FundamentalGroup.FiniteEtale
 import Pi1.FundamentalGroup.Rank
 import Pi1.RingTheory.FinitePresentation
@@ -537,8 +537,8 @@ instance [ConnectedSpace X] (Y : FiniteEtale X) :
   have : ConnectedSpace ↑↑((Functor.fromPUnit X).obj Y.right).toPresheafedSpace := by
     dsimp
     infer_instance
-  exact Y.hom.isOpenMap.finite_connectedComponents_of_finite_preimage_singleton Y.hom.continuous
-    Y.hom.isClosedMap (fun y ↦ Scheme.Hom.finite_preimage_singleton _ y)
+  exact Y.hom.isOpenMap.finite_connectedComponents_of_finite_preimage_singleton Y.hom.isClosedMap
+    Y.hom.continuous (fun y ↦ Scheme.Hom.finite_preimage_singleton _ y)
 
 open MorphismProperty
 

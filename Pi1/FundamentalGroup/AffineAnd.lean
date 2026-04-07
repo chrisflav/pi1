@@ -7,7 +7,7 @@ import Mathlib.AlgebraicGeometry.Morphisms.Etale
 import Mathlib.AlgebraicGeometry.Morphisms.Finite
 import Mathlib.CategoryTheory.Limits.MorphismProperty
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.Composition
-import Pi1.Mathlib.CategoryTheory.MorphismProperty.UnderAdjunction
+import Mathlib.CategoryTheory.MorphismProperty.OverAdjunction
 import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
 import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
 import Mathlib.CategoryTheory.MorphismProperty.Limits
