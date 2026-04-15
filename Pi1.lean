@@ -25,6 +25,7 @@ import Pi1.Mathlib.RingTheory.IsTensorProduct
 import Pi1.Mathlib.RingTheory.Presentation
 import Pi1.Mathlib.RingTheory.RingHom.Etale
 import Pi1.Mathlib.RingTheory.RingHom.Finite
+import Pi1.Mathlib.RingTheory.RingHom.FiniteEtale
 import Pi1.Mathlib.RingTheory.RingHom.Integral
 import Pi1.Mathlib.RingTheory.RingHom.Smooth
 import Pi1.Mathlib.RingTheory.TensorProduct.Basic
