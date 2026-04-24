@@ -13,7 +13,8 @@ import Pi1.RingTheory.RankAtStalk
 import Pi1.RingTheory.SmoothFlat
 import Pi1.Mathlib.RingTheory.TensorProduct.Basic
 import Pi1.Mathlib.RingTheory.Etale.Basic
-import Pi1.Mathlib.RingTheory.Unramified.Basic
+import Mathlib.RingTheory.Unramified.Basic
+import Mathlib.RingTheory.Idempotents
 
 /-!
 # Totally split algebras
