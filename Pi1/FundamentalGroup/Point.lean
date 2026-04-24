@@ -219,10 +219,8 @@ def homEquivAlgHom (X : FiniteEtale (Spec (.of k))) :
         convert this
         · simp [Scheme.Hom.appLE]
         · dsimp [Iso.commRingCatIsoToRingEquiv]
-          rw [← CommRingCat.comp_apply]
-          rw [← CommRingCat.comp_apply]
-          rw [Scheme.ΓSpecIso_naturality, Iso.inv_hom_id_assoc]
-          simp
+          rw [← ConcreteCategory.comp_apply]
+          simp [RingHom.comp_apply, Scheme.ΓSpecIso_naturality]
         }
   invFun x := Over.homMk
       (Spec.map (CommRingCat.ofHom x.toRingHom) ≫ X.left.isoSpec.inv) <| by
@@ -248,8 +246,13 @@ def homEquivAlgHom (X : FiniteEtale (Spec (.of k))) :
   right_inv x := by
     apply AlgHom.coe_ringHom_injective
     dsimp
-    rw [← CommRingCat.hom_comp, ← CommRingCat.hom_comp, Category.assoc, Scheme.ΓSpecIso_naturality]
-    rw [← AlgebraicGeometry.Scheme.toSpecΓ_appTop, ← Scheme.comp_app_top_assoc, ← Scheme.Hom.appTop]
+    rw [← CommRingCat.hom_comp, ← CommRingCat.hom_comp]
+    simp only [Category.assoc, Scheme.ΓSpecIso_naturality]
+    rw [← Scheme.Hom.appTop]
+    change CommRingCat.Hom.hom (X.left.isoSpec.inv.appTop ≫
+        (Scheme.ΓSpecIso Γ(X.left, ⊤)).hom ≫ CommRingCat.ofHom x.toRingHom) = _
+    rw [← Scheme.toSpecΓ_appTop, ← Scheme.Hom.comp_appTop_assoc,
+      Scheme.toSpecΓ_isoSpec_inv, Scheme.Hom.id_appTop, Category.id_comp]
     simp
 
 lemma homEquivAlgHom_smul (X : FiniteEtale (Spec (.of k))) [IsConnected X] (g : K ≃ₐ[k] K) (x) :
@@ -260,7 +263,7 @@ lemma homEquivAlgHom_smul (X : FiniteEtale (Spec (.of k))) [IsConnected X] (g : 
   rw [AlgEquiv.smul_algHom_def]
   ext1 a
   dsimp only [AlgHom.coe_mk, RingHom.coe_comp, Function.comp_apply, AlgHom.coe_comp, AlgHom.coe_coe]
-  rw [← CommRingCat.comp_apply]
+  rw [← ConcreteCategory.comp_apply]
   simp
 
 instance isGalois_of_isGalois (X : FiniteEtale (Spec (.of k))) [IsGalois X] :
@@ -296,10 +299,9 @@ lemma eq_one_of_smul_eq [Algebra.IsSeparable k K] (g : K ≃ₐ[k] K)
     refine Over.homMk (Spec.map <| CommRingCat.ofHom L.subtype) ?_
     simp [X, ← Spec.map_comp, Spec.map_injective.eq_iff, ConcreteCategory.ext_iff]
   specialize H X y
-  rw [CommaMorphism.ext_iff] at H
+  rw [CostructuredArrow.ext_iff] at H
   simp only [Over.mk_left, Subalgebra.toSubsemiring_subtype,
-    IntermediateField.coe_type_toSubalgebra, algEquiv_smul_hom, Over.homMk_left,
-    CostructuredArrow.right_eq_id, and_true, y, X] at H
+    IntermediateField.coe_type_toSubalgebra, algEquiv_smul_hom, Over.homMk_left, y, X] at H
   rw [← Spec.map_comp, Spec.map_injective.eq_iff, ConcreteCategory.ext_iff, RingHom.ext_iff] at H
   exact H ⟨x, IntermediateField.mem_adjoin_simple_self k x⟩
 
@@ -312,7 +314,7 @@ instance : IsFundamentalGroup (fib k K) (K ≃ₐ[k] K) where
     simp only [fiberObjEquivHom_symm_naturality, Equiv.apply_symm_apply]
     ext1
     simp only [Over.mk_left, Over.comp_left, algEquiv_smul_hom, Category.assoc]
-    rw [← Over.comp_left, fiberObjEquivHom_naturality]
+    simp [← Over.comp_left, fiberObjEquivHom_naturality]
   continuous_smul X := by
     constructor
     let u : (K ≃ₐ[k] K) × (fib k K).obj X → (fib k K).obj X :=
