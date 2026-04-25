@@ -44,5 +44,4 @@ import Pi1.RingTheory.Smooth.StandardSmoothSmooth
 import Pi1.RingTheory.SmoothDescent
 import Pi1.RingTheory.SmoothFlat
 import Pi1.RingTheory.StableProperties
-import Pi1.RingTheory.TotallySplit
 import Pi1.RingTheory.Transcendence
