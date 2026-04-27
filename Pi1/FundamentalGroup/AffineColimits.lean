@@ -422,12 +422,12 @@ def pullbackΓIso : (pullback f).op ⋙ Γ T ≅ Γ S ⋙ Under.pushout (f.app �
     apply pushout.hom_ext
     · rw [pushout.inl_desc]
       simp only [inl_ΓpullbackIsoPushout_inv_assoc]
-      rw [← Scheme.comp_app_top_assoc]
+      rw [← Scheme.Hom.comp_appTop_assoc]
       rw [pullback.lift_fst]
       simp
     · simp only [inr_ΓpullbackIsoPushout_inv_assoc, colimit.ι_desc,
         PushoutCocone.mk_pt, PushoutCocone.mk_ι_app]
-      rw [← Scheme.comp_app_top_assoc]
+      rw [← Scheme.Hom.comp_appTop_assoc]
       rw [pullback.lift_snd]
       simp
 

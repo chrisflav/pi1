@@ -17,7 +17,6 @@ import Pi1.Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.Composition
 import Pi1.Mathlib.CategoryTheory.MorphismProperty.Limits
 import Pi1.Mathlib.RingTheory.Etale.Basic
-import Pi1.Mathlib.RingTheory.Extension.Cotangent.BaseChange
 import Pi1.Mathlib.RingTheory.Flat.Equalizer
 import Pi1.Mathlib.RingTheory.Geometric
 import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
@@ -28,7 +27,6 @@ import Pi1.Mathlib.RingTheory.RingHom.Finite
 import Pi1.Mathlib.RingTheory.RingHom.Integral
 import Pi1.Mathlib.RingTheory.RingHom.Smooth
 import Pi1.Mathlib.RingTheory.TensorProduct.Basic
-import Pi1.Mathlib.RingTheory.Unramified.Basic
 import Pi1.RingTheory.CotangentBaseChange
 import Pi1.RingTheory.FiniteEtale.Basic
 import Pi1.RingTheory.FiniteEtale.Descent
@@ -46,5 +44,4 @@ import Pi1.RingTheory.Smooth.StandardSmoothSmooth
 import Pi1.RingTheory.SmoothDescent
 import Pi1.RingTheory.SmoothFlat
 import Pi1.RingTheory.StableProperties
-import Pi1.RingTheory.TotallySplit
 import Pi1.RingTheory.Transcendence

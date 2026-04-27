@@ -4,6 +4,7 @@ import Mathlib.RingTheory.Henselian
 import Mathlib.RingTheory.LocalProperties.Exactness
 import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
 import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
+import Mathlib.RingTheory.Flat.Rank
 import Mathlib.RingTheory.Support
 import Mathlib.RingTheory.TensorProduct.IsBaseChangePi
 import Pi1.Mathlib.RingTheory.RingHom.Integral
@@ -11,23 +12,6 @@ import Pi1.Mathlib.RingTheory.RingHom.Integral
 universe u
 
 open TensorProduct
-
-section
-
-/-- If `R → S` is surjective, the multiplication map `S ⊗[R] S → S` is an isomorphism, this
-is the algebraic version of closed immersions are monomorphisms. -/
-lemma LinearMap.mul'_bijective_of_surjective {R S : Type*} [CommRing R] [CommRing S]
-      [Algebra R S] (H : Function.Surjective (algebraMap R S)) :
-    Function.Bijective (LinearMap.mul' R S) :=
-  have : TensorProduct.CompatibleSMul R S S S := by
-    refine ⟨fun r m n ↦ ?_⟩
-    obtain ⟨r, rfl⟩ := H r
-    obtain ⟨m, rfl⟩ := H m
-    obtain ⟨n, rfl⟩ := H n
-    rw [smul_eq_mul, smul_eq_mul, ← Algebra.smul_def, TensorProduct.smul_tmul, Algebra.smul_def]
-  (Algebra.TensorProduct.lmulEquiv R S).bijective
-
-end
 
 section rankAtStalk
 
@@ -142,25 +126,6 @@ lemma Algebra.surjective_algebraMap_of_rankAtStalk_le_one
   · refine (Algebra.bijective_algebraMap_of_free ?_).2
     rw [← Module.rankAtStalk_eq_finrank_tensorProduct ⟨p, inferInstance⟩]
     omega
-
-variable (R) (S) in
-/-- If `S` is a finite and flat `R`-algebra, `R → S` is surjective iff `S ⊗[R] S → S` is an
-isomorphism iff the rank of `S` is at most `1` at all primes. -/
-lemma Module.Flat.tfae_algebraMap_surjective :
-    [Function.Surjective (algebraMap R S),
-      Function.Bijective (LinearMap.mul' R S),
-      (∀ p, Module.rankAtStalk (R := R) S p ≤ 1)].TFAE := by
-  tfae_have 1 → 2 := LinearMap.mul'_bijective_of_surjective
-  tfae_have 2 → 3 := fun H ↦ by
-    intro p
-    have h : Module.rankAtStalk (S ⊗[R] S) p = Module.rankAtStalk S p ^ 2 := by
-      simp [Module.rankAtStalk_tensorProduct, sq]
-    by_contra! hc
-    apply Nat.succ_succ_ne_one 0
-    rw [← Nat.pow_eq_self_iff hc, ← h, Module.rankAtStalk_eq_of_equiv
-      (AlgEquiv.ofBijective (Algebra.TensorProduct.lmul' R (S := S)) H).toLinearEquiv]
-  tfae_have 3 → 1 := Algebra.surjective_algebraMap_of_rankAtStalk_le_one
-  tfae_finish
 
 lemma Algebra.rankAtStalk_le_one_iff_surjective :
     (∀ p, Module.rankAtStalk (R := R) S p ≤ 1) ↔ Function.Surjective (algebraMap R S) :=

@@ -54,7 +54,7 @@ def Under.congr [P.RespectsIso] [Q.RespectsIso] {X Y : C} (e : X ≅ Y) :
 
 @[simps]
 noncomputable def pushoutIsoOfIso [HasPushouts C] {X Y X' Y' Z : C} {f : X ⟶ Y} {f' : X' ⟶ Y'}
-    (e : Arrow.mk f ≅ Arrow.mk f') (g : X ⟶ Z) :
+    (e : CategoryTheory.Arrow.mk f ≅ CategoryTheory.Arrow.mk f') (g : X ⟶ Z) :
     pushout g f ≅ pushout (e.inv.left ≫ g) f' where
   hom := pushout.map _ _ _ _ (𝟙 Z) e.hom.right e.hom.left (by simp) (by simp)
   inv := pushout.map _ _ _ _ (𝟙 Z) e.inv.right e.inv.left (by simp) (by simp)
@@ -67,7 +67,8 @@ def Under.congrPushoutIso [HasPushouts C] [P.IsStableUnderCobaseChange]
     (Under.congr P Q eX).functor ⋙ Under.pushout P Q f' ≅
       Under.pushout P Q f ⋙ (Under.congr P Q eY).functor :=
   NatIso.ofComponents
-    (fun A ↦ Under.isoMk ((pushoutIsoOfIso (Arrow.isoMk eX eY h.symm) A.hom).symm)) <|
+    (fun A ↦ Under.isoMk
+      ((pushoutIsoOfIso (CategoryTheory.Arrow.isoMk eX eY h.symm) A.hom).symm)) <|
     fun {A B} g ↦ by
       ext
       apply pushout.hom_ext <;> simp [Under.pushout]
@@ -181,9 +182,7 @@ def _root_.CommRingCat.Under.createsFiniteProductsForget (hQi : RingHom.Respects
         HasLimit.isoOfNatIso (Discrete.natIso fun i ↦ eqToIso <| by simp) ≪≫
         limit.isoLimitCone ⟨CommRingCat.Under.piFan' <| fun i ↦ (pres.diag.obj ⟨i⟩),
           CommRingCat.Under.piFanIsLimit' <| fun i ↦ (pres.diag.obj ⟨i⟩)⟩
-    have := Under.w e.inv
-    simp only [commaObj_iff, Functor.const_obj_obj, Functor.id_obj]
-    rw [← this]
+    simp only [commaObj_iff, Functor.const_obj_obj, Functor.id_obj, ← Under.w e.inv]
     have : (RingHom.toMorphismProperty Q).RespectsIso :=
       RingHom.toMorphismProperty_respectsIso_iff.mp hQi
     rw [MorphismProperty.cancel_right_of_respectsIso (P := RingHom.toMorphismProperty Q)]
@@ -219,9 +218,7 @@ def _root_.CommRingCat.Under.createsEqualizersForget (hQi : RingHom.RespectsIso 
           ⟨CommRingCat.Under.equalizerFork (pres.diag.map .left) (pres.diag.map .right),
             CommRingCat.Under.equalizerForkIsLimit
               (pres.diag.map .left) (pres.diag.map .right)⟩
-    have := Under.w e.inv
-    simp only [commaObj_iff, Functor.const_obj_obj, Functor.id_obj]
-    rw [← this]
+    simp only [commaObj_iff, Functor.const_obj_obj, Functor.id_obj, ← Under.w e.inv]
     have : (RingHom.toMorphismProperty Q).RespectsIso :=
       RingHom.toMorphismProperty_respectsIso_iff.mp hQi
     rw [MorphismProperty.cancel_right_of_respectsIso (P := RingHom.toMorphismProperty Q)]
@@ -290,7 +287,7 @@ def createsFiniteColimits (hQi : RingHom.RespectsIso Q) (hQp : RingHom.HasFinite
         colimit (D' ⋙ Affine.pullback U.1.ι) :=
       preservesColimitIso (Affine.pullback U.1.ι) D'
     erw [P.over_iso_iff ((MorphismProperty.Comma.forget _ _ _ _ _).mapIso i)]
-    simp only [Comma.forget_obj, Functor.id_obj, Functor.const_obj_obj]
+    simp only [Comma.forget_obj]
     let i₂ : (Affine.Γ U.1).rightOp.obj (colimit (D' ⋙ Affine.pullback U.1.ι)) ≅
         colimit (D' ⋙ Affine.pullback U.1.ι ⋙ (Affine.Γ U.1).rightOp) :=
       preservesColimitIso (Affine.Γ U.1).rightOp (D' ⋙ Affine.pullback U.1.ι)
@@ -309,7 +306,7 @@ def createsFiniteColimits (hQi : RingHom.RespectsIso Q) (hQp : RingHom.HasFinite
     have heq : (colimit (D' ⋙ Affine.pullback U.1.ι)).hom.appTop =
         ((Affine.Γ U.1).rightOp.obj (colimit (D' ⋙ Affine.pullback U.1.ι))).unop.hom := rfl
     rw [heq, ← this, CommRingCat.hom_comp]
-    simp only [Functor.id_obj, Functor.rightOp_obj]
+    simp only [Functor.rightOp_obj]
     rw [hQi.cancel_right_isIso]
     apply _root_.CommRingCat.Under.property_limit_of_hasFiniteProducts_of_hasEqualizers
     · exact hQi
@@ -445,7 +442,7 @@ lemma isEquivalence_ΓProp (hQi : RingHom.RespectsIso Q) {S : Scheme.{u}} [IsAff
   full := full_ΓProp ..
   essSurj := essSurj_ΓProp ..
 
-attribute [reassoc (attr := simp)] Scheme.appLE_comp_appLE
+attribute [simp] Scheme.Hom.appLE_comp_appLE Scheme.Hom.appLE_comp_appLE_assoc
 
 noncomputable
 def pullbackΓPropIso [(RingHom.toMorphismProperty Q).IsStableUnderCobaseChange]
@@ -606,7 +603,7 @@ def _root_.CategoryTheory.IsPullback.arrowMkSndIso
     {fst : P ⟶ X} {snd : P ⟶ Y} {f : X ⟶ Z} {g : Y ⟶ Z}
     {P' : C} {fst' : P' ⟶ X} {snd' : P' ⟶ Y} (h : IsPullback fst snd f g)
     (h' : IsPullback fst' snd' f g) :
-    Arrow.mk snd ≅ Arrow.mk snd' :=
+    CategoryTheory.Arrow.mk snd ≅ CategoryTheory.Arrow.mk snd' :=
   Arrow.isoMk (h.isoIsPullback _ _ h') (Iso.refl _) (by simp)
 
 noncomputable
@@ -615,7 +612,7 @@ def _root_.CategoryTheory.IsPullback.arrowMkFstIso
     {fst : P ⟶ X} {snd : P ⟶ Y} {f : X ⟶ Z} {g : Y ⟶ Z}
     {P' : C} {fst' : P' ⟶ X} {snd' : P' ⟶ Y} (h : IsPullback fst snd f g)
     (h' : IsPullback fst' snd' f g) :
-    Arrow.mk fst ≅ Arrow.mk fst' :=
+    CategoryTheory.Arrow.mk fst ≅ CategoryTheory.Arrow.mk fst' :=
   Arrow.isoMk (h.isoIsPullback _ _ h') (Iso.refl _) (by simp)
 
 noncomputable
@@ -660,7 +657,7 @@ noncomputable
 def _root_.CategoryTheory.Limits.colimit.arrowMkPostIsoOfIso {J C D : Type*} [Category J]
     [Category C] [Category D] (K : J ⥤ C) (F F' : C ⥤ D)
     (e : F ≅ F') [HasColimit K] [HasColimit (K ⋙ F)] [HasColimit (K ⋙ F')] :
-    Arrow.mk (colimit.post K F) ≅ Arrow.mk (colimit.post K F') :=
+    CategoryTheory.Arrow.mk (colimit.post K F) ≅ CategoryTheory.Arrow.mk (colimit.post K F') :=
   Arrow.isoMk (HasColimit.isoOfNatIso <| Functor.isoWhiskerLeft K e) (e.app _)
     (by apply colimit.hom_ext; simp)
 

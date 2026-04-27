@@ -1,5 +1,4 @@
 import Mathlib
-import Pi1.RingTheory.TotallySplit
 import Pi1.Mathlib.RingTheory.RingHom.Etale
 import Pi1.Mathlib.RingTheory.RingHom.Finite
 
@@ -18,11 +17,8 @@ lemma Algebra.FiniteEtale.of_equiv {R S S' : Type u} [CommRing R] [CommRing S] [
   have := Module.Finite.equiv e.toLinearEquiv
   constructor
 
-instance (n : ℕ) (R S : Type u) [CommRing R] [CommRing S] [Algebra R S]
-    [Algebra.IsSplitOfRank n R S] : Algebra.FiniteEtale R S := by
-  obtain ⟨e⟩ := Algebra.IsSplitOfRank.nonempty_algEquiv_fun n R S
-  have : Algebra.FiniteEtale R (Fin n → R) := by constructor
-  exact Algebra.FiniteEtale.of_equiv e.symm
+instance (R S : Type u) [CommRing R] [CommRing S] [Algebra R S]
+    [Algebra.IsFiniteSplit R S] : Algebra.FiniteEtale R S where
 
 section
 

@@ -57,7 +57,7 @@ noncomputable def baseChangeHom (hJ : J ≤ Ideal.comap (MvPolynomial.map <| alg
   fapply Algebra.TensorProduct.lift
   · exact Algebra.ofId _ _
   · let f : MvPolynomial ι R →ₐ[R] MvPolynomial ι S :=
-      MvPolynomial.aeval MvPolynomial.X
+      MvPolynomial.mapAlgHom (Algebra.ofId R S)
     let g : MvPolynomial ι S →ₐ[R] MvPolynomial ι S ⧸ I :=
       Ideal.Quotient.mkₐ R I
     fapply Ideal.Quotient.liftₐ
@@ -67,7 +67,7 @@ noncomputable def baseChangeHom (hJ : J ≤ Ideal.comap (MvPolynomial.map <| alg
     rw [← RingHom.mem_ker]
     change f x ∈ RingHom.ker (Ideal.Quotient.mkₐ R I)
     erw [Ideal.Quotient.mkₐ_ker R I]
-    exact (hJ hx)
+    exact Ideal.mem_comap.mp (hJ hx)
   · intro s p
     apply mul_comm
 

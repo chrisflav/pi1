@@ -3,6 +3,8 @@ import Pi1.RingTheory.FiniteEtale.Equalizer
 import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Pi1.Mathlib.RingTheory.Flat.Equalizer
 
+attribute [local instance] Module.FinitePresentation.of_finite_of_finitePresentation
+
 set_option linter.unusedTactic false
 
 open TensorProduct
@@ -293,34 +295,34 @@ lemma AlgHom.IsSplit.iff_of_isScalarTower
 
 namespace Algebra
 
-lemma exists_isSplitOfRank [Module.Finite R A] [Algebra.Etale R A]
+lemma exists_isFiniteSplit [Module.Finite R A] [Algebra.Etale R A]
     (p : PrimeSpectrum R) :
-    ∃ (S : Type u) (_ : CommRing S) (_ : Algebra R S) (n : ℕ),
+    ∃ (S : Type u) (_ : CommRing S) (_ : Algebra R S),
       Module.Flat R S ∧
       IsOpenMap (PrimeSpectrum.comap (algebraMap R S)) ∧
       p ∈ Set.range (PrimeSpectrum.comap (algebraMap R S)) ∧
-      Algebra.IsSplitOfRank n S (S ⊗[R] A) := by
+      Algebra.IsFiniteSplit S (S ⊗[R] A) := by
   wlog h : ∃ (n : ℕ), Module.rankAtStalk (R := R) A = n
   · obtain ⟨r, hr, hn⟩ := Algebra.exists_cover_rankAtStalk_eq A p.asIdeal
     obtain ⟨p', rfl⟩ : p ∈ Set.range
         (PrimeSpectrum.comap <| algebraMap R (Localization.Away r)) := by
       rwa [PrimeSpectrum.localization_away_comap_range _ r]
-    obtain ⟨S, _, _, n, _, ho, ⟨q, rfl⟩, h⟩ := this p' ⟨_, hn⟩
+    obtain ⟨S, _, _, _, ho, ⟨q, rfl⟩, h⟩ := this p' ⟨_, hn⟩
     let _ : Algebra R S := Algebra.compHom S (algebraMap R (Localization.Away r))
     have : IsScalarTower R (Localization.Away r) S := IsScalarTower.of_algebraMap_eq' rfl
     let e : S ⊗[Localization.Away r] (Localization.Away r ⊗[R] A) ≃ₐ[S] S ⊗[R] A :=
       TensorProduct.cancelBaseChange ..
-    refine ⟨S, inferInstance, inferInstance, n, ?_, ?_, ⟨q, rfl⟩, ?_⟩
+    refine ⟨S, inferInstance, inferInstance, ?_, ?_, ⟨q, rfl⟩, ?_⟩
     · exact Module.Flat.trans R (Localization.Away r) S
     · rw [IsScalarTower.algebraMap_eq R (Localization.Away r) S, PrimeSpectrum.comap_comp]
       exact (PrimeSpectrum.localization_away_isOpenEmbedding _ r).isOpenMap.comp ho
-    · exact IsSplitOfRank.of_equiv (S := S ⊗[Localization.Away r] (Localization.Away r ⊗[R] A)) e
+    · exact IsFiniteSplit.of_algEquiv (S := S ⊗[Localization.Away r] (Localization.Away r ⊗[R] A)) e
   obtain ⟨n, hn⟩ := h
-  obtain ⟨S, _, _, _, _, hS⟩ := Algebra.IsSplitOfRank.exists_isSplitOfRank_tensorProduct hn
+  obtain ⟨S, _, _, _, _, _, hS⟩ := Algebra.IsFiniteSplit.exists_tensorProduct_of_etale hn
   obtain ⟨p, rfl⟩ := PrimeSpectrum.comap_surjective_of_faithfullyFlat (B := S) p
   have homap : IsOpenMap (PrimeSpectrum.comap (algebraMap R S)) :=
     PrimeSpectrum.isOpenMap_comap_of_hasGoingDown_of_finitePresentation
-  refine ⟨S, inferInstance, inferInstance, n, ?_, homap, ⟨p, rfl⟩, hS⟩
+  refine ⟨S, inferInstance, inferInstance, ?_, homap, ⟨p, rfl⟩, hS⟩
   exact Module.Flat.trans _ S _
 
 lemma exists_isSplit [Module.Finite R A] [Algebra.Etale R A]
@@ -332,29 +334,28 @@ lemma exists_isSplit [Module.Finite R A] [Algebra.Etale R A]
       p ∈ Set.range (PrimeSpectrum.comap (algebraMap R S)) ∧
       (TensorProduct.map (AlgHom.id S S) f).IsSplit := by
   classical
-  wlog h : ∃ (n : ℕ), IsSplitOfRank n R A
-  · obtain ⟨S, _, _, n, _, ho₁, ⟨p, rfl⟩, hS⟩ := exists_isSplitOfRank p (A := A)
-    obtain ⟨S', _, _, _, ho₂, ⟨q, rfl⟩, hS'⟩ := this (TensorProduct.map (.id S S) f) p ⟨n, hS⟩
+  wlog hA : IsFiniteSplit R A
+  · obtain ⟨S, _, _, _, ho₁, ⟨p, rfl⟩, hS⟩ := exists_isFiniteSplit p (A := A)
+    obtain ⟨S', _, _, _, ho₂, ⟨q, rfl⟩, hS'⟩ := this (TensorProduct.map (.id S S) f) p hS
     let _ : Algebra R S' := Algebra.compHom S' (algebraMap R S)
     have : IsScalarTower R S S' := .of_algebraMap_eq' rfl
     refine ⟨S', inferInstance, inferInstance, Module.Flat.trans R S S', ?_, ⟨q, rfl⟩, ?_⟩
     · rw [IsScalarTower.algebraMap_eq R S S', PrimeSpectrum.comap_comp]
       exact ho₁.comp ho₂
     · rwa [AlgHom.IsSplit.iff_of_isScalarTower S]
-  obtain ⟨n, hn⟩ := h
-  wlog h : ∃ (m : ℕ), IsSplitOfRank m R B
-  · obtain ⟨S, _, _, m, _, ho₁, ⟨p, rfl⟩, hS⟩ := exists_isSplitOfRank p (A := B)
+  wlog hB : IsFiniteSplit R B
+  · obtain ⟨S, _, _, _, ho₁, ⟨p, rfl⟩, hS⟩ := exists_isFiniteSplit p (A := B)
     obtain ⟨S', _, _, _, ho₂, ⟨q, rfl⟩, hS'⟩ := this
       (A := S ⊗[R] A) (B := S ⊗[R] B) (R := S)
-      (TensorProduct.map (.id S S) f) p n inferInstance ⟨m, hS⟩
+      (TensorProduct.map (.id S S) f) p inferInstance hS
     let _ : Algebra R S' := Algebra.compHom S' (algebraMap R S)
     have : IsScalarTower R S S' := .of_algebraMap_eq' rfl
     refine ⟨S', inferInstance, inferInstance, Module.Flat.trans R S S', ?_, ⟨q, rfl⟩, ?_⟩
     · rw [IsScalarTower.algebraMap_eq R S S', PrimeSpectrum.comap_comp]
       exact ho₁.comp ho₂
     · rwa [AlgHom.IsSplit.iff_of_isScalarTower S]
-  obtain ⟨⟨eA⟩⟩ := hn
-  obtain ⟨m, ⟨⟨eB⟩⟩⟩ := h
+  obtain ⟨n, ⟨eA⟩⟩ := hA
+  obtain ⟨m, ⟨eB⟩⟩ := hB
   let f' : (Fin n → R) →ₐ[R] Fin m → R := eB.toAlgHom.comp (f.comp eA.symm.toAlgHom)
   obtain ⟨r, hr, σ, hσ⟩ := AlgHom.exists_cover_eq_compRight'' f' p.asIdeal
   refine ⟨Localization.Away r, inferInstance, inferInstance, inferInstance,

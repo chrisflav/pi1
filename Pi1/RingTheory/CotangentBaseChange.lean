@@ -2,7 +2,6 @@ import Mathlib
 import Pi1.RingTheory.KaehlerBaseChange
 import Pi1.RingTheory.FiveLemma
 import Pi1.Mathlib.RingTheory.TensorProduct.Basic
-import Pi1.Mathlib.RingTheory.Extension.Cotangent.BaseChange
 
 noncomputable section
 

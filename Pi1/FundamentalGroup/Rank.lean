@@ -37,13 +37,11 @@ lemma Algebra.IsPushout.of_bijective_left (R S T : Type*) [CommRing R] [CommRing
     [CommRing T] [Algebra R T] [Algebra S T] [IsScalarTower R S T]
     (H : Function.Bijective (algebraMap R S)) :
     Algebra.IsPushout R T S T := by
-  have : IsLocalization (algebraMapSubmonoid T <| IsUnit.submonoid R) T := by
-    apply IsLocalization.at_units _ _
-    rintro x ⟨a, ha, rfl⟩
-    exact ha.map _
+  have : IsLocalization (algebraMapSubmonoid T <| IsUnit.submonoid R) T :=
+    IsLocalization.of_le_isUnit Algebra.algebraMapSubmonoid_isUnit_le
   have : IsLocalization (IsUnit.submonoid R) S := by
     rw [← IsLocalization.isLocalization_iff_of_algEquiv _ (.ofBijective (Algebra.ofId R S) H)]
-    exact IsLocalization.at_units (IsUnit.submonoid R) le_rfl
+    exact IsLocalization.of_le_isUnit le_rfl
   apply Algebra.isPushout_of_isLocalization (IsUnit.submonoid R)
 
 lemma Algebra.IsPushout.of_bijective_right (R S T : Type*) [CommRing R] [CommRing S] [Algebra R S]
@@ -52,11 +50,7 @@ lemma Algebra.IsPushout.of_bijective_right (R S T : Type*) [CommRing R] [CommRin
     Algebra.IsPushout R S R T := by
   have : IsLocalization (algebraMapSubmonoid S (IsUnit.submonoid R)) T := by
     rw [← IsLocalization.isLocalization_iff_of_algEquiv _ (.ofBijective (Algebra.ofId S T) H)]
-    refine IsLocalization.at_units _ (fun x ↦ ?_)
-    rintro ⟨a, ha, rfl⟩
-    exact ha.map _
-  have : IsLocalization (IsUnit.submonoid R) R :=
-    IsLocalization.at_units _ le_rfl
+    exact IsLocalization.of_le_isUnit Algebra.algebraMapSubmonoid_isUnit_le
   apply Algebra.isPushout_of_isLocalization (IsUnit.submonoid R)
 
 lemma RingHom.finrank_comp_left_of_bijective {R S T : Type*} [CommRing R] [CommRing S] [CommRing T]

@@ -1,7 +1,9 @@
-import Pi1.RingTheory.TotallySplit
 import Pi1.RingTheory.FiniteEtale.Descent
+import Mathlib.RingTheory.TotallySplit
 import Mathlib.RingTheory.Flat.Equalizer
 import Mathlib.RingTheory.Flat.Localization
+
+attribute [local instance] Module.FinitePresentation.of_finite_of_finitePresentation
 
 open TensorProduct
 
@@ -121,9 +123,9 @@ end rankAtStalk
 namespace RingHom
 
 /-- A ring hom is split of (constant) rank `n` if `S` is `R`-split of rank `n`. -/
-def IsSplitOfRank (n : ℕ) {R S : Type*} [CommRing R] [CommRing S] (f : R →+* S) : Prop :=
+def IsFiniteSplit {R S : Type*} [CommRing R] [CommRing S] (f : R →+* S) : Prop :=
   letI : Algebra R S := f.toAlgebra
-  Algebra.IsSplitOfRank n R S
+  Algebra.IsFiniteSplit R S
 
 end RingHom
 
@@ -168,9 +170,9 @@ def AlgHom.equalizerCompRightEquiv (R S : Type*) [CommRing R] [CommRing S] [Alge
     (by ext f x; simp)
 
 instance (R : Type*) [CommRing R] [Finite E] [Finite F] (σ τ : E → F) :
-    Algebra.IsSplitOfRank (Nat.card (Function.Coequalizer σ τ)) R
+    Algebra.IsFiniteSplit R
       (AlgHom.equalizer (AlgHom.compRight R R σ) (AlgHom.compRight R R τ)) :=
-  Algebra.IsSplitOfRank.of_card_eq rfl (AlgHom.equalizerCompRightEquiv R R σ τ)
+  Algebra.IsFiniteSplit.of_algEquiv (AlgHom.equalizerCompRightEquiv R R σ τ).symm
 
 lemma AlgHom.eq_compRight_of_no_nontrivial_isIdempotentElem {R E F : Type*} [_root_.Finite E]
     [Nonempty E] [CommRing R] (H : ∀ e : R, IsIdempotentElem e → e = 0 ∨ e = 1)
@@ -383,14 +385,17 @@ lemma Algebra.FiniteEtale.equalizer_fun {R : Type u} {E F : Type} [CommRing R] [
   let cong : A ⊗[R] AlgHom.equalizer f g ≃ₐ[A] A ⊗[R]
       AlgHom.equalizer (AlgHom.compRight R R σ) (AlgHom.compRight R R τ) :=
     cong₁.trans (cong₂.trans cong₃)
+  have : FiniteEtale
+      A (A ⊗[R] ↥(AlgHom.equalizer (AlgHom.compRight R R σ) (AlgHom.compRight R R τ))) := by
+    constructor
   apply Algebra.FiniteEtale.of_equiv cong.symm
 
-lemma Algebra.FiniteEtale.equalizer_of_isSplitOfRank {R S T : Type u} {n m : ℕ} [CommRing R]
+lemma Algebra.FiniteEtale.equalizer_of_isFiniteSplit {R S T : Type u} [CommRing R]
     [CommRing S] [CommRing T] [Algebra R S]
-    [Algebra R T] [Algebra.IsSplitOfRank n R S] [Algebra.IsSplitOfRank m R T] (f g : S →ₐ[R] T) :
+    [Algebra R T] [Algebra.IsFiniteSplit R S] [Algebra.IsFiniteSplit R T] (f g : S →ₐ[R] T) :
     Algebra.FiniteEtale R (AlgHom.equalizer f g) := by
-  obtain ⟨eS⟩ := Algebra.IsSplitOfRank.nonempty_algEquiv_fun n R S
-  obtain ⟨eT⟩ := Algebra.IsSplitOfRank.nonempty_algEquiv_fun m R T
+  obtain ⟨n, ⟨eS⟩⟩ := Algebra.IsFiniteSplit.nonempty_algEquiv_fun R S
+  obtain ⟨m, ⟨eT⟩⟩ := Algebra.IsFiniteSplit.nonempty_algEquiv_fun R T
   let f' : (Fin n → R) →ₐ[R] Fin m → R := eT.toAlgHom.comp (f.comp eS.symm)
   let g' : (Fin n → R) →ₐ[R] Fin m → R := eT.toAlgHom.comp (g.comp eS.symm)
   have : Algebra.FiniteEtale R (AlgHom.equalizer f' g') :=
@@ -405,8 +410,8 @@ lemma Algebra.FiniteEtale.equalizer_of_rankAtStalk_eq {R S T : Type u} [CommRing
     {n m : ℕ} (hn : Module.rankAtStalk (R := R) S = n) (hm : Module.rankAtStalk (R := R) T = m)
     (f g : S →ₐ[R] T) :
     Algebra.FiniteEtale R (AlgHom.equalizer f g) := by
-  wlog hS : Algebra.IsSplitOfRank n R S
-  · obtain ⟨A, _, _, _, _, hA⟩ := Algebra.IsSplitOfRank.exists_isSplitOfRank_tensorProduct hn
+  wlog hS : Algebra.IsFiniteSplit R S
+  · obtain ⟨A, _, _, _, _, _, hA⟩ := Algebra.IsFiniteSplit.exists_tensorProduct_of_etale hn
     let f' : A ⊗[R] S →ₐ[A] A ⊗[R] T := Algebra.TensorProduct.map (AlgHom.id _ _) f
     let g' : A ⊗[R] S →ₐ[A] A ⊗[R] T := Algebra.TensorProduct.map (AlgHom.id _ _) g
     let cong : A ⊗[R] AlgHom.equalizer f g ≃ₐ[A] AlgHom.equalizer f' g' :=
@@ -423,9 +428,9 @@ lemma Algebra.FiniteEtale.equalizer_of_rankAtStalk_eq {R S T : Type u} [CommRing
     have : Algebra.FiniteEtale A (A ⊗[R] AlgHom.equalizer f g) :=
       Algebra.FiniteEtale.of_equiv cong.symm
     exact Algebra.FiniteEtale.of_finiteEtale_tensorProduct_of_faithfullyFlat A
-  clear hn
-  wlog hT : Algebra.IsSplitOfRank m R T
-  · obtain ⟨A, _, _, _, _, hA⟩ := Algebra.IsSplitOfRank.exists_isSplitOfRank_tensorProduct hm
+  clear n hn
+  wlog hT : Algebra.IsFiniteSplit R T
+  · obtain ⟨A, _, _, _, _, _, hA⟩ := Algebra.IsFiniteSplit.exists_tensorProduct_of_etale hm
     let f' : A ⊗[R] S →ₐ[A] A ⊗[R] T := Algebra.TensorProduct.map (AlgHom.id _ _) f
     let g' : A ⊗[R] S →ₐ[A] A ⊗[R] T := Algebra.TensorProduct.map (AlgHom.id _ _) g
     let cong : A ⊗[R] AlgHom.equalizer f g ≃ₐ[A] AlgHom.equalizer f' g' :=
@@ -440,7 +445,7 @@ lemma Algebra.FiniteEtale.equalizer_of_rankAtStalk_eq {R S T : Type u} [CommRing
     have : Algebra.FiniteEtale A (A ⊗[R] AlgHom.equalizer f g) :=
       Algebra.FiniteEtale.of_equiv cong.symm
     exact Algebra.FiniteEtale.of_finiteEtale_tensorProduct_of_faithfullyFlat A
-  apply Algebra.FiniteEtale.equalizer_of_isSplitOfRank
+  apply Algebra.FiniteEtale.equalizer_of_isFiniteSplit
 
 set_option maxHeartbeats 0 in
 theorem Algebra.Etale.equalizer {R S T : Type u} [CommRing R] [CommRing S] [CommRing T]

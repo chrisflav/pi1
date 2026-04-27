@@ -116,7 +116,7 @@ instance {Ω : Type u} [Field Ω] (X : FiniteEtale (Spec (.of Ω))) : Fintype X.
 @[simps]
 def forgetScheme (Ω : Type u) [Field Ω] : FiniteEtale (Spec (.of Ω)) ⥤ FintypeCat.{u} where
   obj X := FintypeCat.of X.left
-  map {X Y} f := ⟨f.left.base⟩
+  map {X Y} f := { hom := TypeCat.ofHom (⇑f.left : ↥X.left → ↥Y.left) }
 
 variable (Ω : Type u) [Field Ω]
 
