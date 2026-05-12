@@ -481,11 +481,11 @@ instance {X : Scheme.{u}} [Finite (_root_.ConnectedComponents X)]
 lemma _root_.AlgebraicGeometry.IsFiniteEtale.isIso_of_isIso_snd {X Y Z : Scheme.{u}} (f : X ⟶ Z)
     (g : Y ⟶ Z) [IsFiniteEtale f] [PreconnectedSpace Z] [Nonempty Y]
     [IsIso (pullback.snd f g)] : IsIso f := by
-  rw [isIso_iff_rank_eq]
+  rw [f.isIso_iff_finrank_eq]
   obtain ⟨y⟩ := ‹Nonempty Y›
   ext z
-  rw [finrank_eq_const_of_preconnectedSpace f z (g.base y), ← finrank_pullback_snd,
-    finrank_eq_one_of_isIso, Pi.one_apply, Pi.one_apply]
+  rw [finrank_eq_const_of_preconnectedSpace f z (g.base y), ← Scheme.Hom.finrank_pullback_snd,
+    Scheme.Hom.finrank_eq_one_of_isIso, Pi.one_apply, Pi.one_apply]
 
 instance {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z) [IsFiniteEtale g] :
     IsFiniteEtale (pullback.fst f g) :=
@@ -498,11 +498,11 @@ instance {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z) [IsFiniteEtale f] :
 instance _root_.AlgebraicGeometry.IsFiniteEtale.surjective {X Y : Scheme.{u}} (f : X ⟶ Y)
     [PreconnectedSpace Y] [Nonempty X] [IsFiniteEtale f] :
     Surjective f := by
-  rw [← one_le_finrank_iff_surjective]
+  rw [← Scheme.Hom.one_le_finrank_iff_surjective]
   obtain ⟨x⟩ := ‹Nonempty X›
   intro y
   rw [finrank_eq_const_of_preconnectedSpace _ _ (f.base x)]
-  apply one_le_finrank_map
+  apply Scheme.Hom.one_le_finrank_map
 
 lemma _root_.AlgebraicGeometry.IsFiniteEtale.isIso_of_isIso_snd' {X Y Z : Scheme.{u}} (f : X ⟶ Z)
     (g : Y ⟶ Z) [IsFiniteEtale f]

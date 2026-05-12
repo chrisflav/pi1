@@ -64,13 +64,13 @@ def AlgHom.equalizerCongr {R A A' B B' : Type*} [CommSemiring R]
   AlgEquiv.ofAlgHom
     (AlgHom.codRestrict (eA.toAlgHom.comp (equalizer f g).val) _ <| by
       intro x
-      simp only [AlgEquiv.toAlgHom_eq_coe, coe_comp, AlgHom.coe_coe, Subalgebra.coe_val,
-        Function.comp_apply, mem_equalizer]
+      simp only [coe_comp, AlgEquiv.coe_algHom, Subalgebra.coe_val, Function.comp_apply,
+        mem_equalizer]
       rw [← hf', x.2, hg'])
     (AlgHom.codRestrict (eA.symm.toAlgHom.comp (equalizer f' g').val) _ <| by
       intro x
-      simp only [AlgEquiv.toAlgHom_eq_coe, coe_comp, AlgHom.coe_coe, Subalgebra.coe_val,
-        Function.comp_apply, mem_equalizer]
+      simp only [coe_comp, AlgEquiv.coe_algHom, Subalgebra.coe_val, Function.comp_apply,
+        mem_equalizer]
       apply eB.injective
       rw [hf', hg', AlgEquiv.apply_symm_apply, x.2])
     (by ext; simp)
