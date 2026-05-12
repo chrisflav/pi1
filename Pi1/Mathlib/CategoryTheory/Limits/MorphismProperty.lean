@@ -1,5 +1,10 @@
-import Mathlib.CategoryTheory.Limits.MorphismProperty
-import Mathlib.CategoryTheory.MorphismProperty.OverAdjunction
+module
+
+public import Mathlib.CategoryTheory.Limits.MorphismProperty
+public import Mathlib.CategoryTheory.MorphismProperty.OverAdjunction
+
+@[expose] public section
+
 -- import Pi1.FundamentalGroup.AffineColimits
 
 open CategoryTheory Limits

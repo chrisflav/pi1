@@ -1,16 +1,20 @@
-import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
-import Mathlib.AlgebraicGeometry.Morphisms.Flat
-import Mathlib.AlgebraicGeometry.Morphisms.FlatMono
-import Mathlib.AlgebraicGeometry.Morphisms.Descent
-import Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
-import Mathlib.AlgebraicGeometry.Morphisms.UniversallyClosed
-import Mathlib.AlgebraicGeometry.Morphisms.UniversallyInjective
-import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
-import Mathlib.RingTheory.Ideal.GoingDown
-import Mathlib.RingTheory.Spectrum.Prime.Chevalley
-import Pi1.Mathlib.AlgebraicGeometry.PullbackCarrier
-import Mathlib.RingTheory.Flat.FaithfullyFlat.Descent
-import Pi1.Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
+public import Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import Mathlib.AlgebraicGeometry.Morphisms.FlatMono
+public import Mathlib.AlgebraicGeometry.Morphisms.Descent
+public import Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
+public import Mathlib.AlgebraicGeometry.Morphisms.UniversallyClosed
+public import Mathlib.AlgebraicGeometry.Morphisms.UniversallyInjective
+public import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
+public import Mathlib.RingTheory.Ideal.GoingDown
+public import Mathlib.RingTheory.Spectrum.Prime.Chevalley
+public import Pi1.Mathlib.AlgebraicGeometry.PullbackCarrier
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Descent
+public import Pi1.Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+
+@[expose] public section
 
 universe u v
 

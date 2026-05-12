@@ -1,4 +1,8 @@
-import Mathlib.CategoryTheory.MorphismProperty.Composition
+module
+
+public import Mathlib.CategoryTheory.MorphismProperty.Composition
+
+@[expose] public section
 
 namespace CategoryTheory.MorphismProperty
 

@@ -1,6 +1,10 @@
-import Pi1.RingTheory.FiniteEtale.Equalizer
+module
+
+public import Pi1.RingTheory.FiniteEtale.Equalizer
 -- TODO: disentangle imports
-import Mathlib.RingTheory.Flat.Equalizer
+public import Mathlib.RingTheory.Flat.Equalizer
+
+@[expose] public section
 
 universe u
 

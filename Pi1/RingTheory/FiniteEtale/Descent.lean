@@ -1,5 +1,9 @@
-import Pi1.RingTheory.SmoothDescent
-import Pi1.RingTheory.FiniteEtale.Basic
+module
+
+public import Pi1.RingTheory.SmoothDescent
+public import Pi1.RingTheory.FiniteEtale.Basic
+
+@[expose] public section
 
 universe u v w
 

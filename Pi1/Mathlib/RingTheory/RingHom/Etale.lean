@@ -1,9 +1,13 @@
-import Mathlib.RingTheory.Etale.Basic
-import Mathlib.RingTheory.RingHom.Locally
-import Mathlib.RingTheory.RingHom.StandardSmooth
-import Mathlib.RingTheory.RingHom.Unramified
-import Pi1.Mathlib.RingTheory.RingHom.Smooth
-import Pi1.RingTheory.Smooth.StandardSmoothSmooth
+module
+
+public import Mathlib.RingTheory.Etale.Basic
+public import Mathlib.RingTheory.RingHom.Locally
+public import Mathlib.RingTheory.RingHom.StandardSmooth
+public import Mathlib.RingTheory.RingHom.Unramified
+public import Pi1.Mathlib.RingTheory.RingHom.Smooth
+public import Pi1.RingTheory.Smooth.StandardSmoothSmooth
+
+@[expose] public section
 
 universe u
 

@@ -1,4 +1,8 @@
-import Mathlib.RingTheory.RingHom.Finite
+module
+
+public import Mathlib.RingTheory.RingHom.Finite
+
+@[expose] public section
 
 universe u
 

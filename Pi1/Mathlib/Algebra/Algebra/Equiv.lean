@@ -1,4 +1,8 @@
-import Mathlib.Algebra.Algebra.Equiv
+module
+
+public import Mathlib.Algebra.Algebra.Equiv
+
+@[expose] public section
 
 instance {R S T : Type*} [CommSemiring R] [Semiring S] [Semiring T] [Algebra R S] [Algebra R T]
     [Subsingleton S] [Subsingleton T] :

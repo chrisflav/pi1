@@ -3,11 +3,14 @@ Copyright (c) 2024 Christian Merten. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Judith Ludwig, Christian Merten
 -/
-import Mathlib.RingTheory.TensorProduct.Basic
-import Mathlib.RingTheory.MvPolynomial.Homogeneous
-import Mathlib.RingTheory.MvPolynomial.Tower
-import Mathlib.RingTheory.Ideal.Maps
+module
 
+public import Mathlib.RingTheory.TensorProduct.Basic
+public import Mathlib.RingTheory.MvPolynomial.Homogeneous
+public import Mathlib.RingTheory.MvPolynomial.Tower
+public import Mathlib.RingTheory.Ideal.Maps
+
+@[expose] public section
 
 universe u v w t
 

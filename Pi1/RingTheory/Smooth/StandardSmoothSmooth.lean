@@ -3,18 +3,22 @@ Copyright (c) 2024 Christian Merten. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christian Merten
 -/
-import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
-import Pi1.Mathlib.RingTheory.RingHom.Smooth
-import Mathlib.RingTheory.Smooth.Kaehler
-import Mathlib.RingTheory.Smooth.Locus
-import Mathlib.Algebra.Module.LocalizedModule.Basic
-import Mathlib.RingTheory.RingHom.Locally
-import Mathlib.RingTheory.RingHom.StandardSmooth
-import Mathlib.RingTheory.RingHom.FinitePresentation
+module
+
+public import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
+public import Pi1.Mathlib.RingTheory.RingHom.Smooth
+public import Mathlib.RingTheory.Smooth.Kaehler
+public import Mathlib.RingTheory.Smooth.Locus
+public import Mathlib.Algebra.Module.LocalizedModule.Basic
+public import Mathlib.RingTheory.RingHom.Locally
+public import Mathlib.RingTheory.RingHom.StandardSmooth
+public import Mathlib.RingTheory.RingHom.FinitePresentation
 
 /-!
 # Smooth and locally standard smooth
 -/
+
+@[expose] public section
 
 suppress_compilation
 

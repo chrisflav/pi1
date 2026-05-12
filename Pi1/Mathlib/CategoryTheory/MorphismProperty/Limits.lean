@@ -1,4 +1,8 @@
-import Mathlib.CategoryTheory.MorphismProperty.Limits
+module
+
+public import Mathlib.CategoryTheory.MorphismProperty.Limits
+
+@[expose] public section
 
 namespace CategoryTheory.MorphismProperty
 

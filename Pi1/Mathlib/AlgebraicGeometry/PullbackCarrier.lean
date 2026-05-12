@@ -1,4 +1,8 @@
-import Mathlib.AlgebraicGeometry.PullbackCarrier
+module
+
+public import Mathlib.AlgebraicGeometry.PullbackCarrier
+
+@[expose] public section
 
 universe u
 

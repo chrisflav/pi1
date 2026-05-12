@@ -1,7 +1,11 @@
-import Mathlib
-import Pi1.RingTheory.KaehlerBaseChange
-import Pi1.RingTheory.FiveLemma
-import Pi1.Mathlib.RingTheory.TensorProduct.Basic
+module
+
+public import Mathlib
+public import Pi1.RingTheory.KaehlerBaseChange
+public import Pi1.RingTheory.FiveLemma
+public import Pi1.Mathlib.RingTheory.TensorProduct.Basic
+
+@[expose] public section
 
 noncomputable section
 

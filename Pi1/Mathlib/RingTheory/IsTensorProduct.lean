@@ -1,4 +1,8 @@
-import Mathlib.RingTheory.IsTensorProduct
+module
+
+public import Mathlib.RingTheory.IsTensorProduct
+
+@[expose] public section
 
 open TensorProduct
 

@@ -1,4 +1,8 @@
-import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
+
+@[expose] public section
 
 universe u
 

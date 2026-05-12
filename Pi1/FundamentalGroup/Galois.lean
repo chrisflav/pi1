@@ -3,25 +3,27 @@ Copyright (c) 2025 Christian Merten. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christian Merten
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.Etale
-import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
-import Mathlib.CategoryTheory.MorphismProperty.Limits
-import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
-import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
-import Pi1.Mathlib.RingTheory.RingHom.Etale
-import Pi1.Mathlib.RingTheory.RingHom.Smooth
-import Pi1.RingTheory.Smooth.StandardSmoothSmooth
-import Pi1.Mathlib.AlgebraicGeometry.Limits
-import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
-import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
-import Mathlib.Topology.Connected.CardComponents
-import Pi1.FundamentalGroup.FiniteEtale
-import Pi1.FundamentalGroup.Rank
-import Pi1.RingTheory.FinitePresentation
-import Pi1.RingTheory.SmoothFlat
-import Mathlib.CategoryTheory.Galois.Basic
-import Mathlib.AlgebraicGeometry.Morphisms.Immersion
-import Mathlib.AlgebraicGeometry.Morphisms.UniversallyInjective
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Etale
+public import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
+public import Mathlib.CategoryTheory.MorphismProperty.Limits
+public import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
+public import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import Pi1.Mathlib.RingTheory.RingHom.Etale
+public import Pi1.Mathlib.RingTheory.RingHom.Smooth
+public import Pi1.RingTheory.Smooth.StandardSmoothSmooth
+public import Pi1.Mathlib.AlgebraicGeometry.Limits
+public import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
+public import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
+public import Mathlib.Topology.Connected.CardComponents
+public import Pi1.FundamentalGroup.FiniteEtale
+public import Pi1.FundamentalGroup.Rank
+public import Pi1.RingTheory.FinitePresentation
+public import Pi1.RingTheory.SmoothFlat
+public import Mathlib.CategoryTheory.Galois.Basic
+public import Mathlib.AlgebraicGeometry.Morphisms.Immersion
+public import Mathlib.AlgebraicGeometry.Morphisms.UniversallyInjective
 
 /-!
 # The category of finite étale morphisms over a connected base is a Galois category
@@ -29,6 +31,8 @@ import Mathlib.AlgebraicGeometry.Morphisms.UniversallyInjective
 Let `S` be a scheme and denote by `FEt S` the category of finite étale schemes over `S`. Then
 `FEt S` is a `PreGaloisCategory`.
 -/
+
+@[expose] public section
 
 universe u w
 

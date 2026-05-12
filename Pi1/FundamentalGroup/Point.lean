@@ -3,10 +3,14 @@ Copyright (c) 2025 Christian Merten. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christian Merten
 -/
-import Pi1.FundamentalGroup.Galois
-import Mathlib.CategoryTheory.Galois.IsFundamentalgroup
-import Mathlib.FieldTheory.Galois.Profinite
-import Mathlib.FieldTheory.IntermediateField.Adjoin.Algebra
+module
+
+public import Pi1.FundamentalGroup.Galois
+public import Mathlib.CategoryTheory.Galois.IsFundamentalgroup
+public import Mathlib.FieldTheory.Galois.Profinite
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Algebra
+
+@[expose] public section
 
 universe u
 

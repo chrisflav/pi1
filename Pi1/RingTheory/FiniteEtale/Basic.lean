@@ -1,6 +1,10 @@
-import Mathlib
-import Pi1.Mathlib.RingTheory.RingHom.Etale
-import Pi1.Mathlib.RingTheory.RingHom.Finite
+module
+
+public import Mathlib
+public import Pi1.Mathlib.RingTheory.RingHom.Etale
+public import Pi1.Mathlib.RingTheory.RingHom.Finite
+
+@[expose] public section
 
 open TensorProduct
 

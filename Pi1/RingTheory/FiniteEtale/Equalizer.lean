@@ -1,7 +1,11 @@
-import Pi1.RingTheory.FiniteEtale.Descent
-import Mathlib.RingTheory.TotallySplit
-import Mathlib.RingTheory.Flat.Equalizer
-import Mathlib.RingTheory.Flat.Localization
+module
+
+public import Pi1.RingTheory.FiniteEtale.Descent
+public import Mathlib.RingTheory.TotallySplit
+public import Mathlib.RingTheory.Flat.Equalizer
+public import Mathlib.RingTheory.Flat.Localization
+
+@[expose] public section
 
 attribute [local instance] Module.FinitePresentation.of_finite_of_finitePresentation
 

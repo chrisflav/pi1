@@ -1,6 +1,10 @@
-import Mathlib
-import Pi1.RingTheory.CotangentBaseChange
-import Pi1.RingTheory.KaehlerBaseChange
+module
+
+public import Mathlib
+public import Pi1.RingTheory.CotangentBaseChange
+public import Pi1.RingTheory.KaehlerBaseChange
+
+@[expose] public section
 
 universe u
 
