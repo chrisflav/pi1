@@ -3,10 +3,12 @@ Copyright (c) 2025 Christian Merten. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christian Merten
 -/
-import Mathlib.RingTheory.Extension.Presentation.Basic
-import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
-import Mathlib.RingTheory.Extension.Cotangent.LocalizationAway
-import Mathlib.RingTheory.Kaehler.JacobiZariski
+module
+
+public import Mathlib.RingTheory.Extension.Presentation.Basic
+public import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
+public import Mathlib.RingTheory.Extension.Cotangent.LocalizationAway
+public import Mathlib.RingTheory.Kaehler.JacobiZariski
 
 /-!
 # Cotangent and localization away
@@ -21,6 +23,8 @@ canonical `S`-presentation of `T`.
 - `Algebra.Generators.liftBaseChange_injective`: The map `T ⊗[S] (I⧸I²)` is injective.
 
 -/
+
+@[expose] public section
 
 open TensorProduct MvPolynomial
 

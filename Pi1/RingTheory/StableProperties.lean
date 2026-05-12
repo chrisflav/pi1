@@ -1,4 +1,8 @@
-import Mathlib.Algebra.Category.Ring.Under.Property
+module
+
+public import Mathlib.Algebra.Category.Ring.Under.Property
+
+@[expose] public section
 
 set_option linter.unreachableTactic false
 set_option linter.unusedTactic false

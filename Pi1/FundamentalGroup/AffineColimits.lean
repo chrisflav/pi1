@@ -3,16 +3,20 @@ Copyright (c) 2025 Christian Merten. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christian Merten
 -/
-import Mathlib.Algebra.Category.Ring.Under.Limits
-import Mathlib.AlgebraicGeometry.Morphisms.Affine
-import Mathlib.AlgebraicGeometry.Morphisms.Flat
-import Mathlib.CategoryTheory.MorphismProperty.OverAdjunction
-import Mathlib.AlgebraicGeometry.ColimitsOver
+module
+
+public import Mathlib.Algebra.Category.Ring.Under.Limits
+public import Mathlib.AlgebraicGeometry.Morphisms.Affine
+public import Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import Mathlib.CategoryTheory.MorphismProperty.OverAdjunction
+public import Mathlib.AlgebraicGeometry.ColimitsOver
 
 /-!
 # Category of schemes affine over an affine base
 
 -/
+
+@[expose] public section
 
 universe w t u
 

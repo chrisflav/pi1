@@ -1,6 +1,10 @@
-import Mathlib.RingTheory.RingHom.Integral
-import Mathlib.RingTheory.Spectrum.Prime.RingHom
-import Mathlib.RingTheory.Ideal.GoingUp
+module
+
+public import Mathlib.RingTheory.RingHom.Integral
+public import Mathlib.RingTheory.Spectrum.Prime.RingHom
+public import Mathlib.RingTheory.Ideal.GoingUp
+
+@[expose] public section
 
 lemma Algebra.IsIntegral.specComap_surjective {R S : Type*} [CommRing R] [CommRing S]
     [Algebra R S] [Algebra.IsIntegral R S] [FaithfulSMul R S] :

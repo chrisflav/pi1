@@ -1,10 +1,14 @@
-import Mathlib.RingTheory.IsAdjoinRoot
-import Mathlib.Algebra.Module.FinitePresentation
-import Mathlib.RingTheory.FinitePresentation
-import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
-import Mathlib.RingTheory.Etale.Pi
-import Mathlib.RingTheory.RingHom.FinitePresentation
-import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
+module
+
+public import Mathlib.RingTheory.IsAdjoinRoot
+public import Mathlib.Algebra.Module.FinitePresentation
+public import Mathlib.RingTheory.FinitePresentation
+public import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+public import Mathlib.RingTheory.Etale.Pi
+public import Mathlib.RingTheory.RingHom.FinitePresentation
+public import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
+
+@[expose] public section
 
 universe u
 

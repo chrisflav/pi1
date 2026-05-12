@@ -1,4 +1,8 @@
-import Mathlib.RingTheory.Smooth.Flat
+module
+
+public import Mathlib.RingTheory.Smooth.Flat
+
+@[expose] public section
 
 universe u
 

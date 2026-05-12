@@ -1,4 +1,8 @@
-import Mathlib.RingTheory.Etale.Basic
+module
+
+public import Mathlib.RingTheory.Etale.Basic
+
+@[expose] public section
 
 universe u
 

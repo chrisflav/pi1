@@ -3,11 +3,13 @@ Copyright (c) 2025 Christian Merten. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christian Merten
 -/
-import Pi1.Mathlib.RingTheory.RingHom.Etale
-import Pi1.FundamentalGroup.AffineAnd
-import Pi1.RingTheory.StableProperties
-import Pi1.RingTheory.FiniteEtale.Equalizer
-import Pi1.RingTheory.KerTensor
+module
+
+public import Pi1.Mathlib.RingTheory.RingHom.Etale
+public import Pi1.FundamentalGroup.AffineAnd
+public import Pi1.RingTheory.StableProperties
+public import Pi1.RingTheory.FiniteEtale.Equalizer
+public import Pi1.RingTheory.KerTensor
 
 /-!
 # Finite étale morphisms
@@ -15,6 +17,8 @@ import Pi1.RingTheory.KerTensor
 We say a morphism is finite étale if it is finite and étale. The category `FiniteEtale X` is
 the category of finite etale schemes over `X`.
 -/
+
+@[expose] public section
 
 noncomputable section
 

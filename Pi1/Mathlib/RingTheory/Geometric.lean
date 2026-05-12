@@ -1,6 +1,10 @@
-import Mathlib
-import Pi1.Mathlib.RingTheory.TensorProduct.Basic
-import Pi1.Mathlib.RingTheory.RingHom.Integral
+module
+
+public import Mathlib
+public import Pi1.Mathlib.RingTheory.TensorProduct.Basic
+public import Pi1.Mathlib.RingTheory.RingHom.Integral
+
+@[expose] public section
 
 universe u v w
 

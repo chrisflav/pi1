@@ -1,5 +1,9 @@
-import Mathlib.CategoryTheory.Galois.IsFundamentalgroup
-import Mathlib.Topology.Algebra.IsUniformGroup.Basic
+module
+
+public import Mathlib.CategoryTheory.Galois.IsFundamentalgroup
+public import Mathlib.Topology.Algebra.IsUniformGroup.Basic
+
+@[expose] public section
 
 open CategoryTheory
 

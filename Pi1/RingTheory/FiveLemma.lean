@@ -3,7 +3,9 @@ Copyright (c) 2025 Christian Merten. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christian Merten
 -/
-import Mathlib.Algebra.Exact
+module
+
+public import Mathlib.Algebra.Exact
 
 /-!
 # The five lemma in terms of modules
@@ -23,6 +25,8 @@ and ease of application in the unbundled setting, we reprove them here.
 In theory, we could prove these in the multiplicative version and let `to_additive` prove
 the additive variants. But `Function.Exact` currently has no multiplicative analogue (yet).
 -/
+
+@[expose] public section
 
 namespace AddMonoidHom
 

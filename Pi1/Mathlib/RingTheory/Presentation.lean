@@ -1,4 +1,8 @@
-import Mathlib.RingTheory.Extension.Presentation.Basic
+module
+
+public import Mathlib.RingTheory.Extension.Presentation.Basic
+
+@[expose] public section
 
 noncomputable section
 

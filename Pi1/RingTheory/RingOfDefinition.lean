@@ -3,11 +3,13 @@ Copyright (c) 2024 Christian Merten. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Judith Ludwig, Christian Merten
 -/
-import Mathlib
-import Mathlib.RingTheory.TensorProduct.Basic
-import Mathlib.RingTheory.MvPolynomial.Homogeneous
-import Mathlib.RingTheory.MvPolynomial.Tower
-import Pi1.RingTheory.RingOfDefinition.Utils
+module
+
+public import Mathlib
+public import Mathlib.RingTheory.TensorProduct.Basic
+public import Mathlib.RingTheory.MvPolynomial.Homogeneous
+public import Mathlib.RingTheory.MvPolynomial.Tower
+public import Pi1.RingTheory.RingOfDefinition.Utils
 
 /-!
 # Descent of finitely presented algebras
@@ -18,6 +20,8 @@ over `ℤ` and a finitely presented `R₀`-algebra `A₀` such that `A` is `R`-i
 coefficients of `A` to `R`. More generally we show, that `R ⊗[R₀] A₀` is `R`-isomorphic to `A`
 whenever `R₀` contains all defining coefficients of `A`.
 -/
+
+@[expose] public section
 
 universe u v w t
 

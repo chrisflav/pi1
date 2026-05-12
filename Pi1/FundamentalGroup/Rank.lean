@@ -1,4 +1,8 @@
-import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
+
+@[expose] public section
 
 open CategoryTheory Limits TopologicalSpace TensorProduct
 

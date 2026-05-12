@@ -1,4 +1,8 @@
-import Pi1.RingTheory.RingOfDefinition
+module
+
+public import Pi1.RingTheory.RingOfDefinition
+
+@[expose] public section
 
 namespace Algebra
 

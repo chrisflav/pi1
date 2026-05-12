@@ -3,28 +3,32 @@ Copyright (c) 2025 Christian Merten. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christian Merten
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.Etale
-import Mathlib.AlgebraicGeometry.Morphisms.Finite
-import Mathlib.CategoryTheory.Limits.MorphismProperty
-import Pi1.Mathlib.CategoryTheory.MorphismProperty.Composition
-import Mathlib.CategoryTheory.MorphismProperty.OverAdjunction
-import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
-import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
-import Mathlib.CategoryTheory.MorphismProperty.Limits
-import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
-import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
-import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Finite
-import Pi1.Mathlib.RingTheory.RingHom.Etale
-import Pi1.Mathlib.RingTheory.RingHom.Smooth
-import Pi1.RingTheory.SmoothFlat
-import Pi1.RingTheory.Smooth.StandardSmoothSmooth
-import Pi1.FundamentalGroup.AffineColimits
-import Pi1.Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
-import Mathlib.CategoryTheory.Limits.MorphismProperty
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Etale
+public import Mathlib.AlgebraicGeometry.Morphisms.Finite
+public import Mathlib.CategoryTheory.Limits.MorphismProperty
+public import Pi1.Mathlib.CategoryTheory.MorphismProperty.Composition
+public import Mathlib.CategoryTheory.MorphismProperty.OverAdjunction
+public import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
+public import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
+public import Mathlib.CategoryTheory.MorphismProperty.Limits
+public import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
+public import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Finite
+public import Pi1.Mathlib.RingTheory.RingHom.Etale
+public import Pi1.Mathlib.RingTheory.RingHom.Smooth
+public import Pi1.RingTheory.SmoothFlat
+public import Pi1.RingTheory.Smooth.StandardSmoothSmooth
+public import Pi1.FundamentalGroup.AffineColimits
+public import Pi1.Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+public import Mathlib.CategoryTheory.Limits.MorphismProperty
 
 /-!
 # Limit properties of subcategories of `P.Over ⊤ X` for `P = affineAnd`
 -/
+
+@[expose] public section
 
 universe u
 

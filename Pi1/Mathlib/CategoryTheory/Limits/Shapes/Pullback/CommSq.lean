@@ -1,4 +1,8 @@
-import Mathlib.CategoryTheory.Limits.Shapes.Diagonal
+module
+
+public import Mathlib.CategoryTheory.Limits.Shapes.Diagonal
+
+@[expose] public section
 
 namespace CategoryTheory
 

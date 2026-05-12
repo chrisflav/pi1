@@ -1,4 +1,8 @@
-import Mathlib.RingTheory.Ideal.Quotient.Operations
+module
+
+public import Mathlib.RingTheory.Ideal.Quotient.Operations
+
+@[expose] public section
 
 @[simp]
 lemma Ideal.quotientInfRingEquivPiQuotient_mk {R ι : Type*} [Finite ι] [CommRing R]
