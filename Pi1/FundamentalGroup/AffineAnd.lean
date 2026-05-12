@@ -118,26 +118,6 @@ end CommRingCat.Under
 
 end
 
-namespace RingHom
-
-variable {Q : ∀ {R S : Type u} [CommRing R] [CommRing S], (R →+* S) → Prop}
-
--- TODO: reformulate these with ringhoms?
-
-/-- A property of ring homomorphisms `Q` is said to have equalizers, if the equalizer of algebra
-maps between algebras satisfiying `Q` also satisfies `Q`. -/
-def HasEqualizers (Q : ∀ {R S : Type u} [CommRing R] [CommRing S], (R →+* S) → Prop) : Prop :=
-  ∀ {R S T : Type u} [CommRing R] [CommRing S] [CommRing T] [Algebra R S] [Algebra R T]
-    (f g : S →ₐ[R] T), Q (algebraMap R S) → Q (algebraMap R T) →
-      Q (algebraMap R (AlgHom.equalizer f g))
-
-def HasFiniteProducts (Q : ∀ {R S : Type u} [CommRing R] [CommRing S], (R →+* S) → Prop) : Prop :=
-  ∀ {R : Type u} [CommRing R] {ι : Type} [_root_.Finite ι] (S : ι → Type u) [∀ i, CommRing (S i)]
-    [∀ i, Algebra R (S i)],
-    (∀ i, Q (algebraMap R (S i))) → Q (algebraMap R (Π i, S i))
-
-end RingHom
-
 namespace AlgebraicGeometry
 
 variable {Q : ∀ {R S : Type u} [CommRing R] [CommRing S], (R →+* S) → Prop}
@@ -165,88 +145,6 @@ instance : (toAffine P X).Full := (toAffineFullyFaithful P X).full
 variable [P.IsStableUnderBaseChange]
 
 variable (J : Type) [SmallCategory J] [FinCategory J]
-
-@[implicit_reducible]
-noncomputable
-def _root_.CommRingCat.Under.createsFiniteProductsForget (hQi : RingHom.RespectsIso Q)
-    (hQp : RingHom.HasFiniteProducts Q) (R : CommRingCat.{u}) :
-    CreatesFiniteProducts (MorphismProperty.Under.forget (RingHom.toMorphismProperty Q) ⊤ R) := by
-  refine ⟨fun J _ ↦ ?_⟩
-  have : (commaObj (Functor.fromPUnit R) (𝟭 _)
-      (RingHom.toMorphismProperty Q)).IsClosedUnderLimitsOfShape (Discrete J) := by
-    constructor
-    intro (A : Under R) ⟨(pres : LimitPresentation _ A), hpres⟩
-    -- intro (D : Discrete J ⥤ Under R) c hc hD
-    let e : A ≅ CommRingCat.mkUnder R (Π i, pres.diag.obj ⟨i⟩) :=
-      (limit.isoLimitCone ⟨_, pres.isLimit⟩).symm ≪≫
-        HasLimit.isoOfNatIso (Discrete.natIso fun i ↦ eqToIso <| by simp) ≪≫
-        limit.isoLimitCone ⟨CommRingCat.Under.piFan' <| fun i ↦ (pres.diag.obj ⟨i⟩),
-          CommRingCat.Under.piFanIsLimit' <| fun i ↦ (pres.diag.obj ⟨i⟩)⟩
-    simp only [commaObj_iff, Functor.const_obj_obj, Functor.id_obj, ← Under.w e.inv]
-    have : (RingHom.toMorphismProperty Q).RespectsIso :=
-      RingHom.toMorphismProperty_respectsIso_iff.mp hQi
-    rw [MorphismProperty.cancel_right_of_respectsIso (P := RingHom.toMorphismProperty Q)]
-    exact hQp _ fun i ↦ hpres ⟨i⟩
-  apply +allowSynthFailures (Comma.forgetCreatesLimitsOfShapeOfClosed _)
-
-lemma _root_.CommRingCat.Under.hasFiniteProducts (hQi : RingHom.RespectsIso Q)
-    (hQp : RingHom.HasFiniteProducts Q) (R : CommRingCat.{u}) :
-    HasFiniteProducts ((RingHom.toMorphismProperty Q).Under ⊤ R) := by
-  refine ⟨fun n ↦ ⟨fun D ↦ ?_⟩⟩
-  have := CommRingCat.Under.createsFiniteProductsForget hQi hQp R
-  exact CategoryTheory.hasLimit_of_created D (Under.forget _ _ R)
-
-@[implicit_reducible]
-noncomputable
-def _root_.CommRingCat.Under.createsEqualizersForget (hQi : RingHom.RespectsIso Q)
-    (hQe : RingHom.HasEqualizers Q) (R : CommRingCat.{u}) :
-    CreatesLimitsOfShape WalkingParallelPair
-      (MorphismProperty.Under.forget (RingHom.toMorphismProperty Q) ⊤ R) := by
-  have :
-      (commaObj (Functor.fromPUnit R) (𝟭 _)
-        (RingHom.toMorphismProperty Q)).IsClosedUnderLimitsOfShape
-      WalkingParallelPair := by
-    constructor
-    intro (A : Under R) ⟨(pres : LimitPresentation _ A), hpres⟩
-    let e : A ≅
-        CommRingCat.mkUnder R
-          (AlgHom.equalizer (R := R)
-            (CommRingCat.toAlgHom (pres.diag.map .left))
-            (CommRingCat.toAlgHom (pres.diag.map .right))) :=
-      (limit.isoLimitCone ⟨_, pres.isLimit⟩).symm ≪≫
-        HasLimit.isoOfNatIso (diagramIsoParallelPair _) ≪≫ limit.isoLimitCone
-          ⟨CommRingCat.Under.equalizerFork (pres.diag.map .left) (pres.diag.map .right),
-            CommRingCat.Under.equalizerForkIsLimit
-              (pres.diag.map .left) (pres.diag.map .right)⟩
-    simp only [commaObj_iff, Functor.const_obj_obj, Functor.id_obj, ← Under.w e.inv]
-    have : (RingHom.toMorphismProperty Q).RespectsIso :=
-      RingHom.toMorphismProperty_respectsIso_iff.mp hQi
-    rw [MorphismProperty.cancel_right_of_respectsIso (P := RingHom.toMorphismProperty Q)]
-    exact hQe _ _ (hpres .zero) (hpres .one)
-  apply Comma.forgetCreatesLimitsOfShapeOfClosed
-
-@[implicit_reducible]
-noncomputable
-def _root_.CommRingCat.Under.createsFiniteLimitsForget (hQi : RingHom.RespectsIso Q)
-    (hQp : RingHom.HasFiniteProducts Q) (hQe : RingHom.HasEqualizers Q) (R : CommRingCat.{u}) :
-    CreatesFiniteLimits (Under.forget (RingHom.toMorphismProperty Q) ⊤ R) := by
-  have := CommRingCat.Under.createsFiniteProductsForget hQi hQp
-  have := CommRingCat.Under.createsEqualizersForget hQi hQe
-  apply createsFiniteLimitsOfCreatesEqualizersAndFiniteProducts
-
-lemma _root_.CommRingCat.Under.hasEqualizers (hQi : RingHom.RespectsIso Q)
-    (hQe : RingHom.HasEqualizers Q) (R : CommRingCat.{u}) :
-    HasEqualizers ((RingHom.toMorphismProperty Q).Under ⊤ R) := by
-  refine ⟨fun D ↦ ?_⟩
-  have := CommRingCat.Under.createsEqualizersForget hQi hQe R
-  exact CategoryTheory.hasLimit_of_created D (Under.forget _ _ R)
-
-lemma _root_.CommRingCat.Under.hasFiniteLimits (hQi : RingHom.RespectsIso Q)
-    (hQp : RingHom.HasFiniteProducts Q) (hQe : RingHom.HasEqualizers Q) (R : CommRingCat.{u}) :
-    HasFiniteLimits ((RingHom.toMorphismProperty Q).Under ⊤ R) :=
-  have := CommRingCat.Under.hasFiniteProducts hQi hQp
-  have := CommRingCat.Under.hasEqualizers hQi hQe
-  hasFiniteLimits_of_hasEqualizers_and_finite_products
 
 lemma _root_.CommRingCat.Under.property_limit_of_hasFiniteProducts_of_hasEqualizers
     (hQi : RingHom.RespectsIso Q) (hQp : RingHom.HasFiniteProducts Q)

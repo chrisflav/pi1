@@ -195,10 +195,10 @@ lemma TensorProduct.map_tensorEqualizer_bijective_iff_tensorEqualizer_map_biject
     ext x
     · simp only [TensorProduct.map_restrictScalars_comp_includeRight, AlgHom.coe_comp,
         Function.comp_apply, TensorProduct.includeLeft_apply, TensorProduct.includeRight_apply,
-        AlgEquiv.toAlgHom_eq_coe, AlgHom.coe_restrictScalars']
+        AlgHom.coe_restrictScalars']
       erw [AlgHom.comp_apply]
       erw [AlgHom.comp_apply]
-      simp only [AlgHom.coe_coe, auxEquivLHS_one_tmul_one, eLHS]
+      simp only [AlgEquiv.coe_algHom, auxEquivLHS_one_tmul_one, eLHS]
       show 1 ⊗ₜ[R] (AlgHom.tensorEqualizer S S f g) (x ⊗ₜ 1) = eRHS.symm
         ((AlgHom.tensorEqualizer (T ⊗[R] S) (T ⊗[R] S)
           (TensorProduct.map (AlgHom.id T T) f) (TensorProduct.map (AlgHom.id T T) g))
@@ -207,10 +207,10 @@ lemma TensorProduct.map_tensorEqualizer_bijective_iff_tensorEqualizer_map_biject
         auxEquivRHS_symm_tmul]
     · simp only [TensorProduct.map_restrictScalars_comp_includeRight, AlgHom.coe_comp,
         AlgHom.coe_restrictScalars', Function.comp_apply, TensorProduct.includeRight_apply,
-        AlgEquiv.toAlgHom_eq_coe, eLHS]
+        eLHS]
       erw [AlgHom.comp_apply]
       erw [AlgHom.comp_apply]
-      simp only [AlgHom.coe_coe]
+      simp only [AlgEquiv.coe_algHom]
       rw [auxEquivLHS_one_one_tmul]
       rw [AlgHom.tensorEqualizer_one_tmul, AlgHom.tensorEqualizer_one_tmul,
         auxEquivRHS_symm_tmul']
@@ -220,7 +220,6 @@ lemma TensorProduct.map_tensorEqualizer_bijective_iff_tensorEqualizer_map_biject
     rw [← Function.Bijective.of_comp_iff' eRHS.symm.bijective]
     exact H
   · rw [heq]
-    dsimp
     apply eRHS.symm.bijective.comp
     exact H.comp eLHS.bijective
 

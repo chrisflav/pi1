@@ -1,6 +1,4 @@
-import Mathlib.CategoryTheory.MorphismProperty.OverAdjunction
-import Pi1.FundamentalGroup.AffineAnd
-import Mathlib
+import Mathlib.Algebra.Category.Ring.Under.Property
 
 set_option linter.unreachableTactic false
 set_option linter.unusedTactic false
@@ -35,7 +33,7 @@ lemma preservesFiniteProducts_pushout (hPi : RingHom.RespectsIso P)
     [(toMorphismProperty P).IsStableUnderCobaseChange]
     {R S : CommRingCat.{u}} (f : R ⟶ S) :
     PreservesFiniteProducts (Under.pushout (toMorphismProperty P) ⊤ f) := by
-  have := CommRingCat.Under.createsFiniteProductsForget hPi hPp R
+  have := hPp.createsFiniteProductsForget hPi R
   constructor
   intro n
   constructor
@@ -79,7 +77,7 @@ lemma preservesEqualizers_pushout_of_hasStableEqualizers (hPi : RespectsIso P)
     PreservesLimitsOfShape WalkingParallelPair (Under.pushout (toMorphismProperty P) ⊤ f) := by
   constructor
   intro K
-  have := CommRingCat.Under.createsEqualizersForget hPi hPe R
+  have := hPe.createsLimitsWalkingParallelPair hPi R
   algebraize [f.hom]
   have : PreservesLimit (K ⋙ Under.forget (toMorphismProperty P) ⊤ R)
       (CategoryTheory.Under.pushout f) := by

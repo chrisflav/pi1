@@ -211,8 +211,7 @@ lemma CodescendsAlong.algHom_of_forall_exists_flat {R A B : Type u} [CommRing R]
         AlgHom.toRingHom_eq_coe, coe_coe]
     · simp [e]
   replace hdiag' := congr($(hdiag').toRingHom)
-  simp only [AlgHom.toRingHom_eq_coe, IsScalarTower.coe_toAlgHom,
-    AlgEquiv.toAlgHom_eq_coe, AlgHom.comp_toRingHom] at hdiag'
+  simp only [AlgHom.toRingHom_eq_coe, IsScalarTower.coe_toAlgHom, AlgHom.comp_toRingHom] at hdiag'
   refine ⟨A ⊗[R] T, inferInstance, inferInstance, ?_, inferInstance, ?_, ?_⟩
   · rw [heq]
     use q
@@ -247,7 +246,7 @@ lemma AlgHom.IsSplit.mk (f : A →ₐ[R] B) {E F : Type*} [_root_.Finite E] [_ro
   · ext x
     apply eB.injective
     have := DFunLike.congr_fun h x
-    simp only [AlgEquiv.toAlgHom_eq_coe, coe_comp, AlgHom.coe_coe, Function.comp_apply] at this
+    simp only [coe_comp, AlgEquiv.coe_algHom, Function.comp_apply] at this
     ext i
     simp [this, AlgHom.compRight]
 
@@ -280,8 +279,7 @@ lemma AlgHom.IsSplit.iff_of_isScalarTower
     exact (Algebra.TensorProduct.cancelBaseChange _ _ _ _ _).trans eB
     ext a i
     have := DFunLike.congr_fun hf (1 ⊗ₜ a)
-    simp only [Algebra.TensorProduct.map_tmul, coe_id, id_eq, AlgEquiv.toAlgHom_eq_coe, coe_comp,
-      AlgHom.coe_coe, Function.comp_apply] at this
+    simp only [Algebra.TensorProduct.map_tmul, coe_id, id_eq, coe_comp, Function.comp_apply] at this
     simp [this]
   · rintro ⟨n, m, eA, eB, σ, hf⟩
     refine AlgHom.IsSplit.mk (E := Fin n) (F := Fin m) _ ?_ ?_ σ ?_
@@ -289,8 +287,7 @@ lemma AlgHom.IsSplit.iff_of_isScalarTower
     exact (Algebra.TensorProduct.cancelBaseChange _ _ _ _ _).symm.trans eB
     ext a i
     have := DFunLike.congr_fun hf (1 ⊗ₜ (1 ⊗ₜ a))
-    simp only [Algebra.TensorProduct.map_tmul, coe_id, id_eq, AlgEquiv.toAlgHom_eq_coe, coe_comp,
-      AlgHom.coe_coe, Function.comp_apply] at this
+    simp only [Algebra.TensorProduct.map_tmul, coe_id, id_eq, coe_comp, Function.comp_apply] at this
     simp [this]
 
 namespace Algebra
@@ -404,8 +401,8 @@ lemma tensorEqualizer_compRight_bijective {E F : Type*} [Finite E] [Finite F]
     simp only [AlgHom.coe_comp, AlgHom.coe_restrictScalars', Function.comp_apply,
       TensorProduct.includeRight_apply, AlgHom.coe_tensorEqualizer, TensorProduct.map_tmul,
       AlgHom.coe_id, id_eq, Subalgebra.coe_val, TensorProduct.piScalarRight_tmul, smul_def, mul_one,
-      AlgEquiv.toAlgHom_eq_coe, AlgHom.coe_coe, TensorProduct.congr_apply, AlgEquiv.refl_toAlgHom,
-      AlgHom.equalizerCongr_symm_apply, AlgEquiv.apply_symm_apply, eq₁, eq₂, e₁, e₂, eq₃, eL]
+      AlgEquiv.coe_algHom, TensorProduct.congr_apply, AlgEquiv.refl_toAlgHom,
+      AlgHom.equalizerCongr_symm_apply, AlgEquiv.apply_symm_apply, eq₃, eL, e₂, eq₂, eq₁, e₁]
     ext i
     rw [AlgHom.equalizerCompRightEquiv_symm_apply, AlgHom.equalizerCompRightEquiv_apply]
   rw [this]
