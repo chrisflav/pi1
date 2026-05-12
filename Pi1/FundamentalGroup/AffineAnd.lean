@@ -75,49 +75,6 @@ def Under.congrPushoutIso [HasPushouts C] [P.IsStableUnderCobaseChange]
 
 end CategoryTheory.MorphismProperty
 
-section
-
-variable {R : CommRingCat.{u}} {ι : Type} (P : ι → Under R)
-
-namespace CommRingCat
-
-variable {ι : Type} (R : ι → CommRingCat.{u})
-
-/--
-The categorical product of rings is the cartesian product of rings. This is its `Fan`.
--/
-@[simps! pt]
-def piFan' : Fan R :=
-  Fan.mk (CommRingCat.of ((i : ι) → R i)) (fun i ↦ ofHom <| Pi.evalRingHom _ i)
-
-/--
-The categorical product of rings is the cartesian product of rings.
--/
-def piFanIsLimit' : IsLimit (piFan' R) where
-  lift s := ofHom <| Pi.ringHom fun i ↦ (s.π.1 ⟨i⟩).hom
-  fac s i := by rfl
-  uniq _ _ h := hom_ext <| DFunLike.ext _ _ fun x ↦ funext fun i ↦
-    DFunLike.congr_fun (congrArg Hom.hom <| h ⟨i⟩) x
-
-end CommRingCat
-
-namespace CommRingCat.Under
-
-/-- The canonical fan on `P : ι → Under R` given by `∀ i, P i`. -/
-def piFan' : Fan P :=
-  Fan.mk (Under.mk <| ofHom <| Pi.ringHom (fun i ↦ (P i).hom.hom))
-    (fun i ↦ Under.homMk (ofHom <| Pi.evalRingHom _ i))
-
-/-- The canonical fan is limiting. -/
-noncomputable def piFanIsLimit' : IsLimit (piFan' P) :=
-  isLimitOfReflects (Under.forget R) <|
-    (isLimitMapConeFanMkEquiv (Under.forget R) P _).symm <|
-      CommRingCat.piFanIsLimit' (fun i ↦ (P i).right)
-
-end CommRingCat.Under
-
-end
-
 namespace AlgebraicGeometry
 
 variable {Q : ∀ {R S : Type u} [CommRing R] [CommRing S], (R →+* S) → Prop}
