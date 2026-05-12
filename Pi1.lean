@@ -47,5 +47,3 @@ public import Pi1.RingTheory.SmoothDescent
 public import Pi1.RingTheory.SmoothFlat
 public import Pi1.RingTheory.StableProperties
 public import Pi1.RingTheory.Transcendence
-
-@[expose] public section
