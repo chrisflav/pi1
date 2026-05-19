@@ -1,4 +1,4 @@
-module
+module  -- shake: keep-all
 
 public import Pi1.FundamentalGroup.AffineAnd
 public import Pi1.FundamentalGroup.AffineColimits
@@ -6,44 +6,26 @@ public import Pi1.FundamentalGroup.FiniteEtale
 public import Pi1.FundamentalGroup.Galois
 public import Pi1.FundamentalGroup.Point
 public import Pi1.FundamentalGroup.Rank
-public import Pi1.Mathlib.Algebra.Algebra.Equiv
 public import Pi1.Mathlib.AlgebraicGeometry.Limits
 public import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Finite
-public import Pi1.Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
 public import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
-public import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
-public import Pi1.Mathlib.AlgebraicGeometry.PullbackCarrier
 public import Pi1.Mathlib.CategoryTheory.Galois.IsFundamentalGroup
 public import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
-public import Pi1.Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
-public import Pi1.Mathlib.CategoryTheory.MorphismProperty.Composition
-public import Pi1.Mathlib.CategoryTheory.MorphismProperty.Limits
-public import Pi1.Mathlib.RingTheory.Etale.Basic
 public import Pi1.Mathlib.RingTheory.Flat.Equalizer
 public import Pi1.Mathlib.RingTheory.Geometric
 public import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
-public import Pi1.Mathlib.RingTheory.IsTensorProduct
-public import Pi1.Mathlib.RingTheory.Presentation
 public import Pi1.Mathlib.RingTheory.RingHom.Etale
 public import Pi1.Mathlib.RingTheory.RingHom.Finite
-public import Pi1.Mathlib.RingTheory.RingHom.Integral
 public import Pi1.Mathlib.RingTheory.RingHom.Smooth
 public import Pi1.Mathlib.RingTheory.TensorProduct.Basic
-public import Pi1.RingTheory.CotangentBaseChange
 public import Pi1.RingTheory.FiniteEtale.Basic
 public import Pi1.RingTheory.FiniteEtale.Descent
 public import Pi1.RingTheory.FiniteEtale.Equalizer
 public import Pi1.RingTheory.FinitePresentation
-public import Pi1.RingTheory.FiveLemma
 public import Pi1.RingTheory.KaehlerBaseChange
 public import Pi1.RingTheory.KerTensor
-public import Pi1.RingTheory.RankAtStalk
 public import Pi1.RingTheory.RingOfDefinition
-public import Pi1.RingTheory.RingOfDefinition.Ideal
 public import Pi1.RingTheory.RingOfDefinition.Utils
-public import Pi1.RingTheory.Smooth.KaehlerLocalization
 public import Pi1.RingTheory.Smooth.StandardSmoothSmooth
-public import Pi1.RingTheory.SmoothDescent
-public import Pi1.RingTheory.SmoothFlat
 public import Pi1.RingTheory.StableProperties
 public import Pi1.RingTheory.Transcendence
