@@ -1,15 +1,7 @@
 module
 
-public import Mathlib.LinearAlgebra.FreeModule.Finite.Matrix
-public import Mathlib.LinearAlgebra.Trace
 public import Mathlib.RingTheory.Henselian
-public import Mathlib.RingTheory.LocalProperties.Exactness
-public import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
 public import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
-public import Mathlib.RingTheory.Flat.Rank
-public import Mathlib.RingTheory.Support
-public import Mathlib.RingTheory.TensorProduct.IsBaseChangePi
-public import Pi1.Mathlib.RingTheory.RingHom.Integral
 
 @[expose] public section
 

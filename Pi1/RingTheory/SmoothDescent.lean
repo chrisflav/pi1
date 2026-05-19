@@ -1,7 +1,9 @@
 module
 
-public import Mathlib
-public import Pi1.RingTheory.CotangentBaseChange
+public import Mathlib.RingTheory.Extension.Cotangent.BaseChange
+public import Mathlib.RingTheory.Flat.EquationalCriterion
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
+public import Mathlib.RingTheory.Smooth.Basic
 public import Pi1.RingTheory.KaehlerBaseChange
 
 @[expose] public section

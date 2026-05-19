@@ -5,10 +5,9 @@ Authors: Judith Ludwig, Christian Merten
 -/
 module
 
-public import Mathlib
-public import Mathlib.RingTheory.TensorProduct.Basic
-public import Mathlib.RingTheory.MvPolynomial.Homogeneous
-public import Mathlib.RingTheory.MvPolynomial.Tower
+public import Mathlib.Algebra.Lie.OfAssociative
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+public import Mathlib.RingTheory.TensorProduct.Maps
 public import Pi1.RingTheory.RingOfDefinition.Utils
 
 /-!

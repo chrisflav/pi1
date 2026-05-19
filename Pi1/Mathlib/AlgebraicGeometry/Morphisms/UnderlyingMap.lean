@@ -1,7 +1,6 @@
 module
 
 public import Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
-public import Mathlib.AlgebraicGeometry.Morphisms.Constructors
 
 @[expose] public section
 

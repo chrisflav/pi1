@@ -1,7 +1,6 @@
 module
 
 public import Mathlib.CategoryTheory.Galois.IsFundamentalgroup
-public import Mathlib.Topology.Algebra.IsUniformGroup.Basic
 
 @[expose] public section
 

@@ -1,7 +1,8 @@
 module
 
-public import Mathlib
-public import Pi1.Mathlib.RingTheory.RingHom.Etale
+public import Mathlib.Algebra.Lie.OfAssociative
+public import Mathlib.RingTheory.RingHom.Etale
+public import Mathlib.RingTheory.TotallySplit
 public import Pi1.Mathlib.RingTheory.RingHom.Finite
 
 @[expose] public section

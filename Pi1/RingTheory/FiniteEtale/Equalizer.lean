@@ -1,9 +1,8 @@
 module
 
+public import Mathlib.Logic.Function.Coequalizer
+public import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
 public import Pi1.RingTheory.FiniteEtale.Descent
-public import Mathlib.RingTheory.TotallySplit
-public import Mathlib.RingTheory.Flat.Equalizer
-public import Mathlib.RingTheory.Flat.Localization
 
 @[expose] public section
 

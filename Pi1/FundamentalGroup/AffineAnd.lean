@@ -5,24 +5,9 @@ Authors: Christian Merten
 -/
 module
 
-public import Mathlib.AlgebraicGeometry.Morphisms.Etale
-public import Mathlib.AlgebraicGeometry.Morphisms.Finite
-public import Mathlib.CategoryTheory.Limits.MorphismProperty
-public import Pi1.Mathlib.CategoryTheory.MorphismProperty.Composition
-public import Mathlib.CategoryTheory.MorphismProperty.OverAdjunction
-public import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
-public import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
-public import Mathlib.CategoryTheory.MorphismProperty.Limits
-public import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
-public import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
-public import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Finite
-public import Pi1.Mathlib.RingTheory.RingHom.Etale
-public import Pi1.Mathlib.RingTheory.RingHom.Smooth
-public import Pi1.RingTheory.SmoothFlat
-public import Pi1.RingTheory.Smooth.StandardSmoothSmooth
+public import Mathlib.Algebra.Category.Ring.Under.Property
+public import Mathlib.AlgebraicGeometry.Morphisms.AffineAnd
 public import Pi1.FundamentalGroup.AffineColimits
-public import Pi1.Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
-public import Mathlib.CategoryTheory.Limits.MorphismProperty
 
 /-!
 # Limit properties of subcategories of `P.Over ⊤ X` for `P = affineAnd`

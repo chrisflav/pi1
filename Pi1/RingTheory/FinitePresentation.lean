@@ -1,12 +1,7 @@
 module
 
-public import Mathlib.RingTheory.IsAdjoinRoot
-public import Mathlib.Algebra.Module.FinitePresentation
-public import Mathlib.RingTheory.FinitePresentation
+public import Mathlib.RingTheory.Etale.Basic
 public import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
-public import Mathlib.RingTheory.Etale.Pi
-public import Mathlib.RingTheory.RingHom.FinitePresentation
-public import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
 
 @[expose] public section
 

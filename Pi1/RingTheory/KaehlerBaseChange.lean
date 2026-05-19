@@ -1,6 +1,7 @@
 module
 
-public import Mathlib
+public import Mathlib.Algebra.Lie.OfAssociative
+public import Mathlib.RingTheory.Kaehler.TensorProduct
 
 @[expose] public section
 

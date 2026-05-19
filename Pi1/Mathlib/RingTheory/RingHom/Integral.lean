@@ -1,8 +1,7 @@
 module
 
-public import Mathlib.RingTheory.RingHom.Integral
-public import Mathlib.RingTheory.Spectrum.Prime.RingHom
 public import Mathlib.RingTheory.Ideal.GoingUp
+public import Mathlib.RingTheory.Spectrum.Prime.RingHom
 
 @[expose] public section
 

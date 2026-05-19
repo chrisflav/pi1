@@ -1,7 +1,6 @@
 module
 
 public import Mathlib.CategoryTheory.Limits.MorphismProperty
-public import Mathlib.CategoryTheory.MorphismProperty.OverAdjunction
 
 @[expose] public section
 

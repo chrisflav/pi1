@@ -5,14 +5,7 @@ Authors: Christian Merten
 -/
 module
 
-public import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
-public import Pi1.Mathlib.RingTheory.RingHom.Smooth
-public import Mathlib.RingTheory.Smooth.Kaehler
 public import Mathlib.RingTheory.Smooth.Locus
-public import Mathlib.Algebra.Module.LocalizedModule.Basic
-public import Mathlib.RingTheory.RingHom.Locally
-public import Mathlib.RingTheory.RingHom.StandardSmooth
-public import Mathlib.RingTheory.RingHom.FinitePresentation
 
 /-!
 # Smooth and locally standard smooth

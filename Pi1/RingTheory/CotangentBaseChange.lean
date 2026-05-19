@@ -1,9 +1,7 @@
 module
 
-public import Mathlib
-public import Pi1.RingTheory.KaehlerBaseChange
-public import Pi1.RingTheory.FiveLemma
-public import Pi1.Mathlib.RingTheory.TensorProduct.Basic
+public import Mathlib.Algebra.Lie.OfAssociative
+public import Mathlib.LinearAlgebra.TensorProduct.RightExactness
 
 @[expose] public section
 

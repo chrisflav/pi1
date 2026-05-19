@@ -1,6 +1,7 @@
 module
 
-public import Mathlib.CategoryTheory.Limits.Shapes.Diagonal
+public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.IsPullback.Defs
+public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.Pasting
 
 @[expose] public section
 

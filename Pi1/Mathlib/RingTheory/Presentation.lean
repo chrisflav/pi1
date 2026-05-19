@@ -1,6 +1,7 @@
 module
 
-public import Mathlib.RingTheory.Extension.Presentation.Basic
+public import Mathlib.Algebra.MvPolynomial.Eval
+public import Mathlib.RingTheory.Ideal.Quotient.Operations
 
 @[expose] public section
 

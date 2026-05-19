@@ -5,7 +5,6 @@ Authors: Christian Merten
 -/
 module
 
-public import Mathlib.AlgebraicGeometry.Morphisms.Finite
 public import Mathlib.AlgebraicGeometry.Morphisms.Proper
 
 @[expose] public section
