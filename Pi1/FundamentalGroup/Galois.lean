@@ -5,25 +5,26 @@ Authors: Christian Merten
 -/
 module
 
-public import Mathlib.AlgebraicGeometry.Morphisms.Etale
 public import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
+public import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
+public import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+public import Mathlib.AlgebraicGeometry.Sites.Fpqc
+public import Mathlib.AlgebraicGeometry.Morphisms.Immersion
+public import Mathlib.AlgebraicGeometry.Morphisms.UniversallyInjective
 public import Mathlib.CategoryTheory.MorphismProperty.Limits
+public import Mathlib.CategoryTheory.Galois.IsFundamentalgroup
 public import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.Topology.Connected.CardComponents
+public import Pi1.Mathlib.AlgebraicGeometry.Limits
 public import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
 public import Pi1.Mathlib.RingTheory.RingHom.Etale
 public import Pi1.Mathlib.RingTheory.RingHom.Smooth
-public import Pi1.RingTheory.Smooth.StandardSmoothSmooth
-public import Pi1.Mathlib.AlgebraicGeometry.Limits
 public import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
 public import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
-public import Mathlib.Topology.Connected.CardComponents
 public import Pi1.FundamentalGroup.FiniteEtale
 public import Pi1.FundamentalGroup.Rank
-public import Pi1.RingTheory.FinitePresentation
-public import Pi1.RingTheory.SmoothFlat
-public import Mathlib.CategoryTheory.Galois.Basic
-public import Mathlib.AlgebraicGeometry.Morphisms.Immersion
-public import Mathlib.AlgebraicGeometry.Morphisms.UniversallyInjective
 
 /-!
 # The category of finite étale morphisms over a connected base is a Galois category
@@ -589,7 +590,7 @@ instance [ConnectedSpace X] [IsSepClosed Ω] : (fiber ξ).ReflectsIsomorphisms :
 
 instance [IsSepClosed Ω] : PreservesFiniteColimits (fiber ξ) := by
   dsimp [fiber]
-  infer_instance
+  apply Limits.comp_preservesFiniteColimits
 
 open PreGaloisCategory
 

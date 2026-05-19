@@ -1,6 +1,6 @@
 module
 
-public import Pi1.RingTheory.SmoothDescent
+public import Mathlib.RingTheory.Etale.Descent
 public import Pi1.RingTheory.FiniteEtale.Basic
 
 @[expose] public section

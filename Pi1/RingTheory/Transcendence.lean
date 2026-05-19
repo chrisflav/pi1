@@ -1,6 +1,8 @@
 module
 
-public import Mathlib
+public import Mathlib.Algebra.Lie.OfAssociative
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Algebra
+public import Mathlib.RingTheory.Smooth.Basic
 
 @[expose] public section
 
@@ -25,8 +27,6 @@ instance Algebra.formallySmooth_fractionRing_mvPolynomial {k ι : Type u} [Field
   have : FormallySmooth (MvPolynomial ι k) (FractionRing (MvPolynomial ι k)) :=
     .of_isLocalization (nonZeroDivisors _)
   .comp k (MvPolynomial ι k) (FractionRing (MvPolynomial ι k))
-
-open AlgebraicGeometry CategoryTheory
 
 /-- If `S` is of finite type over `R` and `K` the fraction field of `S`,
 then `K` is finitely generated over `R` as a field. -/

@@ -1,11 +1,6 @@
 module
 
-public import Mathlib.RingTheory.Etale.Basic
-public import Mathlib.RingTheory.RingHom.Locally
-public import Mathlib.RingTheory.RingHom.StandardSmooth
-public import Mathlib.RingTheory.RingHom.Unramified
-public import Pi1.Mathlib.RingTheory.RingHom.Smooth
-public import Pi1.RingTheory.Smooth.StandardSmoothSmooth
+public import Mathlib.RingTheory.RingHom.LocallyStandardSmooth
 
 @[expose] public section
 

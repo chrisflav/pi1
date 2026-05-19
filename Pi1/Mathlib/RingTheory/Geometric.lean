@@ -1,8 +1,14 @@
 module
 
-public import Mathlib
-public import Pi1.Mathlib.RingTheory.TensorProduct.Basic
-public import Pi1.Mathlib.RingTheory.RingHom.Integral
+public import Mathlib.Algebra.Lie.OfAssociative
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.PicardGroup
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.RingHom.Flat
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Spectrum.Prime.Homeomorph
 
 @[expose] public section
 

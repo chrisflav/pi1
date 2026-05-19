@@ -1,7 +1,5 @@
 module
 
-public import Mathlib.AlgebraicGeometry.Limits
-public import Mathlib.AlgebraicGeometry.Morphisms.UniversallyInjective
 public import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
 
 @[expose] public section

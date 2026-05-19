@@ -5,10 +5,11 @@ Authors: Christian Merten
 -/
 module
 
+public import Mathlib.AlgebraicGeometry.Morphisms.Etale
+public import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Finite
 public import Pi1.Mathlib.RingTheory.RingHom.Etale
 public import Pi1.FundamentalGroup.AffineAnd
 public import Pi1.RingTheory.StableProperties
-public import Pi1.RingTheory.FiniteEtale.Equalizer
 public import Pi1.RingTheory.KerTensor
 
 /-!
@@ -240,4 +241,3 @@ instance {Y : Scheme.{u}} (f : X ⟶ Y) :
   · exact FiniteEtale.hasEqualizers
 
 end FiniteEtale
-

@@ -1,18 +1,6 @@
 module
 
-public import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
-public import Mathlib.AlgebraicGeometry.Morphisms.Flat
 public import Mathlib.AlgebraicGeometry.Morphisms.FlatMono
-public import Mathlib.AlgebraicGeometry.Morphisms.Descent
-public import Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
-public import Mathlib.AlgebraicGeometry.Morphisms.UniversallyClosed
-public import Mathlib.AlgebraicGeometry.Morphisms.UniversallyInjective
-public import Pi1.Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
-public import Mathlib.RingTheory.Ideal.GoingDown
-public import Mathlib.RingTheory.Spectrum.Prime.Chevalley
-public import Pi1.Mathlib.AlgebraicGeometry.PullbackCarrier
-public import Mathlib.RingTheory.Flat.FaithfullyFlat.Descent
-public import Pi1.Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
 
 @[expose] public section
 

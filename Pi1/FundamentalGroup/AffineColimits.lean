@@ -5,11 +5,9 @@ Authors: Christian Merten
 -/
 module
 
-public import Mathlib.Algebra.Category.Ring.Under.Limits
+public import Mathlib.AlgebraicGeometry.ColimitsOver
 public import Mathlib.AlgebraicGeometry.Morphisms.Affine
 public import Mathlib.AlgebraicGeometry.Morphisms.Flat
-public import Mathlib.CategoryTheory.MorphismProperty.OverAdjunction
-public import Mathlib.AlgebraicGeometry.ColimitsOver
 
 /-!
 # Category of schemes affine over an affine base

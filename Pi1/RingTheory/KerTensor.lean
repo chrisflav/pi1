@@ -1,8 +1,9 @@
 module
 
-public import Mathlib
-public import Pi1.RingTheory.FiniteEtale.Equalizer
+public import Mathlib.AlgebraicGeometry.PullbackCarrier
+public import Mathlib.RingTheory.RingHom.Bijective
 public import Pi1.Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import Pi1.RingTheory.FiniteEtale.Equalizer
 public import Pi1.Mathlib.RingTheory.Flat.Equalizer
 
 @[expose] public section

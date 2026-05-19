@@ -1,8 +1,7 @@
 module
 
+public import Pi1.Mathlib.RingTheory.TensorProduct.Basic
 public import Pi1.RingTheory.FiniteEtale.Equalizer
--- TODO: disentangle imports
-public import Mathlib.RingTheory.Flat.Equalizer
 
 @[expose] public section
 
