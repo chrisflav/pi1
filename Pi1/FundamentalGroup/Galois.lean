@@ -25,8 +25,6 @@ public import Pi1.Mathlib.CategoryTheory.Limits.MorphismProperty
 public import Pi1.Mathlib.RingTheory.Ideal.Quotient.Operations
 public import Pi1.FundamentalGroup.FiniteEtale
 public import Pi1.FundamentalGroup.Rank
-public import Pi1.RingTheory.FinitePresentation
-public import Pi1.RingTheory.Smooth.StandardSmoothSmooth
 
 /-!
 # The category of finite étale morphisms over a connected base is a Galois category

@@ -21,11 +21,7 @@ public import Pi1.Mathlib.RingTheory.TensorProduct.Basic
 public import Pi1.RingTheory.FiniteEtale.Basic
 public import Pi1.RingTheory.FiniteEtale.Descent
 public import Pi1.RingTheory.FiniteEtale.Equalizer
-public import Pi1.RingTheory.FinitePresentation
-public import Pi1.RingTheory.KaehlerBaseChange
 public import Pi1.RingTheory.KerTensor
-public import Pi1.RingTheory.RingOfDefinition
-public import Pi1.RingTheory.RingOfDefinition.Utils
 public import Pi1.RingTheory.Smooth.StandardSmoothSmooth
 public import Pi1.RingTheory.StableProperties
 public import Pi1.RingTheory.Transcendence
